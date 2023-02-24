@@ -16,9 +16,18 @@
   "entrypoints": {
     "main": [
       "com.grim3212.assorted.lib.AssortedLibFabric"
+    ],
+    "client": [
+      "com.grim3212.assorted.lib.AssortedLibFabricClient"
+    ],
+    "fabric-datagen": [
+      "com.grim3212.assorted.lib.AssortedLibFabricDatagen"
     ]
   },
-  "mixins": [],
+  "mixins": [
+    "${mod_id}.mixins.json",
+    "${mod_id}_fabric.mixins.json"
+  ],
   "depends": {
     "fabricloader": ">=0.14",
     "fabric-api": "*",

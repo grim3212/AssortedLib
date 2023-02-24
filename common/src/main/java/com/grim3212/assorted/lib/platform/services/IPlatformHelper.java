@@ -1,8 +1,8 @@
 package com.grim3212.assorted.lib.platform.services;
 
+import com.grim3212.assorted.lib.config.ConfigBuilder;
 import com.grim3212.assorted.lib.registry.ILoaderRegistry;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.MenuAccess;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -10,8 +10,10 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.function.Consumer;
 
@@ -26,9 +28,9 @@ public interface IPlatformHelper {
 
     String getCommonTagPrefix();
 
-    void openMenu(ServerPlayer player, MenuProvider provider, Consumer<FriendlyByteBuf> extraDataWriter);
+    SoundType getSoundType(BlockState state, Level level, BlockPos pos, Player player);
 
-    <T extends AbstractContainerMenu, S extends Screen & MenuAccess<T>> void registerScreen(MenuType<? extends T> menuType, ScreenFactory<T, S> factory);
+    void openMenu(ServerPlayer player, MenuProvider provider, Consumer<FriendlyByteBuf> extraDataWriter);
 
     /**
      * Checks if a mod with the given id is loaded.
@@ -37,6 +39,10 @@ public interface IPlatformHelper {
      * @return True if the mod is loaded, false otherwise.
      */
     boolean isModLoaded(String modId);
+
+    boolean isPhysicalClient();
+
+    boolean isFakePlayer(Player player);
 
     /**
      * Check if the game is currently in a development environment.
@@ -60,4 +66,8 @@ public interface IPlatformHelper {
     public interface ScreenFactory<T, S> {
         S create(T menu, Inventory inventory, Component title);
     }
+
+    void setupCommonConfig(String modId, ConfigBuilder builder);
+
+    void setupClientConfig(String modId, ConfigBuilder builder);
 }

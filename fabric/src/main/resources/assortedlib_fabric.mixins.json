@@ -1,0 +1,34 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "compatibilityLevel": "JAVA_17",
+  "package": "com.grim3212.assorted.lib.mixin",
+  "mixins": [
+    "world.entity.EntityWorldlyBlockMixin",
+    "world.entity.ExperienceOrbWorldlyBlockMixin",
+    "world.entity.FlyingMobWorldlyBlockMixin",
+    "world.entity.LivingEntityWorldlyBlockMixin",
+    "world.entity.animal.horse.AbstractHorseWorldlyBlockMixin",
+    "world.entity.item.ItemEntityWorldlyBlockMixin",
+    "world.entity.vehicle.BoatWorldlyBlockMixin",
+    "world.item.BlockItemWorldlyBlockMixin",
+    "world.item.ItemStackMixin",
+    "world.item.ItemMixin",
+    "world.level.BlockBehaviourWorldlyBlockMixin",
+    "world.level.ExplosionDamageCalculatorWorldlyBlockMixin",
+    "world.level.LevelWorldlyBlockMixin",
+    "world.level.BlockGetterWorldlyBlockMixin",
+    "world.level.chunk.LevelChunkWorldlyBlockMixin",
+    "world.level.chunk.ProtoChunkWorldlyBlockMixin",
+    "world.level.chunk.storage.ChunkSerializerWorldlyBlockMixin"
+  ],
+  "client": [
+    "client.multiplayer.MultiPlayerGameModeWorldlyBlockMixin",
+    "client.render.LevelRendererWorldlyBlockMixin",
+    "client.render.block.ModelBlockRendererWorldlyBlockMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "refmap": "assortedlib.refmap.json"
+}

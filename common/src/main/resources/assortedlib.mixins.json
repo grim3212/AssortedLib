@@ -1,0 +1,26 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "compatibilityLevel": "JAVA_17",
+  "package": "com.grim3212.assorted.lib.mixin",
+  "mixins": [
+    "block.BambooStalkBlockMixin",
+    "block.BushBlockMixin",
+    "block.CactusBlockMixin",
+    "block.CropBlockMixin",
+    "block.DeadBushBlockMixin",
+    "block.MushroomBlockMixin",
+    "block.NetherWartBlockMixin",
+    "block.StemBlockMixin",
+    "block.SugarCaneBlockMixin",
+    "data.AccessorBlockLootSubProvider"
+  ],
+  "client": [
+    "client.AccessorMinecraft",
+    "client.AccessorBlockModel"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "refmap": "assortedlib.refmap.json"
+}

@@ -3,7 +3,7 @@ package com.grim3212.assorted.lib;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Constants {
+public class LibConstants {
 
     public static final String MOD_ID = "assortedlib";
     public static final String MOD_NAME = "Assorted Lib";

@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "#c:glass_panes/colorless",
+    {
+      "id": "#c:stained_glass_panes",
+      "required": false
+    }
+  ]
+}

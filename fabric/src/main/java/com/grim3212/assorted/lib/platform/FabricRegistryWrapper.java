@@ -41,6 +41,11 @@ public class FabricRegistryWrapper<T> implements ILoaderRegistry<T> {
     }
 
     @Override
+    public boolean containsKey(ResourceLocation resourceLocation) {
+        return getValue(resourceLocation).isPresent();
+    }
+
+    @Override
     public boolean contains(T entry) {
         return this.registry.getKey(entry) != null;
     }

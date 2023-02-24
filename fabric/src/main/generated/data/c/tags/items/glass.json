@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "#c:glass/colorless",
+    {
+      "id": "#c:stained_glass",
+      "required": false
+    },
+    "#c:glass/tinted"
+  ]
+}

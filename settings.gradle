@@ -21,7 +21,9 @@ pluginManagement {
             name = 'Cotton'
             url = 'https://server.bbkr.space/artifactory/libs-release/'
         }
+
         maven { url 'https://plugins.gradle.org/m2/' }
+
     }
 }
 

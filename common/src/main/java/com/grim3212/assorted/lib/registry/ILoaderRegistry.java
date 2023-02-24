@@ -12,5 +12,7 @@ public interface ILoaderRegistry<T> {
 
     boolean contains(T entry);
 
+    boolean containsKey(ResourceLocation resourceLocation);
+
     ResourceLocation getRegistryName(T entry);
 }

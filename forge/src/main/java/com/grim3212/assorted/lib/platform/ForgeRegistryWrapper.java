@@ -39,6 +39,11 @@ public class ForgeRegistryWrapper<T> implements ILoaderRegistry<T> {
     }
 
     @Override
+    public boolean containsKey(ResourceLocation resourceLocation) {
+        return this.forgeRegistry.containsKey(resourceLocation);
+    }
+
+    @Override
     public boolean contains(T entry) {
         return this.forgeRegistry.containsValue(entry);
     }

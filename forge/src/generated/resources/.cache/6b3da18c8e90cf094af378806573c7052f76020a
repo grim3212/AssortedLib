@@ -1,0 +1,5 @@
+// 1.19.3	2023-02-19T09:47:21.5786542	Tags for minecraft:item mod id assortedlib
+71f3b79e3c514d631454464911d07563b93b71c4 data/forge/tags/items/carpet.json
+c882f1fc924c7ace24f2ece6ec48f727ede793e9 data/forge/tags/items/concrete.json
+ed3052eb0c49103d4cdd5f410d09b189a33c80b9 data/forge/tags/items/concrete_powder.json
+b1032f4a07e58b90538755543eac62de26d1dc1d data/forge/tags/items/containers/fluid.json

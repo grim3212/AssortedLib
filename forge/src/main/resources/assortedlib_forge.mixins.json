@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "compatibilityLevel": "JAVA_17",
+  "package": "com.grim3212.assorted.lib.mixin",
+  "mixins": [
+    "crafting.CraftingHelperMixin"
+  ],
+  "client": [],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "refmap": "assortedlib.refmap.json"
+}

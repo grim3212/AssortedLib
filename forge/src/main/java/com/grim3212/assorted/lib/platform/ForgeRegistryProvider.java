@@ -98,6 +98,11 @@ public class ForgeRegistryProvider implements IRegistryFactory {
         }
 
         @Override
+        public boolean containsKey(ResourceLocation resourceLocation) {
+            return this.getValue(resourceLocation).isPresent();
+        }
+
+        @Override
         public ResourceLocation getRegistryName(T entry) {
             return RegistryManager.ACTIVE.getRegistry(this.registry.getRegistryKey()).getKey(entry);
         }

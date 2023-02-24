@@ -103,6 +103,11 @@ public class FabricRegistryProvider implements IRegistryFactory {
         }
 
         @Override
+        public boolean containsKey(ResourceLocation resourceLocation) {
+            return this.getValue(resourceLocation).isPresent();
+        }
+
+        @Override
         public ResourceLocation getRegistryName(T entry) {
             return this.registry.getKey(entry);
         }
