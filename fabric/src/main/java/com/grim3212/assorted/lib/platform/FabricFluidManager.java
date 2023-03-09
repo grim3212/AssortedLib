@@ -101,6 +101,11 @@ public class FabricFluidManager implements IFluidManager {
         return LibFabricProxy.INSTANCE.getFluidDisplayName(fluid);
     }
 
+    @Override
+    public String fluidStackTag() {
+        return "Fluid";
+    }
+
     public static FluidVariant makeVariant(final FluidInformation fluid) {
         if (fluid.data() == null)
             return FluidVariant.of(fluid.fluid());

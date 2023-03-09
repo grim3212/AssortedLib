@@ -8,21 +8,24 @@ public class ExtraPropertyItem extends Item implements IItemExtraProperties {
         super(props);
     }
 
+    @Override
     public int getDamage(ItemStack stack) {
-        return !stack.hasTag() ? 0 : stack.getTag().getInt("Damage");
+        return ExtraPropertyHelper.getDamage(stack);
     }
 
-
+    @Override
     public int getMaxDamage(ItemStack stack) {
-        return this.getMaxDamage();
+        return ExtraPropertyHelper.getMaxDamage(stack);
     }
 
-
+    @Override
     public boolean isDamaged(ItemStack stack) {
-        return stack.getDamageValue() > 0;
+        return ExtraPropertyHelper.isDamaged(stack);
     }
 
+    @Override
     public void setDamage(ItemStack stack, int damage) {
-        stack.getOrCreateTag().putInt("Damage", Math.max(0, damage));
+        ExtraPropertyHelper.setDamage(stack, damage);
     }
+
 }

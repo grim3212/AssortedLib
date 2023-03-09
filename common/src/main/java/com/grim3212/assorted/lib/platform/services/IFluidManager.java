@@ -82,4 +82,6 @@ public interface IFluidManager {
      * @return The display name of the fluid.
      */
     Component getDisplayName(final Fluid fluid);
+
+    String fluidStackTag();
 }

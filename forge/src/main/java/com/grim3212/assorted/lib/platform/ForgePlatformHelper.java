@@ -4,16 +4,12 @@ import com.grim3212.assorted.lib.config.ConfigBuilder;
 import com.grim3212.assorted.lib.config.ForgeConfigUtil;
 import com.grim3212.assorted.lib.platform.services.IPlatformHelper;
 import com.grim3212.assorted.lib.registry.ILoaderRegistry;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.fml.ModList;
@@ -34,11 +30,6 @@ public class ForgePlatformHelper implements IPlatformHelper {
     @Override
     public String getCommonTagPrefix() {
         return "forge";
-    }
-
-    @Override
-    public SoundType getSoundType(BlockState state, Level level, BlockPos pos, Player player) {
-        return state.getSoundType(level, pos, player);
     }
 
     @Override

@@ -26,6 +26,25 @@ public class ForgeConfigUtil {
                     }
                     option.setValueSupplier(() -> value.get());
                 }
+                // Only support 1 level deep subgroups
+                for (ConfigGroup subGroup : group.getSubGroups()) {
+                    builder.push(subGroup.groupName);
+                    for (ConfigOption<?> option : subGroup.getOptions()) {
+                        ForgeConfigSpec.Builder optionBuilder = builder.comment(option.getComment());
+                        ForgeConfigSpec.ConfigValue<?> value;
+                        if (option instanceof ConfigOption.ConfigOptionMinMax<?> minMax) {
+                            if (minMax.getType() == ConfigOption.OptionType.INTEGER) {
+                                value = optionBuilder.defineInRange(minMax.getName(), (int) minMax.getDefaultValue(), (int) minMax.getMin(), (int) minMax.getMax());
+                            } else {
+                                value = optionBuilder.defineInRange(minMax.getName(), (double) minMax.getDefaultValue(), (double) minMax.getMin(), (double) minMax.getMax());
+                            }
+                        } else {
+                            value = optionBuilder.define(option.getName(), option.getDefaultValue());
+                        }
+                        option.setValueSupplier(() -> value.get());
+                    }
+                    builder.pop();
+                }
                 builder.pop();
             }
         }

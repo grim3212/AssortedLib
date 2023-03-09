@@ -7,7 +7,6 @@ import com.grim3212.assorted.lib.registry.ILoaderRegistry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -17,9 +16,6 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.function.Consumer;
 
@@ -33,11 +29,6 @@ public class FabricPlatformHelper implements IPlatformHelper {
     @Override
     public String getCommonTagPrefix() {
         return "c";
-    }
-
-    @Override
-    public SoundType getSoundType(BlockState state, Level level, BlockPos pos, Player player) {
-        return state.getSoundType();
     }
 
     @Override

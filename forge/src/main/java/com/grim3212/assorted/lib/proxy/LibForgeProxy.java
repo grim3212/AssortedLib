@@ -18,4 +18,7 @@ public interface LibForgeProxy {
     default int getFluidColor(final FluidInformation fluid) {
         return 0xffffff;
     }
+
+    default void starting() {
+    }
 }

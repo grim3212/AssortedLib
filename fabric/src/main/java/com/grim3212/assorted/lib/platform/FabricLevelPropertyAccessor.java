@@ -6,11 +6,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 
 public class FabricLevelPropertyAccessor implements ILevelPropertyAccessor {
@@ -72,5 +74,13 @@ public class FabricLevelPropertyAccessor implements ILevelPropertyAccessor {
         }
 
         return blockState.getBlock().getExplosionResistance();
+    }
+
+    @Override
+    public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter blockGetter, BlockPos pos, Player player) {
+        if (state.getBlock() instanceof IBlockExtraProperties extraProperties) {
+            return extraProperties.getCloneItemStack(state, target, blockGetter, pos, player);
+        }
+        return state.getBlock().getCloneItemStack(blockGetter, pos, state);
     }
 }

@@ -13,11 +13,15 @@
     "block.NetherWartBlockMixin",
     "block.StemBlockMixin",
     "block.SugarCaneBlockMixin",
-    "data.AccessorBlockLootSubProvider"
+    "data.AccessorBlockLootSubProvider",
+    "item.ArmorItemAccessor",
+    "item.ArmorMaterialsMixin",
+    "item.DiggerItemAccessor",
+    "item.ItemStackMixin"
   ],
   "client": [
-    "client.AccessorMinecraft",
-    "client.AccessorBlockModel"
+    "client.AccessorBlockModel",
+    "client.AccessorMinecraft"
   ],
   "injectors": {
     "defaultRequire": 1

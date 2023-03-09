@@ -1,4 +1,4 @@
-// 1.19.3	2023-02-21T08:32:32.5366581	Assorted Lib/Tags for minecraft:block
+// 1.19.3	2023-03-08T06:16:33.5575335	Assorted Lib/Tags for minecraft:block
 22dffcab08dbed3334ad4c99bfee0347b82cd5a4 data\c\tags\blocks\fences.json
 1eb80754d00d42e071c653bcecf6a4adba6f2496 data\c\tags\blocks\storage_blocks\copper.json
 b931e727f3ea7f25d6fba33c1fc5881a16f54081 data\c\tags\blocks\ores\gold.json
@@ -22,8 +22,8 @@ f49f51e79d8efb9d3426fb99669723302f4a10b3 data\c\tags\blocks\ores\emerald.json
 a9b55e67ddbec4f60d16ca1cbece69abb4c1b045 data\c\tags\blocks\storage_blocks\lapis.json
 4b4e91f8840d5fd5c2ddfa8f188976667e19b6df data\c\tags\blocks\glass\orange.json
 bc0c1beca7d38da5293284b76560f6f7c0fffd32 data\c\tags\blocks\glass\magenta.json
-37263280d1ff7462e8a0cfcbb35a099e4f399fe8 data\c\tags\blocks\barrels.json
 467a91f04ec3e9de1ac9e13c62b5379e31cfa467 data\c\tags\blocks\fence_gates\wooden.json
+37263280d1ff7462e8a0cfcbb35a099e4f399fe8 data\c\tags\blocks\barrels.json
 7e91177859f362e2aec46fb683b944974fa3a159 data\c\tags\blocks\storage_blocks\iron.json
 0716144cfc9a91217c66076412c0deaf44fcc153 data\c\tags\blocks\end_stones.json
 d2eb0460d1d9d60aff3395c79a1a358dbc9e6c6c data\c\tags\blocks\storage_blocks\redstone.json

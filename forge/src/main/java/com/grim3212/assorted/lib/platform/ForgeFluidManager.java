@@ -10,6 +10,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.templates.FluidHandlerItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -53,6 +54,11 @@ public class ForgeFluidManager implements IFluidManager {
     @Override
     public Component getDisplayName(final Fluid fluid) {
         return fluid.getFluidType().getDescription(buildFluidStack(new FluidInformation(fluid)));
+    }
+
+    @Override
+    public String fluidStackTag() {
+        return FluidHandlerItemStack.FLUID_NBT_KEY;
     }
 
     @NotNull

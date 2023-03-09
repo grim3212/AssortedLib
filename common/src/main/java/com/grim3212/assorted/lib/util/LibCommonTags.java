@@ -260,6 +260,12 @@ public class LibCommonTags {
         public static final TagKey<Item> GLASS_PANES_RED = commonTag("glass_panes/red");
         public static final TagKey<Item> GLASS_PANES_WHITE = commonTag("glass_panes/white");
         public static final TagKey<Item> GLASS_PANES_YELLOW = commonTag("glass_panes/yellow");
+        public static final TagKey<Item> CROPS = commonTag("crops");
+        public static final TagKey<Item> CROPS_BEETROOT = commonTag("crops/beetroot");
+        public static final TagKey<Item> CROPS_CARROT = commonTag("crops/carrot");
+        public static final TagKey<Item> CROPS_NETHER_WART = commonTag("crops/nether_wart");
+        public static final TagKey<Item> CROPS_POTATO = commonTag("crops/potato");
+        public static final TagKey<Item> CROPS_WHEAT = commonTag("crops/wheat");
 
         /// ====================================================================
         /// Below are tags that need to be generated on both Fabric and Forge
@@ -268,6 +274,7 @@ public class LibCommonTags {
         public static final TagKey<Item> CONCRETE_POWDER = commonTag("concrete_powder");
         public static final TagKey<Item> CARPET = commonTag("carpet");
         public static final TagKey<Item> FLUID_CONTAINERS = commonTag("containers/fluid");
+        public static final TagKey<Item> BUCKETS_MILK = commonTag("buckets/milk");
 
         private static TagKey<Item> commonTag(String name) {
             return TagKey.create(Registries.ITEM, new ResourceLocation(Services.PLATFORM.getCommonTagPrefix(), name));

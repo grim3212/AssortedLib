@@ -5,10 +5,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 
 public class ForgeLevelPropertyAccessor implements ILevelPropertyAccessor {
@@ -40,5 +43,10 @@ public class ForgeLevelPropertyAccessor implements ILevelPropertyAccessor {
     @Override
     public float getExplosionResistance(BlockGetter blockGetter, BlockPos position, Explosion explosion) {
         return blockGetter.getBlockState(position).getExplosionResistance(blockGetter, position, explosion);
+    }
+
+    @Override
+    public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter blockGetter, BlockPos pos, Player player) {
+        return state.getCloneItemStack(target, blockGetter, pos, player);
     }
 }

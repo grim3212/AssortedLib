@@ -76,6 +76,20 @@ public class FabricConfigUtil {
                         .withComment(option.getComment())
                         .finishValue(x -> option.setValueSupplier(getValueSuppler(optionType, x)));
             }
+            // Only support 1 level deep subgroups
+            for (ConfigGroup subGroup : group.getSubGroups()) {
+                ConfigTreeBuilder subGroupFork = groupFork.fork(subGroup.groupName);
+                for (ConfigOption<?> option : subGroup.getOptions()) {
+                    var optionType = mapOption(option);
+
+                    subGroupFork
+                            .beginValue(option.getName(), optionType, option.getDefaultValue())
+                            .withComment(option.getComment())
+                            .finishValue(x -> option.setValueSupplier(getValueSuppler(optionType, x)));
+                }
+
+                subGroupFork.finishBranch();
+            }
             groupFork.finishBranch();
         }
 

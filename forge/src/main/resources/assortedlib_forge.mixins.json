@@ -6,7 +6,9 @@
   "mixins": [
     "crafting.CraftingHelperMixin"
   ],
-  "client": [],
+  "client": [
+    "client.rendering.BlockEntityWithoutLevelRendererMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   },

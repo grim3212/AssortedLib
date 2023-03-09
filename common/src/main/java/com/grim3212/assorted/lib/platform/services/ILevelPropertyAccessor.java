@@ -4,10 +4,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.HitResult;
 
 import javax.annotation.Nullable;
 
@@ -35,4 +38,6 @@ public interface ILevelPropertyAccessor {
     SoundType getSoundType(final LevelReader levelReader, BlockPos pos, Entity entity);
 
     float getExplosionResistance(BlockGetter blockGetter, BlockPos position, Explosion explosion);
+
+    ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter blockGetter, BlockPos pos, Player player);
 }

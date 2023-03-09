@@ -230,6 +230,22 @@ public class NBTHelper {
     // =============== END INTEGER ===============
 
     // =============== LONG ===============
+    public static long getLong(CompoundTag compound, String keyName) {
+        initCompoundNBT(compound);
+
+        if (compound == null || !compound.contains(keyName)) {
+            putLong(compound, keyName, 0);
+        }
+
+        return compound.getLong(keyName);
+    }
+
+    public static void putLong(CompoundTag compound, String keyName, long keyValue) {
+        initCompoundNBT(compound);
+
+        compound.putLong(keyName, keyValue);
+    }
+
     public static long getLong(ItemStack itemStack, String keyName) {
         initCompoundNBT(itemStack);
 

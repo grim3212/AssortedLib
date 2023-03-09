@@ -2,7 +2,6 @@ package com.grim3212.assorted.lib.platform.services;
 
 import com.grim3212.assorted.lib.config.ConfigBuilder;
 import com.grim3212.assorted.lib.registry.ILoaderRegistry;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -11,9 +10,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.function.Consumer;
 
@@ -27,8 +23,6 @@ public interface IPlatformHelper {
     String getPlatformName();
 
     String getCommonTagPrefix();
-
-    SoundType getSoundType(BlockState state, Level level, BlockPos pos, Player player);
 
     void openMenu(ServerPlayer player, MenuProvider provider, Consumer<FriendlyByteBuf> extraDataWriter);
 

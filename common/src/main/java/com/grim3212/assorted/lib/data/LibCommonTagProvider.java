@@ -297,12 +297,20 @@ public class LibCommonTagProvider {
                 copier.accept(new Tuple<>(LibCommonTags.Blocks.GLASS_PANES, LibCommonTags.Items.GLASS_PANES));
                 copyColored(LibCommonTags.Blocks.GLASS, LibCommonTags.Items.GLASS, copier);
                 copyColored(LibCommonTags.Blocks.GLASS_PANES, LibCommonTags.Items.GLASS_PANES, copier);
+
+                tagger.apply(LibCommonTags.Items.CROPS).addTag(LibCommonTags.Items.CROPS_BEETROOT).addTag(LibCommonTags.Items.CROPS_CARROT).addTag(LibCommonTags.Items.CROPS_NETHER_WART).addTag(LibCommonTags.Items.CROPS_POTATO).addTag(LibCommonTags.Items.CROPS_WHEAT);
+                tagger.apply(LibCommonTags.Items.CROPS_BEETROOT).add(Items.BEETROOT);
+                tagger.apply(LibCommonTags.Items.CROPS_CARROT).add(Items.CARROT);
+                tagger.apply(LibCommonTags.Items.CROPS_NETHER_WART).add(Items.NETHER_WART);
+                tagger.apply(LibCommonTags.Items.CROPS_POTATO).add(Items.POTATO);
+                tagger.apply(LibCommonTags.Items.CROPS_WHEAT).add(Items.WHEAT);
             }
 
             copier.accept(new Tuple<>(LibCommonTags.Blocks.CONCRETE, LibCommonTags.Items.CONCRETE));
             copier.accept(new Tuple<>(LibCommonTags.Blocks.CONCRETE_POWDER, LibCommonTags.Items.CONCRETE_POWDER));
             copier.accept(new Tuple<>(LibCommonTags.Blocks.CARPET, LibCommonTags.Items.CARPET));
             tagger.apply(LibCommonTags.Items.FLUID_CONTAINERS).add(Items.BUCKET, Items.WATER_BUCKET, Items.LAVA_BUCKET);
+            tagger.apply(LibCommonTags.Items.BUCKETS_MILK).add(Items.MILK_BUCKET);
         }
 
         private void copyColored(TagKey<Block> blockGroup, TagKey<Item> itemGroup, Consumer<Tuple<TagKey<Block>, TagKey<Item>>> copier) {
