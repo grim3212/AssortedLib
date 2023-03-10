@@ -6,12 +6,6 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 
 public interface IKeyBindingHelper {
-    /**
-     * Registers a new key mapping to the system.
-     *
-     * @param mapping The new key mapping to register.
-     */
-    void register(KeyMapping mapping);
 
     /**
      * The conflict context which detects when a GUI is open.

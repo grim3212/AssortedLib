@@ -25,4 +25,5 @@ public class FabricClientHelper implements IClientHelper {
                 renderer::renderByItem
         );
     }
+
 }

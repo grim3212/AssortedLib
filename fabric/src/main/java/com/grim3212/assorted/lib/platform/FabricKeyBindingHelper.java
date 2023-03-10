@@ -4,7 +4,6 @@ import com.grim3212.assorted.lib.client.key.IKeyConflictHelper;
 import com.grim3212.assorted.lib.client.key.KeyModifier;
 import com.grim3212.assorted.lib.platform.services.IKeyBindingHelper;
 import com.mojang.blaze3d.platform.InputConstants;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -13,11 +12,6 @@ import net.minecraft.network.chat.MutableComponent;
 
 
 public class FabricKeyBindingHelper implements IKeyBindingHelper {
-
-    @Override
-    public void register(final KeyMapping mapping) {
-        KeyBindingHelper.registerKeyBinding(mapping);
-    }
 
     @Override
     public IKeyConflictHelper getGuiKeyConflictContext() {

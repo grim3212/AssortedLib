@@ -9,20 +9,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraftforge.client.settings.KeyConflictContext;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class ForgeKeyBindingHelper implements IKeyBindingHelper {
-    private static final List<KeyMapping> registeredKeyMappings = new ArrayList<>();
-
-    public static List<KeyMapping> getRegisteredKeyMappings() {
-        return registeredKeyMappings;
-    }
-
-    @Override
-    public void register(final KeyMapping mapping) {
-        registeredKeyMappings.add(mapping);
-    }
 
     @Override
     public IKeyConflictHelper getGuiKeyConflictContext() {

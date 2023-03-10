@@ -1,6 +1,6 @@
 package com.grim3212.assorted.lib.platform.services;
 
-import com.grim3212.assorted.lib.config.ConfigBuilder;
+import com.grim3212.assorted.lib.dist.Dist;
 import com.grim3212.assorted.lib.registry.ILoaderRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
@@ -34,25 +34,23 @@ public interface IPlatformHelper {
      */
     boolean isModLoaded(String modId);
 
-    boolean isPhysicalClient();
-
     boolean isFakePlayer(Player player);
 
     /**
-     * Check if the game is currently in a development environment.
+     * The current distribution.
      *
-     * @return True if in a development environment, false otherwise.
+     * @return The current distribution.
      */
-    boolean isDevelopmentEnvironment();
+    Dist getCurrentDistribution();
+
+    boolean isPhysicalClient();
 
     /**
-     * Gets the name of the environment type as a string.
+     * Indicates if the current platform is running in production mode or not.
      *
-     * @return The name of the environment type.
+     * @return True if the current platform is running in production mode. False when not.
      */
-    default String getEnvironmentName() {
-        return isDevelopmentEnvironment() ? "development" : "production";
-    }
+    boolean isProduction();
 
     <T> ILoaderRegistry<T> getRegistry(ResourceKey<? extends Registry<T>> key);
 
@@ -60,8 +58,4 @@ public interface IPlatformHelper {
     public interface ScreenFactory<T, S> {
         S create(T menu, Inventory inventory, Component title);
     }
-
-    void setupCommonConfig(String modId, ConfigBuilder builder);
-
-    void setupClientConfig(String modId, ConfigBuilder builder);
 }

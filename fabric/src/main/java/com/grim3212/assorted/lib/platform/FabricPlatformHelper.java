@@ -1,10 +1,8 @@
 package com.grim3212.assorted.lib.platform;
 
-import com.grim3212.assorted.lib.config.ConfigBuilder;
-import com.grim3212.assorted.lib.config.FabricConfigUtil;
+import com.grim3212.assorted.lib.dist.Dist;
 import com.grim3212.assorted.lib.platform.services.IPlatformHelper;
 import com.grim3212.assorted.lib.registry.ILoaderRegistry;
-import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Registry;
@@ -42,33 +40,31 @@ public class FabricPlatformHelper implements IPlatformHelper {
     }
 
     @Override
-    public boolean isPhysicalClient() {
-        return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT;
-    }
-
-    @Override
     public boolean isFakePlayer(Player player) {
         return false;
     }
 
     @Override
-    public boolean isDevelopmentEnvironment() {
-        return FabricLoader.getInstance().isDevelopmentEnvironment();
+    public Dist getCurrentDistribution() {
+        return switch (FabricLoader.getInstance().getEnvironmentType()) {
+            case CLIENT -> Dist.CLIENT;
+            case SERVER -> Dist.DEDICATED_SERVER;
+        };
+    }
+
+    @Override
+    public boolean isPhysicalClient() {
+        return this.getCurrentDistribution() == Dist.CLIENT;
+    }
+
+    @Override
+    public boolean isProduction() {
+        return !FabricLoader.getInstance().isDevelopmentEnvironment();
     }
 
     @Override
     public <T> ILoaderRegistry<T> getRegistry(ResourceKey<? extends Registry<T>> key) {
         return FabricRegistryWrapper.getRegistry(key);
-    }
-
-    @Override
-    public void setupCommonConfig(String modId, ConfigBuilder builder) {
-        FabricConfigUtil.setupCommon(modId, builder);
-    }
-
-    @Override
-    public void setupClientConfig(String modId, ConfigBuilder builder) {
-        FabricConfigUtil.setupClient(modId, builder);
     }
 
     public static class ExtendedScreenHandlerImpl implements ExtendedScreenHandlerFactory {

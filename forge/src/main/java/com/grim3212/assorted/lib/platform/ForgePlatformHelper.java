@@ -1,7 +1,6 @@
 package com.grim3212.assorted.lib.platform;
 
-import com.grim3212.assorted.lib.config.ConfigBuilder;
-import com.grim3212.assorted.lib.config.ForgeConfigUtil;
+import com.grim3212.assorted.lib.dist.Dist;
 import com.grim3212.assorted.lib.platform.services.IPlatformHelper;
 import com.grim3212.assorted.lib.registry.ILoaderRegistry;
 import net.minecraft.core.Registry;
@@ -10,11 +9,9 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.network.NetworkHooks;
 
@@ -42,9 +39,10 @@ public class ForgePlatformHelper implements IPlatformHelper {
         return ModList.get().isLoaded(modId);
     }
 
+
     @Override
-    public boolean isPhysicalClient() {
-        return FMLLoader.getDist() == Dist.CLIENT;
+    public boolean isProduction() {
+        return FMLLoader.isProduction();
     }
 
     @Override
@@ -53,22 +51,21 @@ public class ForgePlatformHelper implements IPlatformHelper {
     }
 
     @Override
-    public boolean isDevelopmentEnvironment() {
-        return !FMLLoader.isProduction();
+    public Dist getCurrentDistribution() {
+        return switch (FMLEnvironment.dist) {
+            case CLIENT -> Dist.CLIENT;
+            case DEDICATED_SERVER -> Dist.DEDICATED_SERVER;
+        };
     }
+
+    @Override
+    public boolean isPhysicalClient() {
+        return this.getCurrentDistribution() == Dist.CLIENT;
+    }
+
 
     @Override
     public <T> ILoaderRegistry<T> getRegistry(ResourceKey<? extends Registry<T>> key) {
         return ForgeRegistryWrapper.getRegistry(key);
-    }
-
-    @Override
-    public void setupCommonConfig(String modId, ConfigBuilder builder) {
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ForgeConfigUtil.getConfigSpec(builder));
-    }
-
-    @Override
-    public void setupClientConfig(String modId, ConfigBuilder builder) {
-        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ForgeConfigUtil.getConfigSpec(builder));
     }
 }

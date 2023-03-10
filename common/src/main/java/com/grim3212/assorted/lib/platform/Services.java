@@ -12,6 +12,7 @@ import java.util.ServiceLoader;
 public class Services {
 
     public static final IPlatformHelper PLATFORM = load(IPlatformHelper.class);
+    public static final IConfigHelper CONFIG = load(IConfigHelper.class);
     public static final IRegistryUtil REGISTRY_UTIL = load(IRegistryUtil.class);
     public static final IRegistryFactory REGISTRY_FACTORY = load(IRegistryFactory.class);
     public static final INetworkHelper NETWORK = load(INetworkHelper.class);
