@@ -1,15 +1,14 @@
 package com.grim3212.assorted.lib;
 
-import com.grim3212.assorted.lib.client.events.ClientTickEvent;
-import com.grim3212.assorted.lib.events.RegisterCreativeTabEvent;
+import com.grim3212.assorted.lib.events.FabricLootTableModificationContext;
+import com.grim3212.assorted.lib.events.LootTableModifyEvent;
 import com.grim3212.assorted.lib.events.UseBlockEvent;
 import com.grim3212.assorted.lib.platform.FabricConfigHelper;
 import com.grim3212.assorted.lib.platform.Services;
 import com.grim3212.assorted.lib.test.LibTestMod;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
+import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -25,29 +24,19 @@ public class AssortedLibFabric implements ModInitializer {
             return event.getInteractionResult();
         }));
 
-        Services.EVENTS.registerEventType(ClientTickEvent.class, () -> ClientTickEvents.START_CLIENT_TICK.register(instance -> {
-            final ClientTickEvent event = new ClientTickEvent.StartClientTickEvent();
+        Services.EVENTS.registerEventType(LootTableModifyEvent.class, () -> LootTableEvents.MODIFY.register((resourceManager, lootManager, id, tableBuilder, source) -> {
+            final LootTableModifyEvent event = new LootTableModifyEvent(lootManager, id, new FabricLootTableModificationContext(tableBuilder), source.isBuiltin());
             Services.EVENTS.handleEvents(event);
         }));
-
-        Services.EVENTS.registerEventType(ClientTickEvent.class, () -> ClientTickEvents.END_CLIENT_TICK.register(instance -> {
-            final ClientTickEvent event = new ClientTickEvent.EndClientTickEvent();
-            Services.EVENTS.handleEvents(event);
-        }));
-
-        Services.EVENTS.registerEventType(RegisterCreativeTabEvent.class, () -> {
-            final RegisterCreativeTabEvent registerCreativeTabEvent = new RegisterCreativeTabEvent((id, title, icon, items) -> {
-                FabricItemGroup.builder(id).title(title).icon(icon).displayItems((enabledFlags, populator, hasPermissions) -> items.get()).build();
-            });
-            Services.EVENTS.handleEvents(registerCreativeTabEvent);
-        });
 
         Services.CONDITIONS.init();
         Services.INGREDIENTS.register();
 
         FabricConfigHelper.init();
 
-        LibTestMod.init();
-        LibTestMod.getConfig();
+        if (!Services.PLATFORM.isProduction()) {
+            LibTestMod.init();
+            LibTestMod.getConfig();
+        }
     }
 }

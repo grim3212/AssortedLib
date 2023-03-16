@@ -3,19 +3,26 @@ package com.grim3212.assorted.lib.platform;
 import com.grim3212.assorted.lib.dist.Dist;
 import com.grim3212.assorted.lib.platform.services.IPlatformHelper;
 import com.grim3212.assorted.lib.registry.ILoaderRegistry;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
+import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
 
+import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class FabricPlatformHelper implements IPlatformHelper {
 
@@ -65,6 +72,14 @@ public class FabricPlatformHelper implements IPlatformHelper {
     @Override
     public <T> ILoaderRegistry<T> getRegistry(ResourceKey<? extends Registry<T>> key) {
         return FabricRegistryWrapper.getRegistry(key);
+    }
+
+    @Override
+    public void registerCreativeTab(ResourceLocation id, Component title, Supplier<ItemStack> icon, Supplier<List<ItemStack>> displayStacks) {
+        CreativeModeTab createdTab = FabricItemGroup.builder(id).title(title).icon(icon).build();
+        ItemGroupEvents.modifyEntriesEvent(createdTab).register(populator -> {
+            populator.acceptAll(displayStacks.get());
+        });
     }
 
     public static class ExtendedScreenHandlerImpl implements ExtendedScreenHandlerFactory {

@@ -1,6 +1,5 @@
 package com.grim3212.assorted.lib.config;
 
-import com.google.common.collect.Lists;
 import com.google.gson.*;
 
 import java.util.ArrayList;
@@ -11,13 +10,14 @@ import java.util.function.Supplier;
 
 public final class FabricConfigurationBuilder implements IConfigurationBuilder {
 
-    private static final Gson GSON = new GsonBuilder()
-            .create();
+    // TODO: Implement comment support for Fabric configs
+
+    private static final Gson GSON = new GsonBuilder().create();
 
     private final FabricConfigurationSource source;
     private final Consumer<FabricConfigurationSpec> specConsumer;
 
-    private final List<FabricConfigurationValue<?>> configuredValues = Lists.newArrayList();
+    private final List<FabricConfigurationValue<?>> configuredValues = new ArrayList<>();
 
     public FabricConfigurationBuilder(
             final FabricConfigurationSource source,
@@ -27,7 +27,7 @@ public final class FabricConfigurationBuilder implements IConfigurationBuilder {
     }
 
     @Override
-    public Supplier<Boolean> defineBoolean(final String key, final boolean defaultValue) {
+    public Supplier<Boolean> defineBoolean(final String key, final boolean defaultValue, final String comment) {
         final FabricConfigurationValue<Boolean> value = new FabricConfigurationValue<>(
                 source,
                 key,
@@ -42,7 +42,7 @@ public final class FabricConfigurationBuilder implements IConfigurationBuilder {
     }
 
     @Override
-    public <T> Supplier<List<? extends T>> defineList(final String key, final List<T> defaultValue, final Class<T> containedType) {
+    public <T> Supplier<List<? extends T>> defineList(final String key, final List<T> defaultValue, final Class<T> containedType, final String comment) {
         final FabricConfigurationValue<List<? extends T>> value = new FabricConfigurationValue<>(
                 source,
                 key,
@@ -69,7 +69,7 @@ public final class FabricConfigurationBuilder implements IConfigurationBuilder {
     }
 
     @Override
-    public Supplier<String> defineString(final String key, final String defaultValue) {
+    public Supplier<String> defineString(final String key, final String defaultValue, final String comment) {
         final FabricConfigurationValue<String> value = new FabricConfigurationValue<>(
                 source,
                 key,
@@ -84,7 +84,7 @@ public final class FabricConfigurationBuilder implements IConfigurationBuilder {
     }
 
     @Override
-    public Supplier<Long> defineLong(final String key, final long defaultValue, final long minValue, final long maxValue) {
+    public Supplier<Long> defineLong(final String key, final long defaultValue, final long minValue, final long maxValue, final String comment) {
         final FabricConfigurationValue<Long> value = new FabricVerifyableConfigurationValue<>(
                 source,
                 key,
@@ -100,7 +100,7 @@ public final class FabricConfigurationBuilder implements IConfigurationBuilder {
     }
 
     @Override
-    public Supplier<Integer> defineInteger(final String key, final int defaultValue, final int minValue, final int maxValue) {
+    public Supplier<Integer> defineInteger(final String key, final int defaultValue, final int minValue, final int maxValue, final String comment) {
         final FabricConfigurationValue<Integer> value = new FabricVerifyableConfigurationValue<>(
                 source,
                 key,
@@ -116,7 +116,7 @@ public final class FabricConfigurationBuilder implements IConfigurationBuilder {
     }
 
     @Override
-    public Supplier<Double> defineDouble(final String key, final double defaultValue, final double minValue, final double maxValue) {
+    public Supplier<Double> defineDouble(final String key, final double defaultValue, final double minValue, final double maxValue, final String comment) {
         final FabricConfigurationValue<Double> value = new FabricVerifyableConfigurationValue<>(
                 source,
                 key,
@@ -132,7 +132,7 @@ public final class FabricConfigurationBuilder implements IConfigurationBuilder {
     }
 
     @Override
-    public <T extends Enum<T>> Supplier<T> defineEnum(final String key, final T defaultValue) {
+    public <T extends Enum<T>> Supplier<T> defineEnum(final String key, final T defaultValue, final String comment) {
         final FabricConfigurationValue<T> value = new FabricConfigurationValue<>(
                 source,
                 key,

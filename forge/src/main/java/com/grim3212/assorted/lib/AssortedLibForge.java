@@ -3,10 +3,8 @@ package com.grim3212.assorted.lib;
 import com.grim3212.assorted.lib.data.ForgeLibBlockTagProvider;
 import com.grim3212.assorted.lib.data.ForgeLibItemTagProvider;
 import com.grim3212.assorted.lib.data.LibCommonRecipeProvider;
-import com.grim3212.assorted.lib.events.AnvilUpdatedEvent;
-import com.grim3212.assorted.lib.events.EntityInteractEvent;
-import com.grim3212.assorted.lib.events.RegisterCreativeTabEvent;
-import com.grim3212.assorted.lib.events.UseBlockEvent;
+import com.grim3212.assorted.lib.events.*;
+import com.grim3212.assorted.lib.platform.ForgePlatformHelper;
 import com.grim3212.assorted.lib.platform.Services;
 import com.grim3212.assorted.lib.proxy.LibForgeProxy;
 import com.grim3212.assorted.lib.test.LibTestMod;
@@ -18,6 +16,7 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.event.AnvilUpdateEvent;
 import net.minecraftforge.event.CreativeModeTabEvent;
+import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -36,6 +35,7 @@ public class AssortedLibForge {
         modBus.addListener(this::gatherData);
         modBus.addListener(this::registerRecipeSerializers);
         modBus.addListener(this::configReady);
+        modBus.addListener(this::registerCreativeTabs);
 
         Services.EVENTS.registerEventType(UseBlockEvent.class, () -> {
             MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, (final PlayerInteractEvent.RightClickBlock event) -> {
@@ -71,12 +71,10 @@ public class AssortedLibForge {
             });
         });
 
-        Services.EVENTS.registerEventType(RegisterCreativeTabEvent.class, () -> {
-            MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, (final CreativeModeTabEvent.Register event) -> {
-                final RegisterCreativeTabEvent registerCreativeTabEvent = new RegisterCreativeTabEvent((id, title, icon, items) -> {
-                    event.registerCreativeModeTab(id, builder -> builder.title(title).icon(icon).displayItems((enabledFlags, populator, hasPermissions) -> items.get()));
-                });
-                Services.EVENTS.handleEvents(registerCreativeTabEvent);
+        Services.EVENTS.registerEventType(LootTableModifyEvent.class, () -> {
+            MinecraftForge.EVENT_BUS.addListener((final LootTableLoadEvent event) -> {
+                final LootTableModifyEvent newEvent = new LootTableModifyEvent(event.getLootTableManager(), event.getName(), new ForgeLootTableModificationContext(event.getTable()), true);
+                Services.EVENTS.handleEvents(newEvent);
             });
         });
 
@@ -86,16 +84,24 @@ public class AssortedLibForge {
 
         Services.CONDITIONS.init();
 
-        LibTestMod.init();
+        if (!Services.PLATFORM.isProduction()) {
+            LibTestMod.init();
+        }
     }
 
     private void configReady(final FMLLoadCompleteEvent loadCompleteEvent) {
-        LibTestMod.getConfig();
+        if (!Services.PLATFORM.isProduction()) LibTestMod.getConfig();
     }
 
     private void registerRecipeSerializers(final RegisterEvent event) {
         if (event.getRegistryKey().equals(ForgeRegistries.Keys.RECIPE_SERIALIZERS)) {
             Services.INGREDIENTS.register();
+        }
+    }
+
+    private void registerCreativeTabs(final CreativeModeTabEvent.Register event) {
+        for (ForgePlatformHelper.TabRegister tab : ForgePlatformHelper.tabsToRegister.values()) {
+            event.registerCreativeModeTab(tab.id(), builder -> builder.title(tab.title()).icon(tab.icon()).displayItems((enabledFlags, populator, hasPermissions) -> populator.acceptAll(tab.displayStacks().get())));
         }
     }
 

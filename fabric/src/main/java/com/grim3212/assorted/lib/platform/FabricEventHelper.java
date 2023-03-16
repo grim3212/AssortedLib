@@ -31,7 +31,6 @@ public class FabricEventHelper implements IEventHelper {
         if (initializer != null) {
             initializer.run();
         }
-
         eventHandlers.put(eventType, handler);
     }
 }

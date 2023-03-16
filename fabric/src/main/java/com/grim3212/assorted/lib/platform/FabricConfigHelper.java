@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 public class FabricConfigHelper implements IConfigHelper {
-    private static final Gson GSON = new GsonBuilder().create();
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     private static final ResourceLocation CONFIG_SYNC_CHANNEL_ID = new ResourceLocation(LibConstants.MOD_ID, "config_sync");
 

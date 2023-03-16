@@ -1,6 +1,7 @@
 package com.grim3212.assorted.lib.mixin.item;
 
-import com.grim3212.assorted.lib.core.item.IItemCorrectDrops;
+import com.grim3212.assorted.lib.events.CorrectToolForDropEvent;
+import com.grim3212.assorted.lib.platform.Services;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,8 +16,11 @@ public abstract class ItemStackMixin {
     public void assortedlib_isCorrectToolForDrops(BlockState state, CallbackInfoReturnable<Boolean> cir) {
         ItemStack stack = (ItemStack) (Object) this;
 
-        if (stack.getItem() instanceof IItemCorrectDrops extraProperties) {
-            cir.setReturnValue(extraProperties.isCorrectToolForDrops(stack, state));
+        final CorrectToolForDropEvent correctToolForDropEvent = new CorrectToolForDropEvent(state, stack);
+        Services.EVENTS.handleEvents(correctToolForDropEvent);
+
+        if (correctToolForDropEvent.getResponse().isPresent()) {
+            cir.setReturnValue(correctToolForDropEvent.getResponse().get());
         }
     }
 }

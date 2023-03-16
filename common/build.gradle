@@ -26,8 +26,6 @@ minecraft {
 
 dependencies {
     compileOnly group: 'org.spongepowered', name: 'mixin', version: '0.8.5'
-    implementation group: 'com.electronwill.night-config', name: 'core', version: "${night_config_version}"
-    implementation group: 'com.electronwill.night-config', name: 'toml', version: "${night_config_version}"
 }
 
 processResources {

@@ -5,6 +5,7 @@
   "package": "com.grim3212.assorted.lib.mixin",
   "mixins": [
     "block.BambooStalkBlockMixin",
+    "block.BlockMixin",
     "block.BushBlockMixin",
     "block.CactusBlockMixin",
     "block.CropBlockMixin",
@@ -14,6 +15,7 @@
     "block.StemBlockMixin",
     "block.SugarCaneBlockMixin",
     "data.AccessorBlockLootSubProvider",
+    "entity.EntityAccessor",
     "item.ArmorItemAccessor",
     "item.ArmorMaterialsMixin",
     "item.DiggerItemAccessor",
