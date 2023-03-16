@@ -14,7 +14,9 @@ import net.minecraft.world.phys.BlockHitResult;
 public class AssortedLibFabricClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
-        ClientLifecycleEvents.CLIENT_STARTED.register(client -> FabricNetworkHelper.initializeClientHandlers());
+        ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
+            FabricNetworkHelper.initializeClientHandlers();
+        });
 
         ClientPickBlockGatherCallback.EVENT.register((player, result) -> {
             if (result instanceof BlockHitResult blockHitResult

@@ -5,6 +5,8 @@ import com.grim3212.assorted.lib.platform.services.IPlatformHelper;
 import com.grim3212.assorted.lib.registry.ILoaderRegistry;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Registry;
@@ -13,6 +15,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -21,6 +27,8 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -79,6 +87,21 @@ public class FabricPlatformHelper implements IPlatformHelper {
         CreativeModeTab createdTab = FabricItemGroup.builder(id).title(title).icon(icon).build();
         ItemGroupEvents.modifyEntriesEvent(createdTab).register(populator -> {
             populator.acceptAll(displayStacks.get());
+        });
+    }
+
+    @Override
+    public void addReloadListener(ResourceLocation identifier, PreparableReloadListener reloadListener) {
+        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new IdentifiableResourceReloadListener() {
+            @Override
+            public ResourceLocation getFabricId() {
+                return identifier;
+            }
+
+            @Override
+            public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller profilerFiller, ProfilerFiller profilerFiller2, Executor executor, Executor executor2) {
+                return reloadListener.reload(preparationBarrier, resourceManager, profilerFiller, profilerFiller2, executor, executor2);
+            }
         });
     }
 

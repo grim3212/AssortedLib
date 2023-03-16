@@ -8,6 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -64,4 +65,6 @@ public interface IPlatformHelper {
     }
 
     void registerCreativeTab(ResourceLocation id, Component title, Supplier<ItemStack> icon, Supplier<List<ItemStack>> displayStacks);
+
+    void addReloadListener(ResourceLocation identifier, PreparableReloadListener reloadListener);
 }

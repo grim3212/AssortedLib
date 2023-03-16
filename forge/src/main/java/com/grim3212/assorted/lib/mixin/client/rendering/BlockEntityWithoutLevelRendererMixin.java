@@ -20,7 +20,7 @@ public abstract class BlockEntityWithoutLevelRendererMixin {
         final Optional<BlockEntityWithoutLevelRenderer> renderer = ForgeClientHelper.getRenderer(stack.getItem());
 
         renderer.ifPresent(blockEntityWithoutLevelRenderer -> {
-            blockEntityWithoutLevelRenderer.renderByItem(stack, ItemTransforms.TransformType.NONE, matrices, vertexConsumers, light, overlay);
+            blockEntityWithoutLevelRenderer.renderByItem(stack, mode, matrices, vertexConsumers, light, overlay);
             info.cancel();
         });
     }

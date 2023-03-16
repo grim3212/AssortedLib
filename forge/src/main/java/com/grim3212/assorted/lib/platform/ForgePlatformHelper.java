@@ -9,10 +9,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
@@ -87,5 +90,10 @@ public class ForgePlatformHelper implements IPlatformHelper {
                               Component title,
                               Supplier<ItemStack> icon,
                               Supplier<List<ItemStack>> displayStacks) {
+    }
+
+    @Override
+    public void addReloadListener(ResourceLocation identifier, PreparableReloadListener reloadListener) {
+        MinecraftForge.EVENT_BUS.addListener((AddReloadListenerEvent event) -> event.addListener(reloadListener));
     }
 }

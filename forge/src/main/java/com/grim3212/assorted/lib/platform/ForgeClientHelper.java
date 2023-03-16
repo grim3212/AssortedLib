@@ -2,6 +2,7 @@ package com.grim3212.assorted.lib.platform;
 
 import com.google.common.collect.Maps;
 import com.grim3212.assorted.lib.client.events.ClientTickHandler;
+import com.grim3212.assorted.lib.client.render.IBEWLR;
 import com.grim3212.assorted.lib.platform.services.IClientHelper;
 import com.grim3212.assorted.lib.platform.services.IPlatformHelper;
 import com.mojang.datafixers.util.Pair;
@@ -24,6 +25,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -33,9 +35,7 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.client.event.*;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -44,13 +44,14 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 
 public class ForgeClientHelper implements IClientHelper {
 
-    private static final Map<Item, BlockEntityWithoutLevelRenderer> bewlrs = Maps.newConcurrentMap();
     private static final Map<String, Registrations> registrationsMap = Maps.newConcurrentMap();
+    private static final Map<Item, BlockEntityWithoutLevelRenderer> bewlrs = Maps.newConcurrentMap();
 
     @Override
     public <T extends AbstractContainerMenu, S extends Screen & MenuAccess<T>> void registerScreen(MenuType<? extends T> menuType, IPlatformHelper.ScreenFactory<T, S> factory) {
@@ -58,8 +59,18 @@ public class ForgeClientHelper implements IClientHelper {
     }
 
     @Override
-    public void registerBEWLR(Item item, BlockEntityWithoutLevelRenderer renderer) {
-        bewlrs.put(item, renderer);
+    public void registerAdditionalModel(List<ResourceLocation> modelLocations) {
+        getRegistration().extraModels.addAll(modelLocations);
+    }
+
+    @Override
+    public void addReloadListener(ResourceLocation identifier, PreparableReloadListener reloadListener) {
+        getRegistration().clientReloadListeners.add(reloadListener);
+    }
+
+    @Override
+    public void registerBEWLR(final Consumer<IBEWLR> register) {
+        getRegistration().blockEntityWithoutLevelInitializers.add(register);
     }
 
     @Override
@@ -147,14 +158,17 @@ public class ForgeClientHelper implements IClientHelper {
     }
 
     public static class Registrations {
-        public final Map<Supplier<BlockEntityType<?>>, BlockEntityRendererProvider<?>> blockEntityRenderers = new HashMap<>();
-        public final Map<Supplier<EntityType<?>>, EntityRendererProvider<?>> entityRenderers = new HashMap<>();
-        public final Map<ModelLayerLocation, Supplier<LayerDefinition>> entityLayers = new HashMap<>();
-        public final Map<BlockColor, Supplier<List<Block>>> blockColors = new HashMap<>();
-        public final Map<ItemColor, Supplier<List<Item>>> itemColors = new HashMap<>();
-        public final Map<Supplier<Item>, Pair<ResourceLocation, ClampedItemPropertyFunction>> itemProperties = new HashMap<>();
-        public final Map<Supplier<Block>, RenderType> renderTypes = new HashMap<>();
-        public final List<KeyMapping> keyMappings = new ArrayList<>();
+        private final Map<Supplier<BlockEntityType<?>>, BlockEntityRendererProvider<?>> blockEntityRenderers = new HashMap<>();
+        private final Map<Supplier<EntityType<?>>, EntityRendererProvider<?>> entityRenderers = new HashMap<>();
+        private final Map<ModelLayerLocation, Supplier<LayerDefinition>> entityLayers = new HashMap<>();
+        private final Map<BlockColor, Supplier<List<Block>>> blockColors = new HashMap<>();
+        private final Map<ItemColor, Supplier<List<Item>>> itemColors = new HashMap<>();
+        private final Map<Supplier<Item>, Pair<ResourceLocation, ClampedItemPropertyFunction>> itemProperties = new HashMap<>();
+        private final Map<Supplier<Block>, RenderType> renderTypes = new HashMap<>();
+        private final List<KeyMapping> keyMappings = new ArrayList<>();
+        private final List<ResourceLocation> extraModels = new ArrayList<>();
+        private final List<Consumer<IBEWLR>> blockEntityWithoutLevelInitializers = Collections.synchronizedList(new ArrayList<>());
+        private final List<PreparableReloadListener> clientReloadListeners = new ArrayList<>();
 
         @SubscribeEvent
         public void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
@@ -191,19 +205,37 @@ public class ForgeClientHelper implements IClientHelper {
         @SubscribeEvent
         @SuppressWarnings("removal")
         public void clientSetup(final FMLClientSetupEvent event) {
-            for (Map.Entry<Supplier<Item>, Pair<ResourceLocation, ClampedItemPropertyFunction>> entry : itemProperties.entrySet()) {
-                ItemProperties.register(entry.getKey().get(), entry.getValue().getFirst(), entry.getValue().getSecond());
-            }
+            event.enqueueWork(() -> {
+                for (Map.Entry<Supplier<Item>, Pair<ResourceLocation, ClampedItemPropertyFunction>> entry : itemProperties.entrySet()) {
+                    ItemProperties.register(entry.getKey().get(), entry.getValue().getFirst(), entry.getValue().getSecond());
+                }
+            });
 
             for (Map.Entry<Supplier<Block>, RenderType> entry : renderTypes.entrySet()) {
                 ItemBlockRenderTypes.setRenderLayer(entry.getKey().get(), entry.getValue());
             }
+
+            blockEntityWithoutLevelInitializers.forEach(callback -> callback.accept((item, renderer) -> bewlrs.put(item, renderer)));
         }
 
         @SubscribeEvent
         public void registerKeyMapping(final RegisterKeyMappingsEvent event) {
             for (KeyMapping key : keyMappings) {
                 event.register(key);
+            }
+        }
+
+        @SubscribeEvent
+        public void registerAdditionalModels(final ModelEvent.RegisterAdditional event) {
+            for (ResourceLocation location : extraModels) {
+                event.register(location);
+            }
+        }
+
+        @SubscribeEvent
+        public void registerAdditionalModels(final RegisterClientReloadListenersEvent event) {
+            for (PreparableReloadListener reloadListener : clientReloadListeners) {
+                event.registerReloadListener(reloadListener);
             }
         }
     }
