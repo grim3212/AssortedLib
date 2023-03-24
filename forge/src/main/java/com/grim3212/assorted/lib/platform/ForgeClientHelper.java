@@ -2,6 +2,8 @@ package com.grim3212.assorted.lib.platform;
 
 import com.google.common.collect.Maps;
 import com.grim3212.assorted.lib.client.events.ClientTickHandler;
+import com.grim3212.assorted.lib.client.model.loader.ForgePlatformModelLoaderPlatformDelegate;
+import com.grim3212.assorted.lib.client.model.loaders.IModelSpecificationLoader;
 import com.grim3212.assorted.lib.client.render.IBEWLR;
 import com.grim3212.assorted.lib.platform.services.IClientHelper;
 import com.grim3212.assorted.lib.platform.services.IPlatformHelper;
@@ -28,6 +30,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
@@ -109,6 +112,11 @@ public class ForgeClientHelper implements IClientHelper {
     }
 
     @Override
+    public void registerModelLoader(ResourceLocation name, IModelSpecificationLoader<?> modelLoader) {
+        getRegistration().modelLoaders.put(name, modelLoader);
+    }
+
+    @Override
     public void registerItemProperty(Supplier<Item> item, ResourceLocation location, ClampedItemPropertyFunction itemPropertyFunction) {
         getRegistration().itemProperties.put(item, Pair.of(location, itemPropertyFunction));
     }
@@ -141,6 +149,11 @@ public class ForgeClientHelper implements IClientHelper {
         });
     }
 
+    @Override
+    public Player getClientPlayer() {
+        return Minecraft.getInstance().player;
+    }
+
     public static Registrations getRegistration() {
         String modId = ModLoadingContext.get().getActiveContainer().getModId();
         if (registrationsMap.containsKey(modId)) {
@@ -169,6 +182,7 @@ public class ForgeClientHelper implements IClientHelper {
         private final List<ResourceLocation> extraModels = new ArrayList<>();
         private final List<Consumer<IBEWLR>> blockEntityWithoutLevelInitializers = Collections.synchronizedList(new ArrayList<>());
         private final List<PreparableReloadListener> clientReloadListeners = new ArrayList<>();
+        private final Map<ResourceLocation, IModelSpecificationLoader<?>> modelLoaders = new HashMap<>();
 
         @SubscribeEvent
         public void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
@@ -236,6 +250,13 @@ public class ForgeClientHelper implements IClientHelper {
         public void registerAdditionalModels(final RegisterClientReloadListenersEvent event) {
             for (PreparableReloadListener reloadListener : clientReloadListeners) {
                 event.registerReloadListener(reloadListener);
+            }
+        }
+
+        @SubscribeEvent
+        public void registerModelLoaders(final ModelEvent.RegisterGeometryLoaders event) {
+            for (Map.Entry<ResourceLocation, IModelSpecificationLoader<?>> entry : modelLoaders.entrySet()) {
+                event.register(entry.getKey().getPath(), new ForgePlatformModelLoaderPlatformDelegate<>(entry.getValue()));
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.grim3212.assorted.lib.platform.services;
 
 import com.grim3212.assorted.lib.client.events.ClientTickHandler;
+import com.grim3212.assorted.lib.client.model.loaders.IModelSpecificationLoader;
 import com.grim3212.assorted.lib.client.render.IBEWLR;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.color.block.BlockColor;
@@ -19,6 +20,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
@@ -54,6 +56,8 @@ public interface IClientHelper {
 
     ItemColors getItemColors();
 
+    void registerModelLoader(ResourceLocation name, IModelSpecificationLoader<?> modelLoader);
+
     void registerItemProperty(Supplier<Item> item, ResourceLocation location, ClampedItemPropertyFunction itemPropertyFunction);
 
     void registerRenderType(Supplier<Block> block, RenderType renderType);
@@ -63,4 +67,6 @@ public interface IClientHelper {
     void registerClientTickStart(ClientTickHandler handler);
 
     void registerClientTickEnd(ClientTickHandler handler);
+
+    Player getClientPlayer();
 }

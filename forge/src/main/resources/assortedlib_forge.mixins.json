@@ -9,6 +9,7 @@
     "item.enchantment.LibEnchantmentMixin"
   ],
   "client": [
+    "client.model.ModelDataManagerMixin",
     "client.rendering.BlockEntityWithoutLevelRendererMixin"
   ],
   "injectors": {

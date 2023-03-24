@@ -1,6 +1,7 @@
 package com.grim3212.assorted.lib.platform.services;
 
 import com.grim3212.assorted.lib.core.fluid.FluidInformation;
+import com.grim3212.assorted.lib.core.fluid.IFluidVariantHandler;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
@@ -58,24 +59,6 @@ public interface IFluidManager {
     }
 
     /**
-     * Gives access to the color of the fluid.
-     *
-     * @param fluid The fluid.
-     * @return The color packed into an int.
-     */
-    int getFluidColor(FluidInformation fluid);
-
-    /**
-     * Gives access to the color of the fluid.
-     *
-     * @param fluid The fluid.
-     * @return The color packed into an int.
-     */
-    default int getFluidColor(final Fluid fluid) {
-        return getFluidColor(new FluidInformation(fluid));
-    }
-
-    /**
      * Gets the display name of the fluid.
      *
      * @param fluid The fluid to get the display name from.
@@ -84,4 +67,24 @@ public interface IFluidManager {
     Component getDisplayName(final Fluid fluid);
 
     String fluidStackTag();
+
+    /**
+     * Returns the fluid variant handler for the given fluid.
+     * This might be empty or filled with a default handler depending on the platform.
+     *
+     * @param fluid The fluid to get the handler for.
+     * @return The fluid variant handler for the given fluid.
+     */
+    Optional<IFluidVariantHandler> getVariantHandlerFor(final Fluid fluid);
+
+    /**
+     * Returns the fluid variant handler for the given fluid information.
+     * This might be empty or filled with a default handler depending on the platform.
+     *
+     * @param fluid The fluid information to get the handler for.
+     * @return The fluid variant handler for the given fluid information.
+     */
+    default Optional<IFluidVariantHandler> getVariantHandlerFor(FluidInformation fluid) {
+        return getVariantHandlerFor(fluid.fluid());
+    }
 }

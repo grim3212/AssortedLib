@@ -1,8 +1,9 @@
 package com.grim3212.assorted.lib.platform;
 
 import com.grim3212.assorted.lib.core.fluid.FluidInformation;
+import com.grim3212.assorted.lib.core.fluid.IFluidVariantHandler;
+import com.grim3212.assorted.lib.fluid.ForgeFluidVariantHandlerDelegate;
 import com.grim3212.assorted.lib.platform.services.IFluidManager;
-import com.grim3212.assorted.lib.proxy.LibForgeProxy;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
@@ -47,11 +48,6 @@ public class ForgeFluidManager implements IFluidManager {
     }
 
     @Override
-    public int getFluidColor(final FluidInformation fluid) {
-        return LibForgeProxy.INSTANCE.getFluidColor(fluid);
-    }
-
-    @Override
     public Component getDisplayName(final Fluid fluid) {
         return fluid.getFluidType().getDescription(buildFluidStack(new FluidInformation(fluid)));
     }
@@ -61,8 +57,21 @@ public class ForgeFluidManager implements IFluidManager {
         return FluidHandlerItemStack.FLUID_NBT_KEY;
     }
 
+    @Override
+    public Optional<IFluidVariantHandler> getVariantHandlerFor(Fluid fluid) {
+        return Optional.of(new ForgeFluidVariantHandlerDelegate(fluid.getFluidType()));
+    }
+
     @NotNull
-    private FluidStack buildFluidStack(final FluidInformation fluid) {
+    public static FluidInformation buildFluidInformation(final FluidStack fluid) {
+        if (fluid.getTag() == null)
+            return new FluidInformation(fluid.getFluid(), (int) fluid.getAmount());
+
+        return new FluidInformation(fluid.getFluid(), (int) fluid.getAmount(), fluid.getOrCreateTag());
+    }
+
+    @NotNull
+    public static FluidStack buildFluidStack(final FluidInformation fluid) {
         if (fluid.data() == null)
             return new FluidStack(fluid.fluid(), (int) fluid.amount());
 

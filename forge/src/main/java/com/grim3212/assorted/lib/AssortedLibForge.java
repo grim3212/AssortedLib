@@ -6,7 +6,6 @@ import com.grim3212.assorted.lib.data.LibCommonRecipeProvider;
 import com.grim3212.assorted.lib.events.*;
 import com.grim3212.assorted.lib.platform.ForgePlatformHelper;
 import com.grim3212.assorted.lib.platform.Services;
-import com.grim3212.assorted.lib.proxy.LibForgeProxy;
 import com.grim3212.assorted.lib.test.LibTestMod;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
@@ -77,10 +76,6 @@ public class AssortedLibForge {
                 Services.EVENTS.handleEvents(newEvent);
             });
         });
-
-        // Used to register all of the client side events
-        // TODO: Switch to using DistExecutor
-        LibForgeProxy.INSTANCE.starting();
 
         Services.CONDITIONS.init();
 

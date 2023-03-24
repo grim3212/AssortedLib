@@ -22,7 +22,7 @@ dependencies {
 }
 
 loom {
-//    accessWidenerPath = file("src/main/resources/${mod_id}.accesswidener")
+    accessWidenerPath = file("src/main/resources/${mod_id}_fabric.accesswidener")
     mixin.defaultRefmapName = "${mod_id}.refmap.json"
 
     runs {

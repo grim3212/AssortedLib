@@ -27,6 +27,9 @@
     "world.level.chunk.storage.ChunkSerializerWorldlyBlockMixin"
   ],
   "client": [
+    "client.model.BlockModelAccessorMixin",
+    "client.model.ItemModelGeneratorMixin",
+    "client.model.ModelManagerMixin",
     "client.multiplayer.MultiPlayerGameModeWorldlyBlockMixin",
     "client.render.LevelRendererWorldlyBlockMixin",
     "client.render.block.ModelBlockRendererWorldlyBlockMixin"

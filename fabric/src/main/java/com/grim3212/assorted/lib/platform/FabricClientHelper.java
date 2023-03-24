@@ -1,6 +1,8 @@
 package com.grim3212.assorted.lib.platform;
 
 import com.grim3212.assorted.lib.client.events.ClientTickHandler;
+import com.grim3212.assorted.lib.client.model.loader.FabricPlatformModelLoaderPlatformDelegate;
+import com.grim3212.assorted.lib.client.model.loaders.IModelSpecificationLoader;
 import com.grim3212.assorted.lib.client.render.IBEWLR;
 import com.grim3212.assorted.lib.mixin.client.AccessorMinecraft;
 import com.grim3212.assorted.lib.platform.services.IClientHelper;
@@ -35,6 +37,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
@@ -120,6 +123,11 @@ public class FabricClientHelper implements IClientHelper {
     }
 
     @Override
+    public void registerModelLoader(ResourceLocation name, IModelSpecificationLoader<?> modelLoader) {
+        ModelLoadingRegistry.INSTANCE.registerResourceProvider(resourceManager -> new FabricPlatformModelLoaderPlatformDelegate<>(name, modelLoader));
+    }
+
+    @Override
     public void registerItemProperty(Supplier<Item> item, ResourceLocation location, ClampedItemPropertyFunction itemPropertyFunction) {
         ItemProperties.register(item.get(), location, itemPropertyFunction);
     }
@@ -142,5 +150,10 @@ public class FabricClientHelper implements IClientHelper {
     @Override
     public void registerClientTickEnd(ClientTickHandler handler) {
         ClientTickEvents.END_CLIENT_TICK.register(handler::handle);
+    }
+
+    @Override
+    public Player getClientPlayer() {
+        return Minecraft.getInstance().player;
     }
 }

@@ -2,8 +2,6 @@ package com.grim3212.assorted.lib;
 
 import com.grim3212.assorted.lib.core.block.IBlockExtraProperties;
 import com.grim3212.assorted.lib.platform.FabricNetworkHelper;
-import com.grim3212.assorted.lib.platform.Services;
-import com.grim3212.assorted.lib.test.LibTestClientMod;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.event.client.player.ClientPickBlockGatherCallback;
@@ -33,9 +31,5 @@ public class AssortedLibFabricClient implements ClientModInitializer {
 
             return ItemStack.EMPTY;
         });
-
-        if (!Services.PLATFORM.isProduction()) {
-            LibTestClientMod.init();
-        }
     }
 }
