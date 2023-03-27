@@ -29,6 +29,16 @@ public interface IDataAwareBakedModel extends BakedModel {
     @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull IBlockModelData extraData, @Nullable RenderType renderType);
 
     /**
+     * Retrieves the models quads for the given data.
+     *
+     * @param stack      The itemstack to get the quads for
+     * @param fabulous   If we are rendering as fabulous models
+     * @param renderType The render type to render in, might be null if unknown.
+     * @return A list of quads for the given data.
+     */
+    @NotNull List<BakedQuad> getQuads(final ItemStack stack, final boolean fabulous, @NotNull RandomSource rand, @Nullable RenderType renderType);
+
+    /**
      * The render types of the model.
      *
      * @param state The block state of the model.

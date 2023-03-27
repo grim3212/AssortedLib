@@ -31,6 +31,8 @@
     "client.model.ItemModelGeneratorMixin",
     "client.model.ModelManagerMixin",
     "client.multiplayer.MultiPlayerGameModeWorldlyBlockMixin",
+    "client.render.GameRendererMixin",
+    "client.render.ItemRendererMixin",
     "client.render.LevelRendererWorldlyBlockMixin",
     "client.render.block.ModelBlockRendererWorldlyBlockMixin"
   ],

@@ -1,6 +1,5 @@
 package com.grim3212.assorted.lib.platform;
 
-import com.grim3212.assorted.lib.client.model.RenderTypeGroup;
 import com.grim3212.assorted.lib.client.model.data.*;
 import com.grim3212.assorted.lib.client.model.loader.ForgeBakedModelDelegate;
 import com.grim3212.assorted.lib.platform.services.IClientModelHelper;
@@ -8,7 +7,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.SimpleBakedModel;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
@@ -17,6 +15,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraftforge.client.ForgeRenderTypes;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.data.ModelProperty;
 import org.jetbrains.annotations.NotNull;
@@ -62,11 +61,6 @@ public class ForgeClientModelHelper implements IClientModelHelper {
     }
 
     @Override
-    public BakedModel adaptToPlatform(final SimpleBakedModel.Builder simpleModelBuilder, final RenderTypeGroup renderTypeGroup) {
-        return adaptToPlatform(simpleModelBuilder.build(new net.minecraftforge.client.RenderTypeGroup(renderTypeGroup.block(), renderTypeGroup.entity())));
-    }
-
-    @Override
     public boolean canRenderInType(final BlockState blockState, final RenderType renderType) {
         return Minecraft.getInstance().getBlockRenderer().getBlockModel(blockState).getRenderTypes(
                 blockState,
@@ -92,5 +86,15 @@ public class ForgeClientModelHelper implements IClientModelHelper {
     @Override
     public @NotNull Collection<RenderType> getRenderTypesFor(BakedModel model, ItemStack stack, boolean isFabulous) {
         return model.getRenderTypes(stack, isFabulous);
+    }
+
+    @Override
+    public RenderType getItemUnlitUnsortedTranslucentRenderType() {
+        return ForgeRenderTypes.ITEM_UNSORTED_UNLIT_TRANSLUCENT.get();
+    }
+
+    @Override
+    public RenderType getItemUnsortedTranslucentRenderType() {
+        return ForgeRenderTypes.ITEM_UNSORTED_TRANSLUCENT.get();
     }
 }

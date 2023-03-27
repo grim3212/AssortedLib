@@ -1,12 +1,10 @@
 package com.grim3212.assorted.lib.platform.services;
 
-import com.grim3212.assorted.lib.client.model.RenderTypeGroup;
 import com.grim3212.assorted.lib.client.model.data.IBlockModelData;
 import com.grim3212.assorted.lib.client.model.data.IModelDataBuilder;
 import com.grim3212.assorted.lib.client.model.data.IModelDataKey;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.SimpleBakedModel;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
@@ -77,17 +75,6 @@ public interface IClientModelHelper {
     BakedModel adaptToPlatform(final BakedModel bakedModel);
 
     /**
-     * Adapts a given baked model to the current platform.
-     * Adaptation might not be necessary in all cases, but this method allows the underlying platform to adapt a default vanilla {@link BakedModel},
-     * to platform specific implementations, unlocking additional functionality.
-     *
-     * @param simpleModelBuilder The simple model to adapt.
-     * @param renderTypeGroup    The render type group to build this model with.
-     * @return The adapted model.
-     */
-    BakedModel adaptToPlatform(final SimpleBakedModel.Builder simpleModelBuilder, final RenderTypeGroup renderTypeGroup);
-
-    /**
      * Indicates if the blockstate needs to be rendered in the render type.
      *
      * @param blockState The block state in question.
@@ -127,4 +114,8 @@ public interface IClientModelHelper {
      */
     @NotNull
     Collection<RenderType> getRenderTypesFor(BakedModel model, ItemStack stack, boolean isFabulous);
+
+    RenderType getItemUnlitUnsortedTranslucentRenderType();
+
+    RenderType getItemUnsortedTranslucentRenderType();
 }

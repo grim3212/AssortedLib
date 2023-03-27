@@ -104,6 +104,19 @@ public class CombiningModel implements IModelSpecification<CombiningModel> {
             return ClientServices.MODELS.getRenderTypesFor(model, state, rand, data);
         }
 
+        @NotNull
+        private static Collection<RenderType> getRenderTypes(final BakedModel model, final ItemStack stack, final Boolean fabulous) {
+            if (model instanceof IDataAwareBakedModel dataAwareBakedModel) {
+                return dataAwareBakedModel.getSupportedRenderTypes(stack, fabulous);
+            }
+
+            if (model instanceof IDelegatingBakedModel delegatingBakedModel) {
+                return getRenderTypes(delegatingBakedModel.getDelegate(), stack, fabulous);
+            }
+
+            return ClientServices.MODELS.getRenderTypesFor(model, stack, fabulous);
+        }
+
         public static Builder builder(IModelBakingContext owner, TextureAtlasSprite particle, ItemOverrides overrides, ItemTransforms cameraTransforms) {
             return builder(owner.useAmbientOcclusion(), owner.isGui3d(), owner.useBlockLight(), particle, overrides, cameraTransforms);
         }
@@ -121,6 +134,22 @@ public class CombiningModel implements IModelSpecification<CombiningModel> {
                         quadLists.add(dataAwareBakedModel.getQuads(state, side, rand, Data.resolve(extraData, entry.getKey()), renderType));
                     } else {
                         quadLists.add(entry.getValue().getQuads(state, side, rand));
+                    }
+                }
+            }
+
+            return ConcatenatedListView.of(quadLists);
+        }
+
+        @Override
+        public @NotNull List<BakedQuad> getQuads(ItemStack stack, boolean fabulous, @NotNull RandomSource rand, @Nullable RenderType renderType) {
+            List<List<BakedQuad>> quadLists = new ArrayList<>();
+            for (Map.Entry<String, BakedModel> entry : children.entrySet()) {
+                if (renderType == null || (stack != null && getRenderTypes(entry.getValue(), stack, fabulous).contains(renderType))) {
+                    if (entry.getValue() instanceof IDataAwareBakedModel dataAwareBakedModel) {
+                        quadLists.add(dataAwareBakedModel.getQuads(stack, fabulous, rand, renderType));
+                    } else {
+                        quadLists.add(entry.getValue().getQuads(null, null, rand));
                     }
                 }
             }

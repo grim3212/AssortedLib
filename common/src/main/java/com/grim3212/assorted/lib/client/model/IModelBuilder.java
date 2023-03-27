@@ -5,13 +5,12 @@
 
 package com.grim3212.assorted.lib.client.model;
 
-import com.grim3212.assorted.lib.platform.ClientServices;
+import com.grim3212.assorted.lib.client.model.baked.simple.WrappedSimpleBakedModel;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.SimpleBakedModel;
 import net.minecraft.core.Direction;
 
 import java.util.List;
@@ -47,13 +46,13 @@ public interface IModelBuilder<T extends IModelBuilder<T>> {
     BakedModel build();
 
     class Simple implements IModelBuilder<Simple> {
-        private final SimpleBakedModel.Builder builder;
+        private final WrappedSimpleBakedModel.Builder builder;
         private final RenderTypeGroup renderTypes;
 
         private Simple(boolean hasAmbientOcclusion, boolean usesBlockLight, boolean isGui3d,
                        ItemTransforms transforms, ItemOverrides overrides, TextureAtlasSprite particle,
                        RenderTypeGroup renderTypes) {
-            this.builder = new SimpleBakedModel.Builder(hasAmbientOcclusion, usesBlockLight, isGui3d, transforms, overrides).particle(particle);
+            this.builder = new WrappedSimpleBakedModel.Builder(hasAmbientOcclusion, usesBlockLight, isGui3d, transforms, overrides).particle(particle);
             this.renderTypes = renderTypes;
         }
 
@@ -72,7 +71,7 @@ public interface IModelBuilder<T extends IModelBuilder<T>> {
         @Deprecated
         @Override
         public BakedModel build() {
-            return ClientServices.MODELS.adaptToPlatform(builder, this.renderTypes);
+            return builder.build(renderTypes);
         }
     }
 

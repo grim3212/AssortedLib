@@ -13,7 +13,6 @@ import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachedBlockView;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
@@ -155,20 +154,37 @@ public class FabricBakedModelDelegate implements BakedModel, IDelegatingBakedMod
 
     @Override
     public void emitItemQuads(final ItemStack itemStack, final Supplier<RandomSource> supplier, final RenderContext renderContext) {
-        final BakedModel itemModel = getDelegate().getOverrides().
-                resolve(
-                        getDelegate(),
-                        itemStack,
-                        Minecraft.getInstance().level,
-                        Minecraft.getInstance().player,
-                        supplier.get().nextInt()
-                );
+        if (!(getDelegate() instanceof final IDataAwareBakedModel dataAwareBakedModel)) {
+            if (getDelegate() instanceof FabricBakedModel fabricBakedModel) {
+                fabricBakedModel.emitItemQuads(itemStack, supplier, renderContext);
+            } else {
+                renderContext.fallbackConsumer().accept(getDelegate());
+            }
 
-        renderContext.pushTransform(quad -> true);
+            return;
+        }
 
-        renderContext.fallbackConsumer().accept(itemModel);
+        emitItemQuads(dataAwareBakedModel, itemStack, supplier, renderContext, false);
+    }
 
-        renderContext.popTransform();
+    public void emitItemQuads(
+            final IDataAwareBakedModel dataAwareBakedModel, final ItemStack itemStack, final Supplier<RandomSource> supplier, final RenderContext renderContext, final boolean isFabulous) {
+        final Collection<RenderType> renderTypes = dataAwareBakedModel.getSupportedRenderTypes(itemStack, isFabulous);
+
+        renderTypes.forEach(renderType -> emitItemQuads(dataAwareBakedModel, itemStack, supplier, renderContext, isFabulous, renderType));
+    }
+
+    public void emitItemQuads(final IDataAwareBakedModel dataAwareBakedModel, final ItemStack itemStack, final Supplier<RandomSource> supplier, final RenderContext renderContext, final boolean isFabulous, final RenderType renderType) {
+        final List<BakedQuad> quads = dataAwareBakedModel.getQuads(itemStack, isFabulous, supplier.get(), renderType);
+        final RenderMaterial material = Objects.requireNonNull(RendererAccess.INSTANCE.getRenderer()).materialFinder().blendMode(0, renderType).find();
+
+        quads.forEach(quad -> {
+            final MeshBuilder meshBuilder = RendererAccess.INSTANCE.getRenderer().meshBuilder();
+            final QuadEmitter emitter = meshBuilder.getEmitter();
+            emitter.fromVanilla(quad, material, null);
+            emitter.emit();
+            renderContext.meshConsumer().accept(meshBuilder.build());
+        });
     }
 
     @FunctionalInterface

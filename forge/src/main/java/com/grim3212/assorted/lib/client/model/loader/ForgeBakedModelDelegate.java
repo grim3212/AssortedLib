@@ -152,6 +152,15 @@ public final class ForgeBakedModelDelegate implements BakedModel, IDelegatingBak
     }
 
     @Override
+    public @NotNull List<BakedQuad> getQuads(ItemStack stack, boolean fabulous, @NotNull RandomSource rand, @Nullable RenderType renderType) {
+        if (delegate instanceof IDataAwareBakedModel dataAwareBakedModel) {
+            return dataAwareBakedModel.getQuads(stack, fabulous, rand, renderType);
+        }
+
+        return delegate.getQuads(null, null, rand, ModelData.EMPTY, renderType);
+    }
+
+    @Override
     public @NotNull Collection<RenderType> getSupportedRenderTypes(final BlockState state, final RandomSource rand, final IBlockModelData data) {
         if (!(data instanceof ForgeBlockModelDataPlatformDelegate blockModelDataPlatformDelegate)) {
             if (delegate instanceof IDataAwareBakedModel dataAwareBakedModel) {

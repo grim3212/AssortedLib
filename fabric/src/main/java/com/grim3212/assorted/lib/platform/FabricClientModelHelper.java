@@ -1,7 +1,6 @@
 package com.grim3212.assorted.lib.platform;
 
 import com.grim3212.assorted.lib.client.model.IModelBakeryAccessor;
-import com.grim3212.assorted.lib.client.model.RenderTypeGroup;
 import com.grim3212.assorted.lib.client.model.baked.IDataAwareBakedModel;
 import com.grim3212.assorted.lib.client.model.data.*;
 import com.grim3212.assorted.lib.client.model.loader.FabricBakedModelDelegate;
@@ -11,7 +10,6 @@ import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.SimpleBakedModel;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
@@ -64,11 +62,6 @@ public class FabricClientModelHelper implements IClientModelHelper {
     }
 
     @Override
-    public BakedModel adaptToPlatform(SimpleBakedModel.Builder simpleModelBuilder, RenderTypeGroup renderTypeGroup) {
-        return adaptToPlatform(simpleModelBuilder.build());
-    }
-
-    @Override
     public boolean canRenderInType(final BlockState blockState, final RenderType renderType) {
         return ItemBlockRenderTypes.getChunkRenderType(blockState) == renderType;
     }
@@ -98,5 +91,15 @@ public class FabricClientModelHelper implements IClientModelHelper {
             return Collections.singletonList(Sheets.cutoutBlockSheet());
         }
         return Collections.singletonList(isFabulous ? Sheets.translucentCullBlockSheet() : Sheets.translucentItemSheet());
+    }
+
+    @Override
+    public RenderType getItemUnlitUnsortedTranslucentRenderType() {
+        return RenderType.solid();
+    }
+
+    @Override
+    public RenderType getItemUnsortedTranslucentRenderType() {
+        return RenderType.solid();
     }
 }
