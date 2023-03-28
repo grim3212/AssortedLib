@@ -21,10 +21,11 @@ import net.minecraft.world.level.material.Fluids;
 
 import java.util.Optional;
 
+@SuppressWarnings("removal")
 public class FabricFluidManager implements IFluidManager {
     @Override
     public Optional<FluidInformation> get(final ItemStack stack) {
-        final Storage<FluidVariant> target = FluidStorage.ITEM.find(stack, ContainerItemContext.withConstant(stack));
+        final Storage<FluidVariant> target = FluidStorage.ITEM.find(stack, ContainerItemContext.withInitial(stack));
         if (target == null)
             return Optional.empty();
 
@@ -49,7 +50,7 @@ public class FabricFluidManager implements IFluidManager {
 
             return contained.map(fluid -> {
                 final FluidVariant variant = makeVariant(fluid);
-                final ContainerItemContext containerContext = ContainerItemContext.withConstant(stack);
+                final ContainerItemContext containerContext = ContainerItemContext.withInitial(stack);
 
                 FluidStorage.ITEM.find(stack, containerContext).extract(variant, amount, context);
 
@@ -60,13 +61,14 @@ public class FabricFluidManager implements IFluidManager {
     }
 
     @Override
+    @SuppressWarnings("removal")
     public ItemStack insertInto(final ItemStack stack, final FluidInformation fluidInformation) {
         try (final Transaction context = Transaction.openOuter()) {
             final Optional<FluidInformation> contained = get(stack);
 
             return contained.map(fluid -> {
                 final FluidVariant variant = makeVariant(fluid);
-                final ContainerItemContext containerContext = ContainerItemContext.withConstant(stack);
+                final ContainerItemContext containerContext = ContainerItemContext.withInitial(stack);
 
                 FluidStorage.ITEM.find(stack, containerContext).insert(variant, fluidInformation.amount(), context);
 
@@ -79,7 +81,7 @@ public class FabricFluidManager implements IFluidManager {
     @Override
     public long simulateInsert(final ItemStack stack, final FluidInformation fluidInformation) {
         final FluidVariant variant = makeVariant(fluidInformation);
-        final ContainerItemContext containerContext = ContainerItemContext.withConstant(stack);
+        final ContainerItemContext containerContext = ContainerItemContext.withInitial(stack);
         return FluidStorage.ITEM.find(stack, containerContext).simulateInsert(variant, fluidInformation.amount(), null);
     }
 
@@ -89,7 +91,7 @@ public class FabricFluidManager implements IFluidManager {
 
         return contained.map(fluid -> {
             final FluidVariant variant = makeVariant(fluid);
-            final ContainerItemContext containerContext = ContainerItemContext.withConstant(stack);
+            final ContainerItemContext containerContext = ContainerItemContext.withInitial(stack);
 
             return FluidStorage.ITEM.find(stack, containerContext).simulateExtract(variant, amount, null);
         }).orElse(0L);
