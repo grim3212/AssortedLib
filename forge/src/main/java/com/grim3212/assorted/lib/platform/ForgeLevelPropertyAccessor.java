@@ -26,8 +26,8 @@ public class ForgeLevelPropertyAccessor implements ILevelPropertyAccessor {
     }
 
     @Override
-    public int getLightEmission(LevelReader levelReader, BlockPos blockPos) {
-        return levelReader.getBlockState(blockPos).getLightEmission(levelReader, blockPos);
+    public int getLightEmission(BlockGetter getter, BlockPos blockPos) {
+        return getter.getBlockState(blockPos).getLightEmission(getter, blockPos);
     }
 
     @Override

@@ -37,10 +37,10 @@ public class FabricLevelPropertyAccessor implements ILevelPropertyAccessor {
     }
 
     @Override
-    public int getLightEmission(LevelReader levelReader, BlockPos blockPos) {
-        final BlockState blockState = levelReader.getBlockState(blockPos);
+    public int getLightEmission(BlockGetter getter, BlockPos blockPos) {
+        final BlockState blockState = getter.getBlockState(blockPos);
         if (blockState.getBlock() instanceof IBlockExtraProperties extraProperties) {
-            return extraProperties.getLightEmission(blockState, levelReader, blockPos);
+            return extraProperties.getLightEmission(blockState, getter, blockPos);
         }
 
         return blockState.getLightEmission();

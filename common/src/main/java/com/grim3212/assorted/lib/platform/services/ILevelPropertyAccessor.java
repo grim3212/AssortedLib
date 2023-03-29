@@ -20,7 +20,7 @@ public interface ILevelPropertyAccessor {
 
     float getFriction(LevelReader levelReader, BlockPos blockPos, @Nullable Entity entity);
 
-    int getLightEmission(LevelReader levelReader, BlockPos blockPos);
+    int getLightEmission(BlockGetter getter, BlockPos blockPos);
 
     default int getLightBlock(BlockGetter blockGetter, BlockPos blockPos) {
         return blockGetter.getBlockState(blockPos).getLightBlock(
