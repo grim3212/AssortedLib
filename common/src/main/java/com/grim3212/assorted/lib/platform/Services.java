@@ -21,6 +21,7 @@ public class Services {
     public static final IFluidManager FLUIDS = load(IFluidManager.class);
     public static final IConditionHelper CONDITIONS = load(IConditionHelper.class);
     public static final IIngredientHelper INGREDIENTS = load(IIngredientHelper.class);
+    public static final IWorldGenHelper WORLD_GEN = load(IWorldGenHelper.class);
 
     public static <T> T load(Class<T> clazz) {
 
