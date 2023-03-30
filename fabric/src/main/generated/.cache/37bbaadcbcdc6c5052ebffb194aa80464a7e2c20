@@ -1,8 +1,8 @@
-// 1.19.3	2023-03-29T18:35:24.0963327	Assorted Lib/Tags for minecraft:item
+// 1.19.3	2023-03-30T06:12:45.9307818	Assorted Lib/Tags for minecraft:item
 a7c276db1d5e8356e0e7aeb1e404411b34467dd8 data\c\tags\items\glass\purple.json
 1c071e5b6725351d88b04f357b38a2d5c512ce78 data\c\tags\items\eggs.json
-706c542d5caa87c859cc68d4b83c08e4baec6fc7 data\c\tags\items\dyes\green.json
 871c42ea5ae1ed6b00f81c05446212ded927be24 data\c\tags\items\bookshelves.json
+706c542d5caa87c859cc68d4b83c08e4baec6fc7 data\c\tags\items\dyes\green.json
 a9b55e67ddbec4f60d16ca1cbece69abb4c1b045 data\c\tags\items\storage_blocks\lapis.json
 ef347f6724a4e2743851d8ddf77b8424e340de90 data\c\tags\items\dyes\white.json
 d2eb0460d1d9d60aff3395c79a1a358dbc9e6c6c data\c\tags\items\storage_blocks\redstone.json
@@ -21,12 +21,12 @@ b1030a3d32c63b98b5506740a13d3a545c5f9063 data\c\tags\items\ingots\gold.json
 c48d8c8b12d016b9951c98c84526d5e5553545d6 data\c\tags\items\storage_blocks\gold.json
 99b94b55b058ee89dbbfbac44968c831e424fe3f data\c\tags\items\glass_panes\light_gray.json
 f53c93b2073653baae329db2b9c4389738796dee data\c\tags\items\armors\chestplates.json
-5964e57269167d85d2545bc6ba530248f19f9a1f data\c\tags\items\storage_blocks\amethyst.json
 b7aab0b81dfdb3b2d0f09d04c2c2264cd058ea19 data\c\tags\items\storage_blocks\raw_iron.json
+5964e57269167d85d2545bc6ba530248f19f9a1f data\c\tags\items\storage_blocks\amethyst.json
 a2306be4be3fce48840c4976924fe52a106a5c3e data\c\tags\items\ingots\netherite.json
 686dba8aa474dfb7843a8b774dc70de61c071f20 data\c\tags\items\tools\fishing_rods.json
-8ce25400eae32b1c3d05ab783fa007b0e852d1fe data\c\tags\items\dusts\redstone.json
 88c249b4efddf745387698ddf4251e595963a7c7 data\c\tags\items\gems\prismarine.json
+8ce25400eae32b1c3d05ab783fa007b0e852d1fe data\c\tags\items\dusts\redstone.json
 fcce80301e8c3f3f75b8035f48bfc420a31361d0 data\c\tags\items\glass\pink.json
 1edec650a70edf74ec0b420c1e111445ee6c6b0c data\c\tags\items\glass_panes\orange.json
 a425733455cf12a61e1d9b16fecba535ada80b09 data\c\tags\items\dyes\light_blue.json
@@ -74,8 +74,8 @@ eeef8c1af9e84cda89e7165f25c7baf20817ef89 data\c\tags\items\armors.json
 fcb8220d6848b7b43390e98a397861b6656db5c6 data\c\tags\items\fences\nether_brick.json
 204c20e23f4b41548367455cdd7ffbaf90bdd9fb data\c\tags\items\obsidian.json
 52165bdbf3a216cd9c426e56ed88dfd8855f82d1 data\c\tags\items\chests\trapped.json
-cfa612cb64f7e213d984ca4431202690f594df8a data\c\tags\items\ender_pearls.json
 467a91f04ec3e9de1ac9e13c62b5379e31cfa467 data\c\tags\items\fence_gates\wooden.json
+cfa612cb64f7e213d984ca4431202690f594df8a data\c\tags\items\ender_pearls.json
 a5632c7bbb7238923790316794f7c8aade6ef3fe data\c\tags\items\ores\redstone.json
 541409fdb746cbacd5ffd709860af95a5a52af9f data\c\tags\items\glass_panes\lime.json
 acb4bfe64edcc6f243f94a58587f56891fd19d9c data\c\tags\items\nuggets\gold.json
@@ -92,8 +92,8 @@ ae63090c29bc848a0d9f25201cd7ed80eb253b2c data\c\tags\items\slimeballs.json
 219ec67757d585474ba0a2791ddaf5e8210711e9 data\c\tags\items\glass\cyan.json
 c3d9bfa84d88ef5deea5ad1f9b37fafb31297dad data\c\tags\items\chests\wooden.json
 8f7aab3e73530e0ab05a76f78b4be1f7be0bb5a4 data\c\tags\items\shears.json
-7e91177859f362e2aec46fb683b944974fa3a159 data\c\tags\items\storage_blocks\iron.json
 0220a968fe46212744631dc228b97c40df25273f data\c\tags\items\tools\shields.json
+7e91177859f362e2aec46fb683b944974fa3a159 data\c\tags\items\storage_blocks\iron.json
 e2814ad6d2a5a9e8f23949ea93b4f1fceb7ee8d4 data\c\tags\items\gunpowder.json
 e8e451a369b002abae37518fe592ebfa5effb981 data\c\tags\items\glass\black.json
 153bec2c03e5393ac6fbd33be427e50f53ef15e5 data\c\tags\items\crops\carrot.json

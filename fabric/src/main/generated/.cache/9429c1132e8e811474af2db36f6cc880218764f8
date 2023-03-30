@@ -1,4 +1,4 @@
-// 1.19.3	2023-03-29T18:35:24.1013327	Assorted Lib/Tags for minecraft:block
+// 1.19.3	2023-03-30T06:12:45.9367821	Assorted Lib/Tags for minecraft:block
 22dffcab08dbed3334ad4c99bfee0347b82cd5a4 data\c\tags\blocks\fences.json
 1eb80754d00d42e071c653bcecf6a4adba6f2496 data\c\tags\blocks\storage_blocks\copper.json
 b931e727f3ea7f25d6fba33c1fc5881a16f54081 data\c\tags\blocks\ores\gold.json
@@ -22,9 +22,9 @@ f49f51e79d8efb9d3426fb99669723302f4a10b3 data\c\tags\blocks\ores\emerald.json
 a9b55e67ddbec4f60d16ca1cbece69abb4c1b045 data\c\tags\blocks\storage_blocks\lapis.json
 4b4e91f8840d5fd5c2ddfa8f188976667e19b6df data\c\tags\blocks\glass\orange.json
 bc0c1beca7d38da5293284b76560f6f7c0fffd32 data\c\tags\blocks\glass\magenta.json
+37263280d1ff7462e8a0cfcbb35a099e4f399fe8 data\c\tags\blocks\barrels.json
 467a91f04ec3e9de1ac9e13c62b5379e31cfa467 data\c\tags\blocks\fence_gates\wooden.json
 7e91177859f362e2aec46fb683b944974fa3a159 data\c\tags\blocks\storage_blocks\iron.json
-37263280d1ff7462e8a0cfcbb35a099e4f399fe8 data\c\tags\blocks\barrels.json
 0716144cfc9a91217c66076412c0deaf44fcc153 data\c\tags\blocks\end_stones.json
 d2eb0460d1d9d60aff3395c79a1a358dbc9e6c6c data\c\tags\blocks\storage_blocks\redstone.json
 8ab1414552e837f706fdd7cbb10d704e02b763bc data\c\tags\blocks\glass\colorless.json
@@ -42,8 +42,8 @@ c0593271af3ba590b2a7ecdbb7a894c1dbca46d8 data\c\tags\blocks\glass\blue.json
 360a9d836b5ef0aa0b96f08d3983c8426d3184ce data\c\tags\blocks\ores\copper.json
 cf79e4cfa53bf431fbfe218fac590e9f526ef044 data\c\tags\blocks\storage_blocks.json
 2cffb88b498310543a0ed750db199a3ea931768e data\c\tags\blocks\glass_panes\light_blue.json
-464acf4f5b3861e8f7833cdeb3117ed5324b11fb data\c\tags\blocks\glass_panes\white.json
 bf7d277f9b28fed9ca8062fdd7ea90b2f14719b3 data\c\tags\blocks\glass_panes\gray.json
+464acf4f5b3861e8f7833cdeb3117ed5324b11fb data\c\tags\blocks\glass_panes\white.json
 f7db294b6430ac71855fe27a4e3ccd5dedb65756 data\c\tags\blocks\glass\brown.json
 dbd095cbed1d5c282ca6c4aecff4ff57922c5875 data\c\tags\blocks\netherrack.json
 66bcc5f158acc6217f1ed1f6fdde4712d1f6b10d data\c\tags\blocks\glass_panes\yellow.json

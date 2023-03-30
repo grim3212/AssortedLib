@@ -1,11 +1,13 @@
 package com.grim3212.assorted.lib;
 
-import com.grim3212.assorted.lib.data.ForgeLibBiomeTagProvider;
-import com.grim3212.assorted.lib.data.ForgeLibBlockTagProvider;
-import com.grim3212.assorted.lib.data.ForgeLibItemTagProvider;
+import com.grim3212.assorted.lib.data.ForgeBiomeTagProvider;
+import com.grim3212.assorted.lib.data.ForgeBlockTagProvider;
+import com.grim3212.assorted.lib.data.ForgeItemTagProvider;
+import com.grim3212.assorted.lib.data.LibCommonTagProvider;
 import com.grim3212.assorted.lib.events.*;
 import com.grim3212.assorted.lib.platform.ForgePlatformHelper;
 import com.grim3212.assorted.lib.platform.Services;
+import com.grim3212.assorted.lib.worldgen.LibForgeWorldGen;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
@@ -75,6 +77,8 @@ public class AssortedLibForge {
         });
 
         Services.CONDITIONS.init();
+
+        LibForgeWorldGen.init(modBus);
     }
 
     private void registerRecipeSerializers(final RegisterEvent event) {
@@ -95,9 +99,9 @@ public class AssortedLibForge {
         ExistingFileHelper fileHelper = event.getExistingFileHelper();
         CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
 
-        ForgeLibBlockTagProvider blockTagProvider = new ForgeLibBlockTagProvider(packOutput, lookupProvider, fileHelper);
+        ForgeBlockTagProvider blockTagProvider = new ForgeBlockTagProvider(packOutput, lookupProvider, fileHelper, LibConstants.MOD_ID, new LibCommonTagProvider.BlockTagProvider(packOutput, lookupProvider));
         datagenerator.addProvider(event.includeServer(), blockTagProvider);
-        datagenerator.addProvider(event.includeServer(), new ForgeLibItemTagProvider(packOutput, lookupProvider, blockTagProvider, fileHelper));
-        datagenerator.addProvider(event.includeServer(), new ForgeLibBiomeTagProvider(packOutput, lookupProvider, fileHelper));
+        datagenerator.addProvider(event.includeServer(), new ForgeItemTagProvider(packOutput, lookupProvider, blockTagProvider, fileHelper, LibConstants.MOD_ID, new LibCommonTagProvider.ItemTagProvider(packOutput, lookupProvider, blockTagProvider)));
+        datagenerator.addProvider(event.includeServer(), new ForgeBiomeTagProvider(packOutput, lookupProvider, fileHelper, LibConstants.MOD_ID, new LibCommonTagProvider.BiomeTagProvider(packOutput, lookupProvider)));
     }
 }
