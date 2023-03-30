@@ -19,7 +19,8 @@
     "item.ArmorItemAccessor",
     "item.ArmorMaterialsMixin",
     "item.DiggerItemAccessor",
-    "item.ItemStackMixin"
+    "item.ItemStackMixin",
+    "world.level.MonsterRoomFeatureAccessor"
   ],
   "client": [
     "client.AccessorBlockModel",

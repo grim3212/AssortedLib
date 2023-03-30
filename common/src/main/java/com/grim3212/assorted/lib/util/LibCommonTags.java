@@ -5,6 +5,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 
 public class LibCommonTags {
@@ -278,6 +279,66 @@ public class LibCommonTags {
 
         private static TagKey<Item> commonTag(String name) {
             return TagKey.create(Registries.ITEM, new ResourceLocation(Services.PLATFORM.getCommonTagPrefix(), name));
+        }
+    }
+
+    public static class Biomes {
+        public static final TagKey<Biome> IS_HOT = commonTag("is_hot");
+        public static final TagKey<Biome> IS_HOT_OVERWORLD = commonTag("is_hot/overworld");
+        public static final TagKey<Biome> IS_HOT_NETHER = commonTag("is_hot/nether");
+        public static final TagKey<Biome> IS_HOT_END = commonTag("is_hot/end");
+
+        public static final TagKey<Biome> IS_COLD = commonTag("is_cold");
+        public static final TagKey<Biome> IS_COLD_OVERWORLD = commonTag("is_cold/overworld");
+        public static final TagKey<Biome> IS_COLD_NETHER = commonTag("is_cold/nether");
+        public static final TagKey<Biome> IS_COLD_END = commonTag("is_cold/end");
+
+        public static final TagKey<Biome> IS_SPARSE = commonTag("is_sparse");
+        public static final TagKey<Biome> IS_SPARSE_OVERWORLD = commonTag("is_sparse/overworld");
+        public static final TagKey<Biome> IS_SPARSE_NETHER = commonTag("is_sparse/nether");
+        public static final TagKey<Biome> IS_SPARSE_END = commonTag("is_sparse/end");
+        public static final TagKey<Biome> IS_DENSE = commonTag("is_dense");
+        public static final TagKey<Biome> IS_DENSE_OVERWORLD = commonTag("is_dense/overworld");
+        public static final TagKey<Biome> IS_DENSE_NETHER = commonTag("is_dense/nether");
+        public static final TagKey<Biome> IS_DENSE_END = commonTag("is_dense/end");
+
+        public static final TagKey<Biome> IS_WET = commonTag("is_wet");
+        public static final TagKey<Biome> IS_WET_OVERWORLD = commonTag("is_wet/overworld");
+        public static final TagKey<Biome> IS_WET_NETHER = commonTag("is_wet/nether");
+        public static final TagKey<Biome> IS_WET_END = commonTag("is_wet/end");
+        public static final TagKey<Biome> IS_DRY = commonTag("is_dry");
+        public static final TagKey<Biome> IS_DRY_OVERWORLD = commonTag("is_dry/overworld");
+        public static final TagKey<Biome> IS_DRY_NETHER = commonTag("is_dry/nether");
+        public static final TagKey<Biome> IS_DRY_END = commonTag("is_dry/end");
+
+        public static final TagKey<Biome> IS_CONIFEROUS = commonTag("is_coniferous");
+
+        public static final TagKey<Biome> IS_SPOOKY = commonTag("is_spooky");
+        public static final TagKey<Biome> IS_DEAD = commonTag("is_dead");
+        public static final TagKey<Biome> IS_LUSH = commonTag("is_lush");
+        public static final TagKey<Biome> IS_MUSHROOM = commonTag("is_mushroom");
+        public static final TagKey<Biome> IS_MAGICAL = commonTag("is_magical");
+        public static final TagKey<Biome> IS_RARE = commonTag("is_rare");
+        public static final TagKey<Biome> IS_PLATEAU = commonTag("is_plateau");
+        public static final TagKey<Biome> IS_MODIFIED = commonTag("is_modified");
+
+        public static final TagKey<Biome> IS_WATER = commonTag("is_water");
+        public static final TagKey<Biome> IS_DESERT = commonTag("is_desert");
+        public static final TagKey<Biome> IS_PLAINS = commonTag("is_plains");
+        public static final TagKey<Biome> IS_SWAMP = commonTag("is_swamp");
+        public static final TagKey<Biome> IS_SANDY = commonTag("is_sandy");
+        public static final TagKey<Biome> IS_SNOWY = commonTag("is_snowy");
+        public static final TagKey<Biome> IS_WASTELAND = commonTag("is_wasteland");
+        public static final TagKey<Biome> IS_VOID = commonTag("is_void");
+        public static final TagKey<Biome> IS_UNDERGROUND = commonTag("is_underground");
+
+        public static final TagKey<Biome> IS_CAVE = commonTag("is_cave");
+        public static final TagKey<Biome> IS_PEAK = commonTag("is_peak");
+        public static final TagKey<Biome> IS_SLOPE = commonTag("is_slope");
+        public static final TagKey<Biome> IS_MOUNTAIN = commonTag("is_mountain");
+
+        private static TagKey<Biome> commonTag(String name) {
+            return TagKey.create(Registries.BIOME, new ResourceLocation(Services.PLATFORM.getCommonTagPrefix(), name));
         }
     }
 }

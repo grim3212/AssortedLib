@@ -10,9 +10,12 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.common.DungeonHooks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.AddReloadListenerEvent;
@@ -95,5 +98,10 @@ public class ForgePlatformHelper implements IPlatformHelper {
     @Override
     public void addReloadListener(ResourceLocation identifier, PreparableReloadListener reloadListener) {
         MinecraftForge.EVENT_BUS.addListener((AddReloadListenerEvent event) -> event.addListener(reloadListener));
+    }
+
+    @Override
+    public EntityType<?> getRandomDungeonEntity(RandomSource random) {
+        return DungeonHooks.getRandomDungeonMob(random);
     }
 }

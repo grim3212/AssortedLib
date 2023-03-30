@@ -5,7 +5,6 @@ import com.grim3212.assorted.lib.events.LootTableModifyEvent;
 import com.grim3212.assorted.lib.events.UseBlockEvent;
 import com.grim3212.assorted.lib.platform.FabricConfigHelper;
 import com.grim3212.assorted.lib.platform.Services;
-import com.grim3212.assorted.lib.test.LibTestMod;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
@@ -33,10 +32,5 @@ public class AssortedLibFabric implements ModInitializer {
         Services.INGREDIENTS.register();
 
         FabricConfigHelper.init();
-
-        if (!Services.PLATFORM.isProduction()) {
-            LibTestMod.init();
-            LibTestMod.getConfig();
-        }
     }
 }

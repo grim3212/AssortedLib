@@ -1,7 +1,9 @@
 package com.grim3212.assorted.lib.platform.services;
 
 import com.grim3212.assorted.lib.dist.Dist;
+import com.grim3212.assorted.lib.mixin.world.level.MonsterRoomFeatureAccessor;
 import com.grim3212.assorted.lib.registry.ILoaderRegistry;
+import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -9,7 +11,9 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -67,4 +71,8 @@ public interface IPlatformHelper {
     void registerCreativeTab(ResourceLocation id, Component title, Supplier<ItemStack> icon, Supplier<List<ItemStack>> displayStacks);
 
     void addReloadListener(ResourceLocation identifier, PreparableReloadListener reloadListener);
+
+    default EntityType<?> getRandomDungeonEntity(RandomSource random) {
+        return Util.getRandom(MonsterRoomFeatureAccessor.getMOBS(), random);
+    }
 }

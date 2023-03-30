@@ -23,17 +23,11 @@ public class FabricExtendedBlockModelDeserializer extends BlockModel.Deserialize
         if (!element.isJsonObject())
             throw new JsonSyntaxException("Model needs to be object");
 
-        final JsonObject jsonobject = element.getAsJsonObject();
-        if (!jsonobject.has("loader"))
-            return null;
-
-        if (!jsonobject.get("loader").getAsString().equals(name))
-            return null;
-
         final BlockModel model = super.deserialize(element, targetType, deserializationContext);
         if (model == null)
             return null;
 
+        JsonObject jsonobject = element.getAsJsonObject();
         final IModelSpecification<?> geometry = deserializeGeometry(deserializationContext, jsonobject);
 
         if (geometry != null) {
@@ -43,7 +37,7 @@ public class FabricExtendedBlockModelDeserializer extends BlockModel.Deserialize
             );
         }
 
-        return null;
+        return model;
     }
 
     @Nullable

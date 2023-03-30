@@ -1,12 +1,11 @@
 package com.grim3212.assorted.lib;
 
+import com.grim3212.assorted.lib.data.ForgeLibBiomeTagProvider;
 import com.grim3212.assorted.lib.data.ForgeLibBlockTagProvider;
 import com.grim3212.assorted.lib.data.ForgeLibItemTagProvider;
-import com.grim3212.assorted.lib.data.LibCommonRecipeProvider;
 import com.grim3212.assorted.lib.events.*;
 import com.grim3212.assorted.lib.platform.ForgePlatformHelper;
 import com.grim3212.assorted.lib.platform.Services;
-import com.grim3212.assorted.lib.test.LibTestMod;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
@@ -20,7 +19,6 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
@@ -33,7 +31,6 @@ public class AssortedLibForge {
         final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         modBus.addListener(this::gatherData);
         modBus.addListener(this::registerRecipeSerializers);
-        modBus.addListener(this::configReady);
         modBus.addListener(this::registerCreativeTabs);
 
         Services.EVENTS.registerEventType(UseBlockEvent.class, () -> {
@@ -78,14 +75,6 @@ public class AssortedLibForge {
         });
 
         Services.CONDITIONS.init();
-
-        if (!Services.PLATFORM.isProduction()) {
-            LibTestMod.init();
-        }
-    }
-
-    private void configReady(final FMLLoadCompleteEvent loadCompleteEvent) {
-        if (!Services.PLATFORM.isProduction()) LibTestMod.getConfig();
     }
 
     private void registerRecipeSerializers(final RegisterEvent event) {
@@ -109,7 +98,6 @@ public class AssortedLibForge {
         ForgeLibBlockTagProvider blockTagProvider = new ForgeLibBlockTagProvider(packOutput, lookupProvider, fileHelper);
         datagenerator.addProvider(event.includeServer(), blockTagProvider);
         datagenerator.addProvider(event.includeServer(), new ForgeLibItemTagProvider(packOutput, lookupProvider, blockTagProvider, fileHelper));
-
-        datagenerator.addProvider(event.includeServer(), new LibCommonRecipeProvider(packOutput));
+        datagenerator.addProvider(event.includeServer(), new ForgeLibBiomeTagProvider(packOutput, lookupProvider, fileHelper));
     }
 }

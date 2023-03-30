@@ -9,7 +9,9 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.data.tags.VanillaBlockTagsProvider;
 import net.minecraft.data.tags.VanillaItemTagsProvider;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Tuple;
@@ -17,6 +19,8 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import org.apache.commons.lang3.NotImplementedException;
@@ -339,6 +343,99 @@ public class LibCommonTagProvider {
                 return (TagKey<Item>) LibCommonTags.Items.class.getDeclaredField(name).get(null);
             } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
                 throw new IllegalStateException(LibCommonTags.Items.class.getName() + " is missing tag name: " + name);
+            }
+        }
+    }
+
+    public static class BiomeTagProvider extends TagsProvider<Biome> {
+
+        public BiomeTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
+            super(output, Registries.BIOME, lookupProvider);
+        }
+
+        @Override
+        protected void addTags(HolderLookup.Provider lookup) {
+            throw new NotImplementedException();
+        }
+
+        @Override
+        protected TagAppender<Biome> tag(TagKey<Biome> tag) {
+            throw new NotImplementedException();
+        }
+
+        private void tagAll(Function<TagKey<Biome>, TagAppender<Biome>> tagger, ResourceKey<Biome> biome, TagKey<Biome>... tags) {
+            for (TagKey<Biome> key : tags) {
+                tagger.apply(key).add(biome);
+            }
+        }
+
+        public void addCommonTags(Function<TagKey<Biome>, TagAppender<Biome>> tagger, boolean isForge) {
+            if (!isForge) {
+                tagAll(tagger, Biomes.PLAINS, LibCommonTags.Biomes.IS_PLAINS);
+                tagAll(tagger, Biomes.DESERT, LibCommonTags.Biomes.IS_HOT_OVERWORLD, LibCommonTags.Biomes.IS_DRY_OVERWORLD, LibCommonTags.Biomes.IS_SANDY, LibCommonTags.Biomes.IS_DESERT);
+                tagAll(tagger, Biomes.TAIGA, LibCommonTags.Biomes.IS_COLD_OVERWORLD, LibCommonTags.Biomes.IS_CONIFEROUS);
+                tagAll(tagger, Biomes.SWAMP, LibCommonTags.Biomes.IS_WET_OVERWORLD, LibCommonTags.Biomes.IS_SWAMP);
+                tagAll(tagger, Biomes.NETHER_WASTES, LibCommonTags.Biomes.IS_HOT_NETHER, LibCommonTags.Biomes.IS_DRY_NETHER);
+                tagAll(tagger, Biomes.THE_END, LibCommonTags.Biomes.IS_COLD_END, LibCommonTags.Biomes.IS_DRY_END);
+                tagAll(tagger, Biomes.FROZEN_OCEAN, LibCommonTags.Biomes.IS_COLD_OVERWORLD, LibCommonTags.Biomes.IS_SNOWY);
+                tagAll(tagger, Biomes.FROZEN_RIVER, LibCommonTags.Biomes.IS_COLD_OVERWORLD, LibCommonTags.Biomes.IS_SNOWY);
+                tagAll(tagger, Biomes.SNOWY_PLAINS, LibCommonTags.Biomes.IS_COLD_OVERWORLD, LibCommonTags.Biomes.IS_SNOWY, LibCommonTags.Biomes.IS_WASTELAND, LibCommonTags.Biomes.IS_PLAINS);
+                tagAll(tagger, Biomes.MUSHROOM_FIELDS, LibCommonTags.Biomes.IS_MUSHROOM, LibCommonTags.Biomes.IS_RARE);
+                tagAll(tagger, Biomes.JUNGLE, LibCommonTags.Biomes.IS_HOT_OVERWORLD, LibCommonTags.Biomes.IS_WET_OVERWORLD, LibCommonTags.Biomes.IS_DENSE_OVERWORLD);
+                tagAll(tagger, Biomes.SPARSE_JUNGLE, LibCommonTags.Biomes.IS_HOT_OVERWORLD, LibCommonTags.Biomes.IS_WET_OVERWORLD, LibCommonTags.Biomes.IS_RARE);
+                tagAll(tagger, Biomes.BEACH, LibCommonTags.Biomes.IS_WET_OVERWORLD, LibCommonTags.Biomes.IS_SANDY);
+                tagAll(tagger, Biomes.SNOWY_BEACH, LibCommonTags.Biomes.IS_COLD_OVERWORLD, LibCommonTags.Biomes.IS_SNOWY);
+                tagAll(tagger, Biomes.DARK_FOREST, LibCommonTags.Biomes.IS_SPOOKY, LibCommonTags.Biomes.IS_DENSE_OVERWORLD);
+                tagAll(tagger, Biomes.SNOWY_TAIGA, LibCommonTags.Biomes.IS_COLD_OVERWORLD, LibCommonTags.Biomes.IS_CONIFEROUS, LibCommonTags.Biomes.IS_SNOWY);
+                tagAll(tagger, Biomes.OLD_GROWTH_PINE_TAIGA, LibCommonTags.Biomes.IS_COLD_OVERWORLD, LibCommonTags.Biomes.IS_CONIFEROUS);
+                tagAll(tagger, Biomes.WINDSWEPT_FOREST, LibCommonTags.Biomes.IS_SPARSE_OVERWORLD);
+                tagAll(tagger, Biomes.SAVANNA, LibCommonTags.Biomes.IS_HOT_OVERWORLD, LibCommonTags.Biomes.IS_SPARSE_OVERWORLD);
+                tagAll(tagger, Biomes.SAVANNA_PLATEAU, LibCommonTags.Biomes.IS_HOT_OVERWORLD, LibCommonTags.Biomes.IS_SPARSE_OVERWORLD, LibCommonTags.Biomes.IS_RARE, LibCommonTags.Biomes.IS_SLOPE, LibCommonTags.Biomes.IS_PLATEAU);
+                tagAll(tagger, Biomes.BADLANDS, LibCommonTags.Biomes.IS_SANDY, LibCommonTags.Biomes.IS_DRY_OVERWORLD);
+                tagAll(tagger, Biomes.WOODED_BADLANDS, LibCommonTags.Biomes.IS_SANDY, LibCommonTags.Biomes.IS_DRY_OVERWORLD, LibCommonTags.Biomes.IS_SPARSE_OVERWORLD, LibCommonTags.Biomes.IS_SLOPE, LibCommonTags.Biomes.IS_PLATEAU);
+                tagAll(tagger, Biomes.MEADOW, LibCommonTags.Biomes.IS_PLAINS, LibCommonTags.Biomes.IS_PLATEAU, LibCommonTags.Biomes.IS_SLOPE);
+                tagAll(tagger, Biomes.GROVE, LibCommonTags.Biomes.IS_COLD_OVERWORLD, LibCommonTags.Biomes.IS_CONIFEROUS, LibCommonTags.Biomes.IS_SNOWY, LibCommonTags.Biomes.IS_SLOPE);
+                tagAll(tagger, Biomes.SNOWY_SLOPES, LibCommonTags.Biomes.IS_COLD_OVERWORLD, LibCommonTags.Biomes.IS_SPARSE_OVERWORLD, LibCommonTags.Biomes.IS_SNOWY, LibCommonTags.Biomes.IS_SLOPE);
+                tagAll(tagger, Biomes.JAGGED_PEAKS, LibCommonTags.Biomes.IS_COLD_OVERWORLD, LibCommonTags.Biomes.IS_SPARSE_OVERWORLD, LibCommonTags.Biomes.IS_SNOWY, LibCommonTags.Biomes.IS_PEAK);
+                tagAll(tagger, Biomes.FROZEN_PEAKS, LibCommonTags.Biomes.IS_COLD_OVERWORLD, LibCommonTags.Biomes.IS_SPARSE_OVERWORLD, LibCommonTags.Biomes.IS_SNOWY, LibCommonTags.Biomes.IS_PEAK);
+                tagAll(tagger, Biomes.STONY_PEAKS, LibCommonTags.Biomes.IS_HOT_OVERWORLD, LibCommonTags.Biomes.IS_PEAK);
+                tagAll(tagger, Biomes.SMALL_END_ISLANDS, LibCommonTags.Biomes.IS_COLD_END, LibCommonTags.Biomes.IS_DRY_END);
+                tagAll(tagger, Biomes.END_MIDLANDS, LibCommonTags.Biomes.IS_COLD_END, LibCommonTags.Biomes.IS_DRY_END);
+                tagAll(tagger, Biomes.END_HIGHLANDS, LibCommonTags.Biomes.IS_COLD_END, LibCommonTags.Biomes.IS_DRY_END);
+                tagAll(tagger, Biomes.END_BARRENS, LibCommonTags.Biomes.IS_COLD_END, LibCommonTags.Biomes.IS_DRY_END);
+                tagAll(tagger, Biomes.WARM_OCEAN, LibCommonTags.Biomes.IS_HOT_OVERWORLD);
+                tagAll(tagger, Biomes.COLD_OCEAN, LibCommonTags.Biomes.IS_COLD_OVERWORLD);
+                tagAll(tagger, Biomes.DEEP_COLD_OCEAN, LibCommonTags.Biomes.IS_COLD_OVERWORLD);
+                tagAll(tagger, Biomes.DEEP_FROZEN_OCEAN, LibCommonTags.Biomes.IS_COLD_OVERWORLD);
+                tagAll(tagger, Biomes.THE_VOID, LibCommonTags.Biomes.IS_VOID);
+                tagAll(tagger, Biomes.SUNFLOWER_PLAINS, LibCommonTags.Biomes.IS_PLAINS, LibCommonTags.Biomes.IS_RARE);
+                tagAll(tagger, Biomes.WINDSWEPT_GRAVELLY_HILLS, LibCommonTags.Biomes.IS_SPARSE_OVERWORLD, LibCommonTags.Biomes.IS_RARE);
+                tagAll(tagger, Biomes.FLOWER_FOREST, LibCommonTags.Biomes.IS_RARE);
+                tagAll(tagger, Biomes.ICE_SPIKES, LibCommonTags.Biomes.IS_COLD_OVERWORLD, LibCommonTags.Biomes.IS_SNOWY, LibCommonTags.Biomes.IS_RARE);
+                tagAll(tagger, Biomes.OLD_GROWTH_BIRCH_FOREST, LibCommonTags.Biomes.IS_DENSE_OVERWORLD, LibCommonTags.Biomes.IS_RARE);
+                tagAll(tagger, Biomes.OLD_GROWTH_SPRUCE_TAIGA, LibCommonTags.Biomes.IS_DENSE_OVERWORLD, LibCommonTags.Biomes.IS_RARE);
+                tagAll(tagger, Biomes.WINDSWEPT_SAVANNA, LibCommonTags.Biomes.IS_HOT_OVERWORLD, LibCommonTags.Biomes.IS_DRY_OVERWORLD, LibCommonTags.Biomes.IS_SPARSE_OVERWORLD, LibCommonTags.Biomes.IS_RARE);
+                tagAll(tagger, Biomes.ERODED_BADLANDS, LibCommonTags.Biomes.IS_HOT_OVERWORLD, LibCommonTags.Biomes.IS_DRY_OVERWORLD, LibCommonTags.Biomes.IS_SPARSE_OVERWORLD, LibCommonTags.Biomes.IS_RARE);
+                tagAll(tagger, Biomes.BAMBOO_JUNGLE, LibCommonTags.Biomes.IS_HOT_OVERWORLD, LibCommonTags.Biomes.IS_WET_OVERWORLD, LibCommonTags.Biomes.IS_RARE);
+                tagAll(tagger, Biomes.LUSH_CAVES, LibCommonTags.Biomes.IS_CAVE, LibCommonTags.Biomes.IS_LUSH, LibCommonTags.Biomes.IS_WET_OVERWORLD);
+                tagAll(tagger, Biomes.DRIPSTONE_CAVES, LibCommonTags.Biomes.IS_CAVE, LibCommonTags.Biomes.IS_SPARSE_OVERWORLD);
+                tagAll(tagger, Biomes.SOUL_SAND_VALLEY, LibCommonTags.Biomes.IS_HOT_NETHER, LibCommonTags.Biomes.IS_DRY_NETHER);
+                tagAll(tagger, Biomes.CRIMSON_FOREST, LibCommonTags.Biomes.IS_HOT_NETHER, LibCommonTags.Biomes.IS_DRY_NETHER);
+                tagAll(tagger, Biomes.WARPED_FOREST, LibCommonTags.Biomes.IS_HOT_NETHER, LibCommonTags.Biomes.IS_DRY_NETHER);
+                tagAll(tagger, Biomes.BASALT_DELTAS, LibCommonTags.Biomes.IS_HOT_NETHER, LibCommonTags.Biomes.IS_DRY_NETHER);
+                tagAll(tagger, Biomes.MANGROVE_SWAMP, LibCommonTags.Biomes.IS_WET_OVERWORLD, LibCommonTags.Biomes.IS_HOT_OVERWORLD, LibCommonTags.Biomes.IS_SWAMP);
+                tagAll(tagger, Biomes.DEEP_DARK, LibCommonTags.Biomes.IS_CAVE, LibCommonTags.Biomes.IS_RARE, LibCommonTags.Biomes.IS_SPOOKY);
+
+                tagger.apply(LibCommonTags.Biomes.IS_HOT).addTag(LibCommonTags.Biomes.IS_HOT_OVERWORLD).addTag(LibCommonTags.Biomes.IS_HOT_NETHER).addOptionalTag(LibCommonTags.Biomes.IS_HOT_END.location());
+                tagger.apply(LibCommonTags.Biomes.IS_COLD).addTag(LibCommonTags.Biomes.IS_COLD_OVERWORLD).addOptionalTag(LibCommonTags.Biomes.IS_COLD_NETHER.location()).addTag(LibCommonTags.Biomes.IS_COLD_END);
+                tagger.apply(LibCommonTags.Biomes.IS_SPARSE).addTag(LibCommonTags.Biomes.IS_SPARSE_OVERWORLD).addOptionalTag(LibCommonTags.Biomes.IS_SPARSE_NETHER.location()).addOptionalTag(LibCommonTags.Biomes.IS_SPARSE_END.location());
+                tagger.apply(LibCommonTags.Biomes.IS_DENSE).addTag(LibCommonTags.Biomes.IS_DENSE_OVERWORLD).addOptionalTag(LibCommonTags.Biomes.IS_DENSE_NETHER.location()).addOptionalTag(LibCommonTags.Biomes.IS_DENSE_END.location());
+                tagger.apply(LibCommonTags.Biomes.IS_WET).addTag(LibCommonTags.Biomes.IS_WET_OVERWORLD).addOptionalTag(LibCommonTags.Biomes.IS_WET_NETHER.location()).addOptionalTag(LibCommonTags.Biomes.IS_WET_END.location());
+                tagger.apply(LibCommonTags.Biomes.IS_DRY).addTag(LibCommonTags.Biomes.IS_DRY_OVERWORLD).addTag(LibCommonTags.Biomes.IS_DRY_NETHER).addTag(LibCommonTags.Biomes.IS_DRY_END);
+
+                tagger.apply(LibCommonTags.Biomes.IS_WATER).addOptionalTag(BiomeTags.IS_OCEAN.location()).addOptionalTag(BiomeTags.IS_RIVER.location());
+                tagger.apply(LibCommonTags.Biomes.IS_MOUNTAIN).addTag(LibCommonTags.Biomes.IS_PEAK).addTag(LibCommonTags.Biomes.IS_SLOPE);
+                tagger.apply(LibCommonTags.Biomes.IS_UNDERGROUND).addTag(LibCommonTags.Biomes.IS_CAVE);
             }
         }
     }
