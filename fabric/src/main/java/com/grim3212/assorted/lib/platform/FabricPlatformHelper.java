@@ -60,6 +60,11 @@ public class FabricPlatformHelper implements IPlatformHelper {
     }
 
     @Override
+    public double getPlayerReachDistance(Player player) {
+        return player.isCreative() ? 5.0F : 4.5F;
+    }
+
+    @Override
     public Dist getCurrentDistribution() {
         return switch (FabricLoader.getInstance().getEnvironmentType()) {
             case CLIENT -> Dist.CLIENT;

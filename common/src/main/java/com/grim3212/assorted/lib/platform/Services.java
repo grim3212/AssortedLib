@@ -22,6 +22,7 @@ public class Services {
     public static final IConditionHelper CONDITIONS = load(IConditionHelper.class);
     public static final IIngredientHelper INGREDIENTS = load(IIngredientHelper.class);
     public static final IWorldGenHelper WORLD_GEN = load(IWorldGenHelper.class);
+    public static final IInventoryHelper INVENTORY = load(IInventoryHelper.class);
 
     public static <T> T load(Class<T> clazz) {
 

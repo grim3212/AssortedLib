@@ -1,6 +1,6 @@
 package com.grim3212.assorted.lib.mixin.client.multiplayer;
 
-import com.grim3212.assorted.lib.core.block.IBlockExtraProperties;
+import com.grim3212.assorted.lib.core.block.IBlockSoundType;
 import com.grim3212.assorted.lib.events.EntityInteractEvent;
 import com.grim3212.assorted.lib.platform.Services;
 import net.minecraft.client.Minecraft;
@@ -33,7 +33,7 @@ public abstract class MultiPlayerGameModeWorldlyBlockMixin {
     )
     private SoundType assortedlib_injectGetBlockStateSoundType(final SoundType current, BlockPos pPosBlock, Direction pDirectionFacing) {
         final BlockState blockState = Minecraft.getInstance().level.getBlockState(pPosBlock);
-        if (blockState.getBlock() instanceof IBlockExtraProperties extraProperties) {
+        if (blockState.getBlock() instanceof IBlockSoundType extraProperties) {
             return extraProperties.getSoundType(blockState, Minecraft.getInstance().level, pPosBlock, Minecraft.getInstance().player);
         }
         return current;
@@ -46,7 +46,7 @@ public abstract class MultiPlayerGameModeWorldlyBlockMixin {
     private void assortedlib_entityInteract(Player player, Entity entity, InteractionHand interactionHand, CallbackInfoReturnable<InteractionResult> cir) {
         final EntityInteractEvent event = new EntityInteractEvent(player, interactionHand, entity);
         Services.EVENTS.handleEvents(event);
-        
+
         if (event.getInteractionResult() == InteractionResult.SUCCESS) {
             cir.setReturnValue(InteractionResult.SUCCESS);
         }

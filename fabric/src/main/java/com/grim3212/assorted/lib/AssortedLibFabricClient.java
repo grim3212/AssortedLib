@@ -1,6 +1,6 @@
 package com.grim3212.assorted.lib;
 
-import com.grim3212.assorted.lib.core.block.IBlockExtraProperties;
+import com.grim3212.assorted.lib.core.block.IBlockCloneStack;
 import com.grim3212.assorted.lib.platform.FabricNetworkHelper;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
@@ -19,7 +19,7 @@ public class AssortedLibFabricClient implements ClientModInitializer {
         ClientPickBlockGatherCallback.EVENT.register((player, result) -> {
             if (result instanceof BlockHitResult blockHitResult
                     && Minecraft.getInstance().level != null
-                    && Minecraft.getInstance().level.getBlockState(blockHitResult.getBlockPos()).getBlock() instanceof IBlockExtraProperties extraProperties) {
+                    && Minecraft.getInstance().level.getBlockState(blockHitResult.getBlockPos()).getBlock() instanceof IBlockCloneStack extraProperties) {
                 return extraProperties.getCloneItemStack(
                         Minecraft.getInstance().level.getBlockState(blockHitResult.getBlockPos()),
                         result,

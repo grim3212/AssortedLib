@@ -1,6 +1,6 @@
 package com.grim3212.assorted.lib.mixin.world.level.chunk;
 
-import com.grim3212.assorted.lib.core.block.IBlockExtraProperties;
+import com.grim3212.assorted.lib.core.block.IBlockLightEmission;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.ChunkPos;
@@ -44,7 +44,7 @@ public abstract class LevelChunkWorldlyBlockMixin extends ChunkAccess {
     @Inject(method = "method_12217", at = @At(value = "HEAD"), cancellable = true)
     public void assortedlib_getLightsInject(final BlockPos blockPos, final CallbackInfoReturnable<Boolean> cir) {
         final BlockState blockState = getBlockState(blockPos);
-        if (blockState.getBlock() instanceof IBlockExtraProperties extraProperties) {
+        if (blockState.getBlock() instanceof IBlockLightEmission extraProperties) {
             cir.setReturnValue(extraProperties.getLightEmission(blockState, getLevel(), blockPos) != 0);
         }
     }

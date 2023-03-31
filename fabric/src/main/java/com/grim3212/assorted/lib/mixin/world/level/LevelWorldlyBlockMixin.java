@@ -1,6 +1,7 @@
 package com.grim3212.assorted.lib.mixin.world.level;
 
 import com.grim3212.assorted.lib.core.block.IBlockExtraProperties;
+import com.grim3212.assorted.lib.core.block.IBlockLightEmission;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
@@ -56,7 +57,7 @@ public abstract class LevelWorldlyBlockMixin implements LevelAccessor, AutoClose
     )
     public void assortedlib_onSetBlockStateCapturePreviousState(final BlockPos pos, final BlockState state, final int flags, final int recursionLeft, final CallbackInfoReturnable<Boolean> cir) {
         this.previousState = this.getBlockState(pos);
-        if (previousState.getBlock() instanceof IBlockExtraProperties extraProperties) {
+        if (previousState.getBlock() instanceof IBlockLightEmission extraProperties) {
             oldLight = extraProperties.getLightEmission(previousState, getInternalMixinTarget(), pos);
         }
     }
@@ -77,7 +78,7 @@ public abstract class LevelWorldlyBlockMixin implements LevelAccessor, AutoClose
         int newLight = newState.getLightEmission();
         int newOpacity = newState.getLightBlock(getInternalMixinTarget(), pos);
 
-        if (newState.getBlock() instanceof IBlockExtraProperties extraProperties) {
+        if (newState.getBlock() instanceof IBlockLightEmission extraProperties) {
             newLight = extraProperties.getLightEmission(newState, getInternalMixinTarget(), pos);
         }
 

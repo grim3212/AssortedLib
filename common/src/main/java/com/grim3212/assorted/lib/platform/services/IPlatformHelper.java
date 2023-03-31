@@ -45,6 +45,8 @@ public interface IPlatformHelper {
 
     boolean isFakePlayer(Player player);
 
+    double getPlayerReachDistance(Player player);
+
     /**
      * The current distribution.
      *

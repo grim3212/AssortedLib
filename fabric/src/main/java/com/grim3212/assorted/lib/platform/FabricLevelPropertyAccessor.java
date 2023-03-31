@@ -1,6 +1,6 @@
 package com.grim3212.assorted.lib.platform;
 
-import com.grim3212.assorted.lib.core.block.IBlockExtraProperties;
+import com.grim3212.assorted.lib.core.block.*;
 import com.grim3212.assorted.lib.platform.services.ILevelPropertyAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -39,7 +39,7 @@ public class FabricLevelPropertyAccessor implements ILevelPropertyAccessor {
     @Override
     public int getLightEmission(BlockGetter getter, BlockPos blockPos) {
         final BlockState blockState = getter.getBlockState(blockPos);
-        if (blockState.getBlock() instanceof IBlockExtraProperties extraProperties) {
+        if (blockState.getBlock() instanceof IBlockLightEmission extraProperties) {
             return extraProperties.getLightEmission(blockState, getter, blockPos);
         }
 
@@ -49,7 +49,7 @@ public class FabricLevelPropertyAccessor implements ILevelPropertyAccessor {
     @Override
     public boolean canHarvestBlock(BlockGetter blockGetter, BlockPos blockPos, Player player) {
         final BlockState blockState = blockGetter.getBlockState(blockPos);
-        if (blockState.getBlock() instanceof IBlockExtraProperties extraProperties) {
+        if (blockState.getBlock() instanceof IBlockCanHarvest extraProperties) {
             return extraProperties.canHarvestBlock(blockState, blockGetter, blockPos, player);
         }
 
@@ -59,7 +59,7 @@ public class FabricLevelPropertyAccessor implements ILevelPropertyAccessor {
     @Override
     public SoundType getSoundType(LevelReader levelReader, BlockPos blockPos, Entity entity) {
         final BlockState blockState = levelReader.getBlockState(blockPos);
-        if (blockState.getBlock() instanceof IBlockExtraProperties extraProperties) {
+        if (blockState.getBlock() instanceof IBlockSoundType extraProperties) {
             return extraProperties.getSoundType(blockState, levelReader, blockPos, entity);
         }
 
@@ -78,7 +78,7 @@ public class FabricLevelPropertyAccessor implements ILevelPropertyAccessor {
 
     @Override
     public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter blockGetter, BlockPos pos, Player player) {
-        if (state.getBlock() instanceof IBlockExtraProperties extraProperties) {
+        if (state.getBlock() instanceof IBlockCloneStack extraProperties) {
             return extraProperties.getCloneItemStack(state, target, blockGetter, pos, player);
         }
         return state.getBlock().getCloneItemStack(blockGetter, pos, state);

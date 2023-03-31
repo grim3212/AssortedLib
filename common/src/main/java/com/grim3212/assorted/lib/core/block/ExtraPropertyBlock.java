@@ -15,7 +15,7 @@ import net.minecraft.world.phys.HitResult;
 
 import javax.annotation.Nullable;
 
-public class ExtraPropertyBlock extends Block implements IBlockExtraProperties {
+public class ExtraPropertyBlock extends Block implements IBlockExtraProperties, IBlockSoundType, IBlockCloneStack, IBlockCanHarvest, IBlockLightEmission {
     public ExtraPropertyBlock(Properties props) {
         super(props);
     }

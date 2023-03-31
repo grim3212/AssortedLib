@@ -1,6 +1,6 @@
 package com.grim3212.assorted.lib.mixin.world.item;
 
-import com.grim3212.assorted.lib.core.block.IBlockExtraProperties;
+import com.grim3212.assorted.lib.core.block.IBlockSoundType;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -63,7 +63,7 @@ public abstract class BlockItemWorldlyBlockMixin extends Item {
             ordinal = 0
     )
     private SoundType assortedlib_injectGetSoundTypeAdaptor(final SoundType current, BlockPlaceContext blockPlaceContext) {
-        if (soundState.getBlock() instanceof IBlockExtraProperties extraProperties) {
+        if (soundState.getBlock() instanceof IBlockSoundType extraProperties) {
             this.soundType = extraProperties.getSoundType(soundState, blockPlaceContext.getLevel(), blockPlaceContext.getClickedPos(), blockPlaceContext.getPlayer());
             return this.soundType;
         }

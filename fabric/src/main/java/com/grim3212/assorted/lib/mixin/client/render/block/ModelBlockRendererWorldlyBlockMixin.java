@@ -1,6 +1,6 @@
 package com.grim3212.assorted.lib.mixin.client.render.block;
 
-import com.grim3212.assorted.lib.core.block.IBlockExtraProperties;
+import com.grim3212.assorted.lib.core.block.IBlockLightEmission;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -29,7 +29,7 @@ public abstract class ModelBlockRendererWorldlyBlockMixin {
             ),
             cancellable = true)
     private void assortedlib_handleWorldlyBlocksWhichDoNotEmitDefaultLightForAO(final BlockAndTintGetter blockAndTintGetter, final BakedModel bakedModel, final BlockState blockState, final BlockPos blockPos, final PoseStack poseStack, final VertexConsumer vertexConsumer, final boolean bl, final RandomSource randomSource, final long l, final int i, final CallbackInfo ci) {
-        if (blockState.getBlock() instanceof IBlockExtraProperties extraProperties) {
+        if (blockState.getBlock() instanceof IBlockLightEmission extraProperties) {
             boolean usesAmbientOcclusion = Minecraft.useAmbientOcclusion() && extraProperties.getLightEmission(blockState, blockAndTintGetter, blockPos) == 0 && bakedModel.useAmbientOcclusion();
             if (usesAmbientOcclusion) {
                 this.tesselateWithAO(blockAndTintGetter, bakedModel, blockState, blockPos, poseStack, vertexConsumer, bl, randomSource, l, i);

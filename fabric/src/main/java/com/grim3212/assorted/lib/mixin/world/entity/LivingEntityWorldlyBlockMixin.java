@@ -1,6 +1,7 @@
 package com.grim3212.assorted.lib.mixin.world.entity;
 
 import com.grim3212.assorted.lib.core.block.IBlockExtraProperties;
+import com.grim3212.assorted.lib.core.block.IBlockSoundType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -53,7 +54,7 @@ public abstract class LivingEntityWorldlyBlockMixin extends Entity {
         final BlockPos pos = new BlockPos(i, j, k);
         BlockState blockState = this.level.getBlockState(pos);
 
-        if (blockState.getBlock() instanceof IBlockExtraProperties extraProperties) {
+        if (blockState.getBlock() instanceof IBlockSoundType extraProperties) {
             return extraProperties.getSoundType(blockState, level, pos, this);
         }
         return current;

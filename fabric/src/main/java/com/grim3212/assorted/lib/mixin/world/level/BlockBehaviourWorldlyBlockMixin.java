@@ -1,6 +1,6 @@
 package com.grim3212.assorted.lib.mixin.world.level;
 
-import com.grim3212.assorted.lib.core.block.IBlockExtraProperties;
+import com.grim3212.assorted.lib.core.block.IBlockCanHarvest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
@@ -22,7 +22,7 @@ public abstract class BlockBehaviourWorldlyBlockMixin {
             cancellable = true
     )
     public void assortedlib_handleWorldlyBreakableCondition(final BlockState state, final Player player, final BlockGetter level, final BlockPos pos, final CallbackInfoReturnable<Float> cir) {
-        if (state.getBlock() instanceof IBlockExtraProperties extraProperties) {
+        if (state.getBlock() instanceof IBlockCanHarvest extraProperties) {
             float f = state.getDestroySpeed(level, pos);
             if (f == -1.0F) {
                 cir.setReturnValue(0.0F);

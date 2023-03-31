@@ -64,6 +64,11 @@ public class ForgePlatformHelper implements IPlatformHelper {
     }
 
     @Override
+    public double getPlayerReachDistance(Player player) {
+        return player.getReachDistance();
+    }
+
+    @Override
     public Dist getCurrentDistribution() {
         return switch (FMLEnvironment.dist) {
             case CLIENT -> Dist.CLIENT;

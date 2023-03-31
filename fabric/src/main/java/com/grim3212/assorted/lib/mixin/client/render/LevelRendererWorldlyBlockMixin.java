@@ -1,6 +1,7 @@
 package com.grim3212.assorted.lib.mixin.client.render;
 
-import com.grim3212.assorted.lib.core.block.IBlockExtraProperties;
+import com.grim3212.assorted.lib.core.block.IBlockLightEmission;
+import com.grim3212.assorted.lib.core.block.IBlockSoundType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -42,7 +43,7 @@ public abstract class LevelRendererWorldlyBlockMixin implements ResourceManagerR
     )
     private static int assortedlib_injectGetBlockStateSoundType(final int current, BlockAndTintGetter pLevel, BlockState pState, BlockPos pPos) {
         final BlockState blockState = pLevel.getBlockState(pPos);
-        if (blockState.getBlock() instanceof IBlockExtraProperties extraProperties) {
+        if (blockState.getBlock() instanceof IBlockLightEmission extraProperties) {
             return extraProperties.getLightEmission(pState, pLevel, pPos);
         }
         return current;
@@ -67,7 +68,7 @@ public abstract class LevelRendererWorldlyBlockMixin implements ResourceManagerR
     )
     public SoundType assortedlib_redirectGetBlockStateSoundType(SoundType current) {
         final BlockState blockState = Block.stateById(currentEventArgument);
-        if (blockState.getBlock() instanceof IBlockExtraProperties extraProperties) {
+        if (blockState.getBlock() instanceof IBlockSoundType extraProperties) {
             return extraProperties.getSoundType(blockState, this.level, currentEventPosition, Minecraft.getInstance().cameraEntity);
         }
         return current;

@@ -1,6 +1,6 @@
 package com.grim3212.assorted.lib.mixin.world.level;
 
-import com.grim3212.assorted.lib.core.block.IBlockExtraProperties;
+import com.grim3212.assorted.lib.core.block.IBlockLightEmission;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,7 +19,7 @@ public interface BlockGetterWorldlyBlockMixin {
     @Inject(method = "getLightEmission(Lnet/minecraft/core/BlockPos;)I", at = @At("HEAD"), cancellable = true)
     public default void assortedlib_onGetLightEmission(final BlockPos pos, final CallbackInfoReturnable<Integer> cir) {
         final BlockState blockState = getBlockState(pos);
-        if (blockState.getBlock() instanceof IBlockExtraProperties extraProperties) {
+        if (blockState.getBlock() instanceof IBlockLightEmission extraProperties) {
             cir.setReturnValue(extraProperties.getLightEmission(blockState, (BlockGetter) this, pos));
         }
     }

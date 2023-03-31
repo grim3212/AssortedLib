@@ -1,6 +1,6 @@
 package com.grim3212.assorted.lib.mixin.world.entity;
 
-import com.grim3212.assorted.lib.core.block.IBlockExtraProperties;
+import com.grim3212.assorted.lib.core.block.IBlockSoundType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.BlockTags;
@@ -43,7 +43,7 @@ public abstract class EntityWorldlyBlockMixin {
             BlockState blockState = this.level.getBlockState(pos.above());
             blockState = blockState.is(BlockTags.INSIDE_STEP_SOUND_BLOCKS) ? blockState : state;
 
-            if (blockState.getBlock() instanceof IBlockExtraProperties extraProperties) {
+            if (blockState.getBlock() instanceof IBlockSoundType extraProperties) {
                 SoundType soundType = extraProperties.getSoundType(blockState, this.level, pos, this.getThis());
                 this.playSound(soundType.getStepSound(), soundType.getVolume() * 0.15F, soundType.getPitch());
                 ci.cancel();

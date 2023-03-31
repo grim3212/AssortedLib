@@ -1,6 +1,6 @@
 package com.grim3212.assorted.lib.mixin.world.entity.animal.horse;
 
-import com.grim3212.assorted.lib.core.block.IBlockExtraProperties;
+import com.grim3212.assorted.lib.core.block.IBlockSoundType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -28,7 +28,7 @@ public abstract class AbstractHorseWorldlyBlockMixin extends Entity {
             ordinal = 0
     )
     private SoundType assortedlib_injectGetBlockStateSoundType(final SoundType current, BlockPos pPos, BlockState pBlock) {
-        if (pBlock.getBlock() instanceof IBlockExtraProperties extraProperties) {
+        if (pBlock.getBlock() instanceof IBlockSoundType extraProperties) {
             return extraProperties.getSoundType(pBlock, this.level, pPos, this);
         }
         return current;

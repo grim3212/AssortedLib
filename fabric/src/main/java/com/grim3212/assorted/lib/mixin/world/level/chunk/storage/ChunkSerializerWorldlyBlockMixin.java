@@ -1,6 +1,6 @@
 package com.grim3212.assorted.lib.mixin.world.level.chunk.storage;
 
-import com.grim3212.assorted.lib.core.block.IBlockExtraProperties;
+import com.grim3212.assorted.lib.core.block.IBlockLightEmission;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ProtoChunk;
@@ -30,7 +30,7 @@ public abstract class ChunkSerializerWorldlyBlockMixin {
     )
     private static BlockPos assortedlib_redirectGetChunkAccessBlockPos(BlockPos blockPos) {
         final BlockState blockState = chunkAccessHolder.get().getBlockState(blockPos);
-        if (blockState.getBlock() instanceof IBlockExtraProperties extraProperties) {
+        if (blockState.getBlock() instanceof IBlockLightEmission extraProperties) {
             if (extraProperties.getLightEmission(blockState, chunkAccessHolder.get(), blockPosHolder.get()) != 0) {
                 chunkAccessHolder.get().addLight(blockPos);
             }

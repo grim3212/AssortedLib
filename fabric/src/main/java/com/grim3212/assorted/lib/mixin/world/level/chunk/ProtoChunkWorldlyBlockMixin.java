@@ -1,6 +1,7 @@
 package com.grim3212.assorted.lib.mixin.world.level.chunk;
 
 import com.grim3212.assorted.lib.core.block.IBlockExtraProperties;
+import com.grim3212.assorted.lib.core.block.IBlockLightEmission;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.BlockGetter;
@@ -51,7 +52,7 @@ public abstract class ProtoChunkWorldlyBlockMixin extends ChunkAccess implements
         int j = pos.getY();
         int k = pos.getZ();
 
-        if (state.getBlock() instanceof IBlockExtraProperties extraProperties && extraProperties.getLightEmission(state, this, pos) > 0) {
+        if (state.getBlock() instanceof IBlockLightEmission extraProperties && extraProperties.getLightEmission(state, this, pos) > 0) {
             this.lights.add(new BlockPos((i & 15) + this.getPos().getMinBlockX(), j, (k & 15) + this.getPos().getMinBlockZ()));
         }
     }
@@ -65,12 +66,12 @@ public abstract class ProtoChunkWorldlyBlockMixin extends ChunkAccess implements
     public BlockState assortedlib_onSetBlockStateDoLightEngineUpdate(final BlockState blockState, BlockPos pos, BlockState state, boolean isMoving) {
         if (state.getLightEmission() == blockState.getLightEmission() && (state.getBlock() instanceof IBlockExtraProperties || blockState.getBlock() instanceof IBlockExtraProperties)) {
             int newBlockEmissions = state.getLightEmission();
-            if (state.getBlock() instanceof IBlockExtraProperties newExtraProperties) {
+            if (state.getBlock() instanceof IBlockLightEmission newExtraProperties) {
                 newBlockEmissions = newExtraProperties.getLightEmission(state, this, pos);
             }
 
             int oldBlockEmissions = blockState.getLightEmission();
-            if (blockState.getBlock() instanceof IBlockExtraProperties oldExtraProperties) {
+            if (blockState.getBlock() instanceof IBlockLightEmission oldExtraProperties) {
                 oldBlockEmissions = oldExtraProperties.getLightEmission(state, this, pos);
             }
 
