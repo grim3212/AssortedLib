@@ -10,6 +10,7 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.phys.HitResult;
 
 import javax.annotation.Nullable;
@@ -40,4 +41,6 @@ public interface ILevelPropertyAccessor {
     float getExplosionResistance(BlockGetter blockGetter, BlockPos position, Explosion explosion);
 
     ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter blockGetter, BlockPos pos, Player player);
+
+    MaterialColor getMapColor(BlockState state, BlockGetter level, BlockPos pos, MaterialColor defaultColor);
 }

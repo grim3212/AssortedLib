@@ -15,13 +15,6 @@ public class ForgeWrappedItemHandler implements IItemStorageHandler {
     }
 
     @Override
-    public void setStackInSlot(int slot, @NotNull ItemStack stack) {
-        if (storage instanceof IItemHandlerModifiable modifiable) {
-            modifiable.setStackInSlot(slot, stack);
-        }
-    }
-
-    @Override
     public int getSlots() {
         return this.storage.getSlots();
     }
@@ -49,5 +42,12 @@ public class ForgeWrappedItemHandler implements IItemStorageHandler {
     @Override
     public boolean isItemValid(int slot, @NotNull ItemStack stack) {
         return this.storage.isItemValid(slot, stack);
+    }
+
+    @Override
+    public void setStackInSlot(int slot, @NotNull ItemStack stack) {
+        if (storage instanceof IItemHandlerModifiable modifiable) {
+            modifiable.setStackInSlot(slot, stack);
+        }
     }
 }

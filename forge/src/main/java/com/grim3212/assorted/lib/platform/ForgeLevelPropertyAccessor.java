@@ -11,6 +11,7 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,5 +49,10 @@ public class ForgeLevelPropertyAccessor implements ILevelPropertyAccessor {
     @Override
     public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter blockGetter, BlockPos pos, Player player) {
         return state.getCloneItemStack(target, blockGetter, pos, player);
+    }
+
+    @Override
+    public MaterialColor getMapColor(BlockState state, BlockGetter level, BlockPos pos, MaterialColor defaultColor) {
+        return state.getBlock().getMapColor(state, level, pos, defaultColor);
     }
 }

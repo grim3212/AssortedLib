@@ -1,7 +1,9 @@
 package com.grim3212.assorted.lib.platform;
 
+import com.grim3212.assorted.lib.core.inventory.IInventoryStorageHandler;
 import com.grim3212.assorted.lib.core.inventory.IItemStackStorage;
 import com.grim3212.assorted.lib.core.inventory.IItemStorageHandler;
+import com.grim3212.assorted.lib.inventory.FabricInventoryStorageHandler;
 import com.grim3212.assorted.lib.inventory.FabricWrappedItemHandler;
 import com.grim3212.assorted.lib.platform.services.IInventoryHelper;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
@@ -54,5 +56,10 @@ public class FabricInventoryHelper implements IInventoryHelper {
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public IInventoryStorageHandler createStorageInventoryHandler(IItemStorageHandler handler) {
+        return new FabricInventoryStorageHandler(handler);
     }
 }

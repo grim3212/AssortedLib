@@ -1,6 +1,8 @@
 package com.grim3212.assorted.lib.platform;
 
+import com.grim3212.assorted.lib.core.inventory.IInventoryStorageHandler;
 import com.grim3212.assorted.lib.core.inventory.IItemStorageHandler;
+import com.grim3212.assorted.lib.inventory.ForgeInventoryStorageHandler;
 import com.grim3212.assorted.lib.inventory.ForgeWrappedItemHandler;
 import com.grim3212.assorted.lib.platform.services.IInventoryHelper;
 import net.minecraft.core.Direction;
@@ -34,5 +36,10 @@ public class ForgeInventoryHelper implements IInventoryHelper {
     public Optional<IItemStorageHandler> getItemStorageHandler(BlockEntity blockEntity, @Nullable Direction direction) {
         var capability = blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, direction);
         return capability.isPresent() ? Optional.of(new ForgeWrappedItemHandler(capability.resolve().get())) : Optional.empty();
+    }
+
+    @Override
+    public IInventoryStorageHandler createStorageInventoryHandler(IItemStorageHandler handler) {
+        return new ForgeInventoryStorageHandler(handler);
     }
 }
