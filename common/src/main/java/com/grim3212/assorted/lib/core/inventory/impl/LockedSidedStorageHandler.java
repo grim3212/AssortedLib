@@ -1,7 +1,7 @@
 package com.grim3212.assorted.lib.core.inventory.impl;
 
-import com.grim3212.assorted.lib.core.inventory.LockedItemHandler;
-import com.grim3212.assorted.lib.core.inventory.LockedWorldlyContainer;
+import com.grim3212.assorted.lib.core.inventory.locking.LockedItemHandler;
+import com.grim3212.assorted.lib.core.inventory.locking.LockedWorldlyContainer;
 import com.grim3212.assorted.lib.platform.Services;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;

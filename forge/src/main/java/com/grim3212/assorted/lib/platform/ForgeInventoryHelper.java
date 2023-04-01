@@ -1,14 +1,18 @@
 package com.grim3212.assorted.lib.platform;
 
-import com.grim3212.assorted.lib.core.inventory.IInventoryStorageHandler;
+import com.grim3212.assorted.lib.core.inventory.IInventoryBlockEntity;
+import com.grim3212.assorted.lib.core.inventory.IInventoryItem;
 import com.grim3212.assorted.lib.core.inventory.IItemStorageHandler;
-import com.grim3212.assorted.lib.inventory.ForgeInventoryStorageHandler;
+import com.grim3212.assorted.lib.core.inventory.IPlatformInventoryStorageHandler;
+import com.grim3212.assorted.lib.inventory.ForgeItemStorageHandler;
+import com.grim3212.assorted.lib.inventory.ForgePlatformInventoryStorageHandler;
 import com.grim3212.assorted.lib.inventory.ForgeWrappedItemHandler;
 import com.grim3212.assorted.lib.platform.services.IInventoryHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,17 +33,51 @@ public class ForgeInventoryHelper implements IInventoryHelper {
     @Override
     public Optional<IItemStorageHandler> getItemStorageHandler(ItemStack stack) {
         var capability = stack.getCapability(ForgeCapabilities.ITEM_HANDLER);
-        return capability.isPresent() ? Optional.of(new ForgeWrappedItemHandler(capability.resolve().get())) : Optional.empty();
+        if (capability.isPresent()) {
+            IItemHandler itemHandler = capability.resolve().get();
+            if (itemHandler instanceof ForgeItemStorageHandler forgeItemStorageHandler) {
+                return Optional.of(forgeItemStorageHandler.getStorage());
+            } else {
+                return Optional.of(new ForgeWrappedItemHandler(itemHandler));
+            }
+        }
+
+        // If we somehow fail to get it from capability try to see if its one of our own
+        if (stack.getItem() instanceof IInventoryItem itemStackStorage) {
+            IPlatformInventoryStorageHandler storageHandler = itemStackStorage.getStorageHandler(stack);
+            if (storageHandler != null) {
+                return Optional.of(storageHandler.getItemStorageHandler());
+            }
+        }
+
+        return Optional.empty();
     }
 
     @Override
     public Optional<IItemStorageHandler> getItemStorageHandler(BlockEntity blockEntity, @Nullable Direction direction) {
         var capability = blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, direction);
-        return capability.isPresent() ? Optional.of(new ForgeWrappedItemHandler(capability.resolve().get())) : Optional.empty();
+        if (capability.isPresent()) {
+            IItemHandler itemHandler = capability.resolve().get();
+            if (itemHandler instanceof ForgeItemStorageHandler forgeItemStorageHandler) {
+                return Optional.of(forgeItemStorageHandler.getStorage());
+            } else {
+                return Optional.of(new ForgeWrappedItemHandler(itemHandler));
+            }
+        }
+
+        // If we somehow fail to get it from capability try to see if its one of our own
+        if (blockEntity instanceof IInventoryBlockEntity inventoryBlockEntity) {
+            IPlatformInventoryStorageHandler storageHandler = inventoryBlockEntity.getStorageHandler();
+            if (storageHandler != null) {
+                return Optional.of(storageHandler.getItemStorageHandler());
+            }
+        }
+
+        return Optional.empty();
     }
 
     @Override
-    public IInventoryStorageHandler createStorageInventoryHandler(IItemStorageHandler handler) {
-        return new ForgeInventoryStorageHandler(handler);
+    public IPlatformInventoryStorageHandler createStorageInventoryHandler(IItemStorageHandler handler) {
+        return new ForgePlatformInventoryStorageHandler(handler);
     }
 }

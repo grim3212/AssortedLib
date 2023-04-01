@@ -1,9 +1,10 @@
 package com.grim3212.assorted.lib.platform;
 
-import com.grim3212.assorted.lib.core.inventory.IInventoryStorageHandler;
-import com.grim3212.assorted.lib.core.inventory.IItemStackStorage;
+import com.grim3212.assorted.lib.core.inventory.IInventoryBlockEntity;
+import com.grim3212.assorted.lib.core.inventory.IInventoryItem;
 import com.grim3212.assorted.lib.core.inventory.IItemStorageHandler;
-import com.grim3212.assorted.lib.inventory.FabricInventoryStorageHandler;
+import com.grim3212.assorted.lib.core.inventory.IPlatformInventoryStorageHandler;
+import com.grim3212.assorted.lib.inventory.FabricPlatformInventoryStorageHandler;
 import com.grim3212.assorted.lib.inventory.FabricWrappedItemHandler;
 import com.grim3212.assorted.lib.platform.services.IInventoryHelper;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
@@ -39,10 +40,15 @@ public class FabricInventoryHelper implements IInventoryHelper {
         if (stack.isEmpty())
             return Optional.empty();
 
-        if (stack.getItem() instanceof IItemStackStorage itemStackStorage) {
-            return Optional.of(itemStackStorage.getItemStorageHandler(stack));
+        if (stack.getItem() instanceof IInventoryItem itemStackStorage) {
+            IPlatformInventoryStorageHandler storageHandler = itemStackStorage.getStorageHandler(stack);
+            if (storageHandler != null) {
+                return Optional.of(storageHandler.getItemStorageHandler());
+            }
         }
 
+        // TODO: Maybe look into trying to automatically generate a handler for other item storages that follow the same
+        // inventory on an ItemStack structure
         return Optional.empty();
     }
 
@@ -50,6 +56,13 @@ public class FabricInventoryHelper implements IInventoryHelper {
     public Optional<IItemStorageHandler> getItemStorageHandler(BlockEntity blockEntity, @Nullable Direction direction) {
         if (blockEntity == null || blockEntity.isRemoved())
             return Optional.empty();
+
+        if (blockEntity instanceof IInventoryBlockEntity inventoryBlockEntity) {
+            IPlatformInventoryStorageHandler storageHandler = inventoryBlockEntity.getStorageHandler();
+            if (storageHandler != null) {
+                return Optional.of(storageHandler.getItemStorageHandler());
+            }
+        }
 
         if (blockEntity instanceof Container container) {
             return Optional.of(new FabricWrappedItemHandler(InventoryStorage.of(container, direction)));
@@ -59,7 +72,7 @@ public class FabricInventoryHelper implements IInventoryHelper {
     }
 
     @Override
-    public IInventoryStorageHandler createStorageInventoryHandler(IItemStorageHandler handler) {
-        return new FabricInventoryStorageHandler(handler);
+    public IPlatformInventoryStorageHandler createStorageInventoryHandler(IItemStorageHandler handler) {
+        return new FabricPlatformInventoryStorageHandler(handler);
     }
 }

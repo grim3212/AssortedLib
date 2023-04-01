@@ -1,7 +1,7 @@
 package com.grim3212.assorted.lib.platform.services;
 
-import com.grim3212.assorted.lib.core.inventory.IInventoryStorageHandler;
 import com.grim3212.assorted.lib.core.inventory.IItemStorageHandler;
+import com.grim3212.assorted.lib.core.inventory.IPlatformInventoryStorageHandler;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -20,5 +20,5 @@ public interface IInventoryHelper {
 
     Optional<IItemStorageHandler> getItemStorageHandler(BlockEntity blockEntity, @Nullable Direction direction);
 
-    IInventoryStorageHandler createStorageInventoryHandler(IItemStorageHandler handler);
+    IPlatformInventoryStorageHandler createStorageInventoryHandler(IItemStorageHandler handler);
 }

@@ -13,6 +13,10 @@ public class ForgeItemStorageHandler implements IItemHandlerModifiable {
         this.storage = storage;
     }
 
+    public IItemStorageHandler getStorage() {
+        return storage;
+    }
+
     @Override
     public void setStackInSlot(int slot, @NotNull ItemStack stack) {
         this.storage.setStackInSlot(slot, stack);

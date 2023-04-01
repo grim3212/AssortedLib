@@ -3,6 +3,7 @@ package com.grim3212.assorted.lib.platform.services;
 import com.grim3212.assorted.lib.client.events.ClientTickHandler;
 import com.grim3212.assorted.lib.client.model.loaders.IModelSpecificationLoader;
 import com.grim3212.assorted.lib.client.render.IBEWLR;
+import com.grim3212.assorted.lib.client.screen.LibScreenFactory;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.block.BlockColors;
@@ -39,7 +40,7 @@ import java.util.function.Supplier;
 
 public interface IClientHelper {
 
-    <T extends AbstractContainerMenu, S extends Screen & MenuAccess<T>> void registerScreen(MenuType<? extends T> menuType, IPlatformHelper.ScreenFactory<T, S> factory);
+    <T extends AbstractContainerMenu, S extends Screen & MenuAccess<T>> void registerScreen(Supplier<MenuType<? extends T>> menuType, LibScreenFactory<T, S> factory);
 
     void registerAdditionalModel(List<ResourceLocation> modelLocations);
 

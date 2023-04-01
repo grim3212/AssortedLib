@@ -1,4 +1,4 @@
-package com.grim3212.assorted.lib.core.inventory;
+package com.grim3212.assorted.lib.core.inventory.locking;
 
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;

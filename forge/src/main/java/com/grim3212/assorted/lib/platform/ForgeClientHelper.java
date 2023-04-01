@@ -5,8 +5,8 @@ import com.grim3212.assorted.lib.client.events.ClientTickHandler;
 import com.grim3212.assorted.lib.client.model.loader.ForgePlatformModelLoaderPlatformDelegate;
 import com.grim3212.assorted.lib.client.model.loaders.IModelSpecificationLoader;
 import com.grim3212.assorted.lib.client.render.IBEWLR;
+import com.grim3212.assorted.lib.client.screen.LibScreenFactory;
 import com.grim3212.assorted.lib.platform.services.IClientHelper;
-import com.grim3212.assorted.lib.platform.services.IPlatformHelper;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -62,8 +62,8 @@ public class ForgeClientHelper implements IClientHelper {
     private static final Map<Item, BlockEntityWithoutLevelRenderer> bewlrs = Maps.newConcurrentMap();
 
     @Override
-    public <T extends AbstractContainerMenu, S extends Screen & MenuAccess<T>> void registerScreen(MenuType<? extends T> menuType, IPlatformHelper.ScreenFactory<T, S> factory) {
-        MenuScreens.register(menuType, factory::create);
+    public <T extends AbstractContainerMenu, S extends Screen & MenuAccess<T>> void registerScreen(Supplier<MenuType<? extends T>> menuType, LibScreenFactory<T, S> factory) {
+        getRegistration().menuTypes.put(menuType::get, factory);
     }
 
     @Override
@@ -194,6 +194,7 @@ public class ForgeClientHelper implements IClientHelper {
         private final List<PreparableReloadListener> clientReloadListeners = new ArrayList<>();
         private final Map<ResourceLocation, IModelSpecificationLoader<?>> modelLoaders = new HashMap<>();
         private final Map<Supplier<ParticleType<?>>, Function<SpriteSet, ParticleProvider<?>>> particleProviders = new HashMap<>();
+        private final Map<Supplier<MenuType<?>>, LibScreenFactory<?, ?>> menuTypes = new HashMap<>();
 
         @SubscribeEvent
         public void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
@@ -240,7 +241,15 @@ public class ForgeClientHelper implements IClientHelper {
                 ItemBlockRenderTypes.setRenderLayer(entry.getKey().get(), entry.getValue());
             }
 
+            for (Map.Entry<Supplier<MenuType<?>>, LibScreenFactory<?, ?>> entry : menuTypes.entrySet()) {
+                this.registerMenu(entry.getKey()::get, (LibScreenFactory) entry.getValue());
+            }
+
             blockEntityWithoutLevelInitializers.forEach(callback -> callback.accept((item, renderer) -> bewlrs.put(item, renderer)));
+        }
+
+        private <T extends AbstractContainerMenu, S extends Screen & MenuAccess<T>> void registerMenu(Supplier<MenuType<? extends T>> menuType, LibScreenFactory<T, S> factory) {
+            MenuScreens.register(menuType.get(), factory::create);
         }
 
         @SubscribeEvent

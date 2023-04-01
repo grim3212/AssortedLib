@@ -1,8 +1,8 @@
 package com.grim3212.assorted.lib.inventory;
 
 import com.google.common.collect.Maps;
-import com.grim3212.assorted.lib.core.inventory.IInventoryStorageHandler;
 import com.grim3212.assorted.lib.core.inventory.IItemStorageHandler;
+import com.grim3212.assorted.lib.core.inventory.IPlatformInventoryStorageHandler;
 import net.minecraft.core.Direction;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
@@ -10,12 +10,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-public class ForgeInventoryStorageHandler implements IInventoryStorageHandler {
+public class ForgePlatformInventoryStorageHandler implements IPlatformInventoryStorageHandler {
 
     private final IItemStorageHandler handler;
     private final Map<Direction, LazyOptional<IItemHandler>> sidedWrappers = Maps.newEnumMap(Direction.class);
 
-    public ForgeInventoryStorageHandler(IItemStorageHandler handler, Direction... sides) {
+    public ForgePlatformInventoryStorageHandler(IItemStorageHandler handler, Direction... sides) {
         this.handler = handler;
 
         for (Direction direction : sides) {
