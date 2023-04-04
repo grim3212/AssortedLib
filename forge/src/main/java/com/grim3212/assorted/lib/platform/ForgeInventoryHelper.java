@@ -5,7 +5,7 @@ import com.grim3212.assorted.lib.core.inventory.IInventoryItem;
 import com.grim3212.assorted.lib.core.inventory.IItemStorageHandler;
 import com.grim3212.assorted.lib.core.inventory.IPlatformInventoryStorageHandler;
 import com.grim3212.assorted.lib.inventory.ForgeItemStorageHandler;
-import com.grim3212.assorted.lib.inventory.ForgePlatformInventoryStorageHandler;
+import com.grim3212.assorted.lib.inventory.ForgePlatformInventoryStorageHandlerUnsided;
 import com.grim3212.assorted.lib.inventory.ForgeWrappedItemHandler;
 import com.grim3212.assorted.lib.platform.services.IInventoryHelper;
 import net.minecraft.core.Direction;
@@ -38,7 +38,7 @@ public class ForgeInventoryHelper implements IInventoryHelper {
             if (itemHandler instanceof ForgeItemStorageHandler forgeItemStorageHandler) {
                 return Optional.of(forgeItemStorageHandler.getStorage());
             } else {
-                return Optional.of(new ForgeWrappedItemHandler(itemHandler));
+                return Optional.of(new ForgeWrappedItemHandler(null, itemHandler));
             }
         }
 
@@ -61,7 +61,7 @@ public class ForgeInventoryHelper implements IInventoryHelper {
             if (itemHandler instanceof ForgeItemStorageHandler forgeItemStorageHandler) {
                 return Optional.of(forgeItemStorageHandler.getStorage());
             } else {
-                return Optional.of(new ForgeWrappedItemHandler(itemHandler));
+                return Optional.of(new ForgeWrappedItemHandler(blockEntity, itemHandler));
             }
         }
 
@@ -78,6 +78,6 @@ public class ForgeInventoryHelper implements IInventoryHelper {
 
     @Override
     public IPlatformInventoryStorageHandler createStorageInventoryHandler(IItemStorageHandler handler) {
-        return new ForgePlatformInventoryStorageHandler(handler);
+        return new ForgePlatformInventoryStorageHandlerUnsided(handler);
     }
 }

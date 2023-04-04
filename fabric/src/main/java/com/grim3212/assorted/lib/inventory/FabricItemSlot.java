@@ -24,18 +24,24 @@ public class FabricItemSlot extends SnapshotParticipant<ItemStack> implements Si
 
     @Override
     public long insert(ItemVariant resource, long maxAmount, TransactionContext transaction) {
-        ItemStack inserted = this.storageHandler.insertItem(this.slot, resource.toStack((int) maxAmount), true);
-        if (!inserted.isEmpty()) {
-            updateSnapshots(transaction);
-            this.storageHandler.insertItem(this.slot, resource.toStack((int) maxAmount), false);
-            return maxAmount - inserted.getCount();
+        if (resource.isBlank()) {
+            return 0;
         }
-        return maxAmount;
+
+        ItemStack stackToInsert = resource.toStack((int) maxAmount);
+        ItemStack inserted = this.storageHandler.insertItem(this.slot, stackToInsert, true);
+        // Were we able to add anything to the inventory
+        if (inserted.isEmpty() || inserted.getCount() < stackToInsert.getCount()) {
+            updateSnapshots(transaction);
+            this.storageHandler.insertItem(this.slot, stackToInsert, false);
+            return inserted.isEmpty() ? maxAmount : maxAmount - inserted.getCount();
+        }
+        return 0;
     }
 
     @Override
     public long extract(ItemVariant resource, long maxAmount, TransactionContext transaction) {
-        if (Services.INVENTORY.canItemStacksStack(this.getStack(), resource.toStack()))
+        if (!Services.INVENTORY.canItemStacksStack(this.getStack(), resource.toStack()))
             return 0;
 
         ItemStack extracted = this.storageHandler.extractItem(this.slot, (int) maxAmount, true);

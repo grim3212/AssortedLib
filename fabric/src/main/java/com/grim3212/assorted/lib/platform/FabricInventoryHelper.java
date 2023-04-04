@@ -57,6 +57,8 @@ public class FabricInventoryHelper implements IInventoryHelper {
         if (blockEntity == null || blockEntity.isRemoved())
             return Optional.empty();
 
+        // TODO: Use fabrics ItemStorage.find first
+
         if (blockEntity instanceof IInventoryBlockEntity inventoryBlockEntity) {
             IPlatformInventoryStorageHandler storageHandler = inventoryBlockEntity.getStorageHandler();
             if (storageHandler != null) {
@@ -65,7 +67,7 @@ public class FabricInventoryHelper implements IInventoryHelper {
         }
 
         if (blockEntity instanceof Container container) {
-            return Optional.of(new FabricWrappedItemHandler(InventoryStorage.of(container, direction)));
+            return Optional.of(new FabricWrappedItemHandler(blockEntity, InventoryStorage.of(container, direction)));
         }
 
         return Optional.empty();

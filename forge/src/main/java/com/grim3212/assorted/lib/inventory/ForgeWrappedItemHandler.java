@@ -2,16 +2,20 @@ package com.grim3212.assorted.lib.inventory;
 
 import com.grim3212.assorted.lib.core.inventory.IItemStorageHandler;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ForgeWrappedItemHandler implements IItemStorageHandler {
 
     private final IItemHandler storage;
+    private final BlockEntity entity;
 
-    public ForgeWrappedItemHandler(@NotNull IItemHandler storage) {
+    public ForgeWrappedItemHandler(@Nullable BlockEntity entity, @NotNull IItemHandler storage) {
         this.storage = storage;
+        this.entity = entity;
     }
 
     @Override
@@ -49,5 +53,11 @@ public class ForgeWrappedItemHandler implements IItemStorageHandler {
         if (storage instanceof IItemHandlerModifiable modifiable) {
             modifiable.setStackInSlot(slot, stack);
         }
+    }
+
+    @Override
+    public void onContentsChanged(int slot) {
+        if (this.entity != null)
+            this.entity.setChanged();
     }
 }

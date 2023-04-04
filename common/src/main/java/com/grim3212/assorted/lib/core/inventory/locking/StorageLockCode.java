@@ -3,6 +3,8 @@ package com.grim3212.assorted.lib.core.inventory.locking;
 import net.minecraft.nbt.CompoundTag;
 
 public class StorageLockCode {
+    // TODO: This is kinda dumb to have a class for this
+    // Get rid of this and just add the tag stuff into StorageUtil
     public static final StorageLockCode EMPTY_CODE = new StorageLockCode("");
     private final String lock;
 

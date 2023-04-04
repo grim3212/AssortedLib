@@ -1,6 +1,7 @@
 package com.grim3212.assorted.lib.core.inventory.slot;
 
 import com.grim3212.assorted.lib.core.inventory.IItemStorageHandler;
+import com.grim3212.assorted.lib.core.inventory.locking.LockedStorageHandler;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
@@ -11,36 +12,34 @@ import org.jetbrains.annotations.NotNull;
 public class SlotStorageHandler extends Slot {
     private static Container emptyInventory = new SimpleContainer(0);
     private final IItemStorageHandler itemHandler;
-    private final int index;
 
-    public SlotStorageHandler(IItemStorageHandler itemHandler, int index, int xPosition, int yPosition) {
-        super(emptyInventory, index, xPosition, yPosition);
+    public SlotStorageHandler(IItemStorageHandler itemHandler, int slotIndex, int xPosition, int yPosition) {
+        super(emptyInventory, slotIndex, xPosition, yPosition);
         this.itemHandler = itemHandler;
-        this.index = index;
     }
 
     @Override
     public boolean mayPlace(@NotNull ItemStack stack) {
         if (stack.isEmpty())
             return false;
-        return itemHandler.isItemValid(index, stack);
+        return itemHandler.isItemValid(getContainerSlot(), stack);
     }
 
     @Override
     @NotNull
     public ItemStack getItem() {
-        return this.getItemHandler().getStackInSlot(index);
+        return this.getItemHandler().getStackInSlot(getContainerSlot());
     }
 
     @Override
     public void set(@NotNull ItemStack stack) {
-        this.getItemHandler().setStackInSlot(index, stack);
+        this.getItemHandler().setStackInSlot(getContainerSlot(), stack);
         this.setChanged();
     }
 
     @Override
     public void initialize(ItemStack stack) {
-        this.getItemHandler().setStackInSlot(index, stack);
+        this.getItemHandler().setStackInSlot(getContainerSlot(), stack);
         this.setChanged();
     }
 
@@ -50,7 +49,7 @@ public class SlotStorageHandler extends Slot {
 
     @Override
     public int getMaxStackSize() {
-        return this.itemHandler.getSlotLimit(this.index);
+        return this.itemHandler.getSlotLimit(this.getContainerSlot());
     }
 
     @Override
@@ -60,27 +59,45 @@ public class SlotStorageHandler extends Slot {
         maxAdd.setCount(maxInput);
 
         IItemStorageHandler handler = this.getItemHandler();
-        ItemStack currentStack = handler.getStackInSlot(index);
+        ItemStack currentStack = handler.getStackInSlot(getContainerSlot());
+        ItemStack remainder = this.insert(maxAdd, true);
 
-        handler.setStackInSlot(index, ItemStack.EMPTY);
-        ItemStack remainder = handler.insertItem(index, maxAdd, true);
-        handler.setStackInSlot(index, currentStack);
-
-        return maxInput - remainder.getCount();
+        int current = currentStack.getCount();
+        int added = maxInput - remainder.getCount();
+        return Math.min(this.getMaxStackSize(), current + added);
     }
 
     @Override
     public boolean mayPickup(Player playerIn) {
-        return !this.getItemHandler().extractItem(index, 1, true).isEmpty();
+        return !this.extract(1, true).isEmpty();
     }
 
     @Override
     @NotNull
     public ItemStack remove(int amount) {
-        return this.getItemHandler().extractItem(index, amount, false);
+        return this.extract(amount, false);
     }
 
     public IItemStorageHandler getItemHandler() {
         return itemHandler;
+    }
+
+    @Override
+    public void setChanged() {
+        this.itemHandler.onContentsChanged(this.getContainerSlot());
+    }
+
+    protected ItemStack insert(ItemStack test, boolean simulate) {
+        if (this.getItemHandler() instanceof LockedStorageHandler lockedStorageHandler) {
+            return lockedStorageHandler.insertItem(getContainerSlot(), test, simulate, "", true);
+        }
+        return this.getItemHandler().insertItem(getContainerSlot(), test, simulate);
+    }
+
+    protected ItemStack extract(int amount, boolean simulate) {
+        if (this.getItemHandler() instanceof LockedStorageHandler lockedStorageHandler) {
+            return lockedStorageHandler.extractItem(getContainerSlot(), amount, simulate, "", true);
+        }
+        return this.getItemHandler().extractItem(getContainerSlot(), amount, simulate);
     }
 }

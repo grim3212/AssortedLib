@@ -10,7 +10,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class ItemStackStorageHandler implements IItemStorageHandler, ITagSerializable<CompoundTag> {
+public class ItemStackStorageHandler implements IItemStorageHandler, ITagSerializable<CompoundTag> {
     protected NonNullList<ItemStack> stacks;
 
     public ItemStackStorageHandler() {
@@ -174,11 +174,25 @@ public abstract class ItemStackStorageHandler implements IItemStorageHandler, IT
     protected void onLoad() {
     }
 
-    protected void onContentsChanged(int slot) {
-        this.save();
+    @Override
+    public void onContentsChanged(int slot) {
     }
 
-    public abstract void save();
+    @Override
+    public boolean isEmpty() {
+        return this.stacks.isEmpty() || this.stacks.stream().allMatch(x -> x.isEmpty());
+    }
 
-    public abstract void load();
+
+    public void setStacks(NonNullList<ItemStack> stacks) {
+        if (stacks.size() != this.stacks.size()) {
+            return;
+        }
+
+        this.stacks = stacks;
+    }
+
+    public NonNullList<ItemStack> getStacks() {
+        return stacks;
+    }
 }

@@ -1,6 +1,6 @@
 package com.grim3212.assorted.lib.core.inventory.impl;
 
-import com.grim3212.assorted.lib.core.inventory.locking.LockedItemHandler;
+import com.grim3212.assorted.lib.core.inventory.locking.LockedStorageHandler;
 import com.grim3212.assorted.lib.core.inventory.locking.LockedWorldlyContainer;
 import com.grim3212.assorted.lib.platform.Services;
 import net.minecraft.core.Direction;
@@ -8,7 +8,8 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class LockedSidedStorageHandler extends SidedStorageHandler implements LockedItemHandler {
+@Deprecated
+public class LockedSidedStorageHandler extends SidedStorageHandler implements LockedStorageHandler {
 
 
     public LockedSidedStorageHandler(LockedWorldlyContainer inv, @Nullable Direction side) {
@@ -22,12 +23,12 @@ public class LockedSidedStorageHandler extends SidedStorageHandler implements Lo
     @Override
     @NotNull
     public ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
-        return this.insertItem(slot, stack, simulate, "");
+        return this.insertItem(slot, stack, simulate, "", false);
     }
 
     @Override
     @NotNull
-    public ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate, String inLockCode) {
+    public ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate, String inLockCode, boolean ignoreLock) {
         if (stack.isEmpty())
             return ItemStack.EMPTY;
 
@@ -99,12 +100,12 @@ public class LockedSidedStorageHandler extends SidedStorageHandler implements Lo
     @Override
     @NotNull
     public ItemStack extractItem(int slot, int amount, boolean simulate) {
-        return this.extractItem(slot, amount, simulate, "");
+        return this.extractItem(slot, amount, simulate, "", false);
     }
 
     @Override
     @NotNull
-    public ItemStack extractItem(int slot, int amount, boolean simulate, String inLockCode) {
+    public ItemStack extractItem(int slot, int amount, boolean simulate, String inLockCode, boolean ignoreLock) {
         if (amount == 0)
             return ItemStack.EMPTY;
 

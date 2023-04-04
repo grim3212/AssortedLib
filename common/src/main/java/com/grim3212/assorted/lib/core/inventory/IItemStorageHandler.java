@@ -1,6 +1,7 @@
 package com.grim3212.assorted.lib.core.inventory;
 
 import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -108,4 +109,25 @@ public interface IItemStorageHandler {
      *                          was not expecting.
      **/
     void setStackInSlot(int slot, @NotNull ItemStack stack);
+
+    default void startOpen(Player player) {
+    }
+
+    default void stopOpen(Player player) {
+    }
+
+    default boolean stillValid(Player player) {
+        return !player.isDeadOrDying();
+    }
+
+    default boolean isEmpty() {
+        for (int slot = 0; slot < this.getSlots(); slot++) {
+            if (this.getStackInSlot(slot) != ItemStack.EMPTY) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void onContentsChanged(int slot);
 }

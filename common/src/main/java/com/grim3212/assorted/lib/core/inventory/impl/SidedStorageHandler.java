@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.IntUnaryOperator;
 
+@Deprecated
 public class SidedStorageHandler implements IItemStorageHandler {
     protected final WorldlyContainer inv;
     @Nullable
@@ -160,6 +161,16 @@ public class SidedStorageHandler implements IItemStorageHandler {
 
         if (slot1 != -1)
             setInventorySlotContents(slot1, stack);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return inv.isEmpty();
+    }
+
+    @Override
+    public void onContentsChanged(int slot) {
+        inv.setChanged();
     }
 
     protected void setInventorySlotContents(int slot, ItemStack stack) {

@@ -7,14 +7,17 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 
 public class FabricWrappedItemHandler implements IItemStorageHandler {
 
     private final InventoryStorage storage;
+    private final BlockEntity entity;
 
-    public FabricWrappedItemHandler(@NotNull InventoryStorage storage) {
+    public FabricWrappedItemHandler(BlockEntity entity, @NotNull InventoryStorage storage) {
         this.storage = storage;
+        this.entity = entity;
     }
 
     @Override
@@ -121,4 +124,9 @@ public class FabricWrappedItemHandler implements IItemStorageHandler {
         }
     }
 
+    @Override
+    public void onContentsChanged(int slot) {
+        if (this.entity != null)
+            this.entity.setChanged();
+    }
 }

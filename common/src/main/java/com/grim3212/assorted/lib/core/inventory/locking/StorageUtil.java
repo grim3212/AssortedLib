@@ -1,7 +1,11 @@
 package com.grim3212.assorted.lib.core.inventory.locking;
 
+import com.grim3212.assorted.lib.core.inventory.IItemStorageHandler;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class StorageUtil {
@@ -60,5 +64,11 @@ public class StorageUtil {
     public static boolean hasCode(ItemStack stack) {
         String code = getCode(stack);
         return !code.isEmpty();
+    }
+
+    public static void dropContents(Level level, BlockPos pos, IItemStorageHandler storageHandler) {
+        for (int slot = 0; slot < storageHandler.getSlots(); slot++) {
+            Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), storageHandler.getStackInSlot(slot));
+        }
     }
 }
