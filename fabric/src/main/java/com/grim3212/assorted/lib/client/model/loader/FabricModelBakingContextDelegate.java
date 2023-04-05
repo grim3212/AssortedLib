@@ -32,7 +32,7 @@ public class FabricModelBakingContextDelegate implements IModelBakingContext {
     @Override
     public Optional<Material> getMaterial(final String name) {
         if (source.hasTexture(name)) {
-            return Optional.ofNullable(source.getMaterial(name));
+            return Optional.of(source.getMaterial(name));
         }
 
         return Optional.empty();

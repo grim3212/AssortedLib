@@ -1,5 +1,6 @@
 package com.grim3212.assorted.lib.core.inventory.impl;
 
+import com.grim3212.assorted.lib.LibConstants;
 import com.grim3212.assorted.lib.core.inventory.IItemStorageHandler;
 import com.grim3212.assorted.lib.platform.Services;
 import com.grim3212.assorted.lib.util.ITagSerializable;
@@ -185,11 +186,21 @@ public class ItemStackStorageHandler implements IItemStorageHandler, ITagSeriali
 
 
     public void setStacks(NonNullList<ItemStack> stacks) {
-        if (stacks.size() != this.stacks.size()) {
-            return;
+        if (stacks.size() < this.stacks.size()) {
+            NonNullList<ItemStack> newStacks = NonNullList.withSize(this.stacks.size(), ItemStack.EMPTY);
+            for (int i = 0; i < stacks.size(); i++) {
+                if (i < stacks.size()) {
+                    newStacks.set(i, stacks.get(i));
+                } else {
+                    newStacks.set(i, ItemStack.EMPTY);
+                }
+            }
+            this.stacks = newStacks;
+        } else if (stacks.size() > this.stacks.size()) {
+            LibConstants.LOG.warn("Can't try to set more stacks than slots");
+        } else {
+            this.stacks = stacks;
         }
-
-        this.stacks = stacks;
     }
 
     public NonNullList<ItemStack> getStacks() {

@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.block.model.*;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.util.GsonHelper;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -70,12 +71,43 @@ public final class FabricPlatformModelLoaderPlatformDelegate<L extends IModelSpe
                 return null;
 
             final JsonObject modelSpecification = specificationData.getAsJsonObject();
-            if (!modelSpecification.has("loader"))
+            if (!modelSpecification.has("loader")) {
+                if (modelSpecification.has("parent")) {
+                    // If we have a parent model check if the parent model is of our loader
+                    return getParentModel(new ResourceLocation(GsonHelper.getAsString(modelSpecification, "parent", "")));
+                }
                 return null;
+            }
 
             return this.gson.fromJson(modelSpecification, UnbakedModel.class);
         } catch (IOException e) {
             throw new ModelProviderException("Failed to find and read resource", e);
         }
+    }
+
+    private @Nullable UnbakedModel getParentModel(ResourceLocation parentLocation) throws IOException {
+        final ResourceLocation target = new ResourceLocation(parentLocation.getNamespace(), "models/" + parentLocation.getPath() + ".json");
+
+        final Optional<Resource> resource = Minecraft.getInstance().getResourceManager().getResource(target);
+        if (resource.isEmpty())
+            return null;
+
+        final InputStream inputStream = resource.get().open();
+        final InputStreamReader streamReader = new InputStreamReader(inputStream);
+
+        final JsonElement specificationData = gson.fromJson(streamReader, JsonElement.class);
+
+        streamReader.close();
+        inputStream.close();
+
+        if (!specificationData.isJsonObject())
+            return null;
+
+        final JsonObject modelSpecification = specificationData.getAsJsonObject();
+        if (!modelSpecification.has("loader")) {
+            return null;
+        }
+
+        return this.gson.fromJson(modelSpecification, UnbakedModel.class);
     }
 }

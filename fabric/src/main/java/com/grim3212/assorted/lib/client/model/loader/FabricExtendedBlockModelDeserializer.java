@@ -19,6 +19,7 @@ public class FabricExtendedBlockModelDeserializer extends BlockModel.Deserialize
         this.delegate = delegate;
     }
 
+    @Override
     public BlockModel deserialize(JsonElement element, Type targetType, JsonDeserializationContext deserializationContext) throws JsonParseException {
         if (!element.isJsonObject())
             throw new JsonSyntaxException("Model needs to be object");

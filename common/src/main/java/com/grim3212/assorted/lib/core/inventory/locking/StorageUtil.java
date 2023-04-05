@@ -57,6 +57,11 @@ public class StorageUtil {
     }
 
     public static boolean hasCodeWithMatch(ItemStack stack, String testCode) {
+        // We are checking for an invalid code so any stack will match
+        if (testCode == null || testCode.isEmpty()) {
+            return true;
+        }
+
         String code = getCode(stack);
         return !code.isEmpty() && code.equals(testCode);
     }
