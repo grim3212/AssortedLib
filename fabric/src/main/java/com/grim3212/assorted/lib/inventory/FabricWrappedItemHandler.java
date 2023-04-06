@@ -27,7 +27,8 @@ public class FabricWrappedItemHandler implements IItemStorageHandler {
 
     @Override
     public @NotNull ItemStack getStackInSlot(int slot) {
-        return this.storage.getSlot(slot).getResource().toStack();
+        SingleSlotStorage<ItemVariant> slotStorage = this.storage.getSlot(slot);
+        return slotStorage.getResource().toStack((int) slotStorage.getAmount());
     }
 
     @Override
@@ -37,7 +38,7 @@ public class FabricWrappedItemHandler implements IItemStorageHandler {
             return stack;
         }
 
-        if (!Services.INVENTORY.canItemStacksStack(stack, slotStorage.getResource().toStack())) {
+        if (!slotStorage.isResourceBlank() && !Services.INVENTORY.canItemStacksStack(stack, slotStorage.getResource().toStack((int) slotStorage.getAmount()))) {
             return stack;
         }
 
@@ -57,6 +58,7 @@ public class FabricWrappedItemHandler implements IItemStorageHandler {
 
         try (final Transaction context = Transaction.openOuter()) {
             int inserted = (int) slotStorage.insert(toInsert, stack.getCount(), context);
+            context.commit();
             if (inserted <= 0) {
                 return stack;
             } else {
@@ -86,16 +88,18 @@ public class FabricWrappedItemHandler implements IItemStorageHandler {
             if (extracted <= 0) {
                 return ItemStack.EMPTY;
             } else {
-                return slotStorage.getResource().toStack().copyWithCount(extracted);
+                return slotStorage.getResource().toStack(extracted);
             }
         }
 
         try (final Transaction context = Transaction.openOuter()) {
+            ItemStack extractingType = slotStorage.getResource().toStack();
             int extracted = (int) slotStorage.extract(variant, amount, context);
+            context.commit();
             if (extracted <= 0) {
                 return ItemStack.EMPTY;
             } else {
-                return slotStorage.getResource().toStack().copyWithCount(extracted);
+                return extractingType.copyWithCount(extracted);
             }
         }
     }
@@ -114,13 +118,12 @@ public class FabricWrappedItemHandler implements IItemStorageHandler {
     @Override
     public void setStackInSlot(int slot, @NotNull ItemStack stack) {
         SingleSlotStorage<ItemVariant> slotStorage = this.storage.getSlot(slot);
-        if (slotStorage.supportsInsertion()) {
-            try (final Transaction context = Transaction.openOuter()) {
-                // Extract everything from the slot
-                slotStorage.extract(slotStorage.getResource(), slotStorage.getCapacity(), context);
-                // Then add the stack in to set
-                slotStorage.insert(ItemVariant.of(stack), stack.getCount(), context);
-            }
+        try (final Transaction context = Transaction.openOuter()) {
+            // Extract everything from the slot
+            slotStorage.extract(slotStorage.getResource(), slotStorage.getCapacity(), context);
+            // Then add the stack in to set
+            slotStorage.insert(ItemVariant.of(stack), stack.getCount(), context);
+            context.commit();
         }
     }
 
