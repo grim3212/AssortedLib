@@ -15,6 +15,7 @@ import net.minecraft.world.phys.BlockHitResult;
 
 public class AssortedLibFabric implements ModInitializer {
 
+
     @Override
     public void onInitialize() {
         Services.EVENTS.registerEventType(UseBlockEvent.class, () -> UseBlockCallback.EVENT.register((Player player, Level level, InteractionHand hand, BlockHitResult hitResult) -> {
@@ -33,4 +34,5 @@ public class AssortedLibFabric implements ModInitializer {
 
         FabricConfigHelper.init();
     }
+
 }

@@ -13,11 +13,6 @@ public interface ILockable {
         }
 
         @Override
-        public StorageLockCode getStorageLockCode() {
-            return StorageLockCode.EMPTY_CODE;
-        }
-
-        @Override
         public void setLockCode(String s) {
             // nope
         }
@@ -36,11 +31,6 @@ public interface ILockable {
             }
 
             @Override
-            public StorageLockCode getStorageLockCode() {
-                return new StorageLockCode(code);
-            }
-
-            @Override
             public void setLockCode(String s) {
                 // nope
             }
@@ -51,8 +41,6 @@ public interface ILockable {
     boolean isLocked();
 
     String getLockCode();
-
-    StorageLockCode getStorageLockCode();
 
     void setLockCode(String s);
 

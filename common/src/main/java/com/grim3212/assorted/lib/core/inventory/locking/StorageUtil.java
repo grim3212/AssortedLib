@@ -9,34 +9,30 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class StorageUtil {
-    public static ItemStack setCodeOnStack(String code, ItemStack stack) {
-        return setCodeOnStack(new StorageLockCode(code), stack);
+    public static void writeLock(CompoundTag nbt, String lock) {
+        if (!lock.isEmpty()) {
+            nbt.putString("Storage_Lock", lock);
+        }
     }
 
-    public static ItemStack setCodeOnStack(StorageLockCode code, ItemStack stack) {
+    public static String readLock(CompoundTag nbt) {
+        if (nbt == null) return "";
+
+        return nbt.contains("Storage_Lock", 8) ? nbt.getString("Storage_Lock") : "";
+    }
+
+    public static ItemStack setCodeOnStack(String code, ItemStack stack) {
         ItemStack output = stack.copy();
-
-        if (output.hasTag()) {
-            code.write(output.getTag());
-        } else {
-            CompoundTag tag = new CompoundTag();
-            code.write(tag);
-            output.setTag(tag);
-        }
-
+        writeCodeToStack(code, output);
         return output;
     }
 
     public static void writeCodeToStack(String code, ItemStack stack) {
-        writeCodeToStack(new StorageLockCode(code), stack);
-    }
-
-    public static void writeCodeToStack(StorageLockCode code, ItemStack stack) {
         if (stack.hasTag()) {
-            code.write(stack.getTag());
+            writeLock(stack.getTag(), code);
         } else {
             CompoundTag tag = new CompoundTag();
-            code.write(tag);
+            writeLock(tag, code);
             stack.setTag(tag);
         }
     }
@@ -50,8 +46,7 @@ public class StorageUtil {
 
     public static String getCode(ItemStack stack) {
         if (stack.hasTag()) {
-            String code = stack.getTag().contains("Storage_Lock", 8) ? stack.getTag().getString("Storage_Lock") : "";
-            return code;
+            return readLock(stack.getTag());
         }
         return "";
     }

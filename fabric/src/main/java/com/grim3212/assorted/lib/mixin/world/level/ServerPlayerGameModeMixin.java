@@ -23,23 +23,29 @@ public abstract class ServerPlayerGameModeMixin {
     @Shadow
     protected ServerPlayer player;
 
+    @Shadow
+    protected abstract boolean isCreative();
+
     @Inject(method = "destroyBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;playerWillDestroy(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/entity/player/Player;)V"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
     private void onDestroy(BlockPos pos, CallbackInfoReturnable<Boolean> info, BlockState state, BlockEntity blockEntity) {
         if (state.getBlock() instanceof IBlockOnPlayerBreak extraProperties) {
             if (this.isCreative()) {
                 this.removeBlock(state, extraProperties, pos, false);
                 info.setReturnValue(true);
-                info.cancel();
+                return;
             }
             ItemStack itemStack = this.player.getMainHandItem();
             ItemStack itemStack2 = itemStack.copy();
             boolean canHarvest = this.player.hasCorrectToolForDrops(state);
             itemStack.mineBlock(this.level, state, pos, this.player);
-            if (this.removeBlock(state, extraProperties, pos, canHarvest) && canHarvest) {
+
+            boolean removed = this.removeBlock(state, extraProperties, pos, canHarvest);
+
+            if (canHarvest && removed) {
                 state.getBlock().playerDestroy(this.level, this.player, pos, state, blockEntity, itemStack2);
             }
+
             info.setReturnValue(true);
-            info.cancel();
         }
     }
 
@@ -50,7 +56,4 @@ public abstract class ServerPlayerGameModeMixin {
         }
         return removed;
     }
-
-    @Shadow
-    public abstract boolean isCreative();
 }
