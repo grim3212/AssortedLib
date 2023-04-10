@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 public interface IInventoryHelper {
 
@@ -21,4 +22,6 @@ public interface IInventoryHelper {
     Optional<IItemStorageHandler> getItemStorageHandler(BlockEntity blockEntity, @Nullable Direction direction);
 
     IPlatformInventoryStorageHandler createStorageInventoryHandler(IItemStorageHandler handler);
+
+    IPlatformInventoryStorageHandler createSidedStorageInventoryHandler(Function<Direction, IItemStorageHandler> handler);
 }

@@ -6,6 +6,7 @@ import com.grim3212.assorted.lib.registry.ILoaderRegistry;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
+import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
@@ -127,6 +128,12 @@ public class FabricPlatformHelper implements IPlatformHelper {
     @Override
     public <T extends AbstractContainerMenu> MenuType<T> createMenuType(MenuFactory<T> factory) {
         return new ExtendedScreenHandlerType(factory::create);
+    }
+
+    @Override
+    public int getFuelTime(ItemStack stack) {
+        Integer fuelTime = FuelRegistry.INSTANCE.get(stack.getItem());
+        return fuelTime != null ? fuelTime : 0;
     }
 
     public static class ExtendedScreenHandlerImpl implements ExtendedScreenHandlerFactory {

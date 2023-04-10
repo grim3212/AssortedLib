@@ -1,6 +1,7 @@
 package com.grim3212.assorted.lib.mixin.world.entity;
 
 import com.grim3212.assorted.lib.core.block.IBlockSoundType;
+import com.grim3212.assorted.lib.core.block.effects.IBlockRunningEffects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.BlockTags;
@@ -13,6 +14,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(Entity.class)
 public abstract class EntityWorldlyBlockMixin {
@@ -48,6 +50,22 @@ public abstract class EntityWorldlyBlockMixin {
                 this.playSound(soundType.getStepSound(), soundType.getVolume() * 0.15F, soundType.getPitch());
                 ci.cancel();
             }
+        }
+    }
+
+    @Inject(
+            method = "spawnSprintParticle",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/world/level/Level;getBlockState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/state/BlockState;"
+            ),
+            locals = LocalCapture.CAPTURE_FAILHARD,
+            cancellable = true
+    )
+    public void assortedlib_spawnSprintParticle(CallbackInfo ci, int i, int j, int k, BlockPos blockPos) {
+        BlockState state = this.level.getBlockState(blockPos);
+        if (state.getBlock() instanceof IBlockRunningEffects extraProperties && extraProperties.addRunningEffects(state, level, blockPos, (Entity) (Object) this)) {
+            ci.cancel();
         }
     }
 }

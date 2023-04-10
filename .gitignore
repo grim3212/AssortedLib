@@ -27,3 +27,5 @@ logs
 
 # Data Generator cache
 common/src/generated/resources/.cache
+forge/src/generated/resources/.cache
+fabric/src/generated/resources/.cache

@@ -21,7 +21,7 @@ public class ForgeItemTagProvider extends ItemTagsProvider {
 
     @Override
     protected void addTags(HolderLookup.Provider pProvider) {
-        this.commonItems.addCommonTags(this::tag, (pair) -> this.copy(pair.getA(), pair.getB()));
+        this.commonItems.addCommonTags(this::tag, this::copy);
     }
 
 }

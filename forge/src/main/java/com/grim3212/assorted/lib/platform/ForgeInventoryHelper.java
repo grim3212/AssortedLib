@@ -5,6 +5,7 @@ import com.grim3212.assorted.lib.core.inventory.IInventoryItem;
 import com.grim3212.assorted.lib.core.inventory.IItemStorageHandler;
 import com.grim3212.assorted.lib.core.inventory.IPlatformInventoryStorageHandler;
 import com.grim3212.assorted.lib.inventory.ForgeItemStorageHandler;
+import com.grim3212.assorted.lib.inventory.ForgePlatformInventoryStorageHandlerSided;
 import com.grim3212.assorted.lib.inventory.ForgePlatformInventoryStorageHandlerUnsided;
 import com.grim3212.assorted.lib.inventory.ForgeWrappedItemHandler;
 import com.grim3212.assorted.lib.platform.services.IInventoryHelper;
@@ -18,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 public class ForgeInventoryHelper implements IInventoryHelper {
     @Override
@@ -46,7 +48,7 @@ public class ForgeInventoryHelper implements IInventoryHelper {
         if (stack.getItem() instanceof IInventoryItem itemStackStorage) {
             IPlatformInventoryStorageHandler storageHandler = itemStackStorage.getStorageHandler(stack);
             if (storageHandler != null) {
-                return Optional.of(storageHandler.getItemStorageHandler());
+                return Optional.of(storageHandler.getItemStorageHandler(null));
             }
         }
 
@@ -69,7 +71,7 @@ public class ForgeInventoryHelper implements IInventoryHelper {
         if (blockEntity instanceof IInventoryBlockEntity inventoryBlockEntity) {
             IPlatformInventoryStorageHandler storageHandler = inventoryBlockEntity.getStorageHandler();
             if (storageHandler != null) {
-                return Optional.of(storageHandler.getItemStorageHandler());
+                return Optional.of(storageHandler.getItemStorageHandler(direction));
             }
         }
 
@@ -79,5 +81,10 @@ public class ForgeInventoryHelper implements IInventoryHelper {
     @Override
     public IPlatformInventoryStorageHandler createStorageInventoryHandler(IItemStorageHandler handler) {
         return new ForgePlatformInventoryStorageHandlerUnsided(handler);
+    }
+
+    @Override
+    public IPlatformInventoryStorageHandler createSidedStorageInventoryHandler(Function<Direction, IItemStorageHandler> handler) {
+        return new ForgePlatformInventoryStorageHandlerSided(handler);
     }
 }

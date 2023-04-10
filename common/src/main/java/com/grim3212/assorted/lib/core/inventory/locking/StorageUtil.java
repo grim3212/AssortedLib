@@ -1,12 +1,16 @@
 package com.grim3212.assorted.lib.core.inventory.locking;
 
 import com.grim3212.assorted.lib.core.inventory.IItemStorageHandler;
+import com.grim3212.assorted.lib.core.inventory.impl.ItemStackStorageHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.Mth;
 import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+
+import javax.annotation.Nullable;
 
 public class StorageUtil {
     public static void writeLock(CompoundTag nbt, String lock) {
@@ -69,6 +73,26 @@ public class StorageUtil {
     public static void dropContents(Level level, BlockPos pos, IItemStorageHandler storageHandler) {
         for (int slot = 0; slot < storageHandler.getSlots(); slot++) {
             Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), storageHandler.getStackInSlot(slot));
+        }
+    }
+
+    public static int getRedstoneSignalFromContainer(@Nullable ItemStackStorageHandler itemHandler) {
+        if (itemHandler == null) {
+            return 0;
+        } else {
+            int $$1 = 0;
+            float $$2 = 0.0F;
+
+            for (int slot = 0; slot < itemHandler.getSlots(); ++slot) {
+                ItemStack stack = itemHandler.getStackInSlot(slot);
+                if (!stack.isEmpty()) {
+                    $$2 += (float) stack.getCount() / (float) Math.min(itemHandler.getSlotLimit(slot), stack.getMaxStackSize());
+                    ++$$1;
+                }
+            }
+
+            $$2 /= (float) itemHandler.getSlots();
+            return Mth.floor($$2 * 14.0F) + ($$1 > 0 ? 1 : 0);
         }
     }
 }

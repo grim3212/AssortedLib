@@ -19,7 +19,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -88,5 +88,37 @@ public interface IPlatformHelper {
     @FunctionalInterface
     interface MenuFactory<T extends AbstractContainerMenu> {
         T create(int syncId, Inventory inventory, FriendlyByteBuf buf);
+    }
+
+    int getFuelTime(ItemStack stack);
+
+    enum ToolType {
+        PICKAXE,
+        SHOVEL,
+        AXE,
+        HOE
+    }
+
+    default boolean isTieredTool(ItemStack stack, Tiers minTier, ToolType toolType) {
+        if (stack.getItem() instanceof TieredItem itemTier) {
+            if (itemTier.getTier().getLevel() >= minTier.getLevel()) {
+                switch (toolType) {
+                    case PICKAXE -> {
+                        return itemTier instanceof PickaxeItem;
+                    }
+                    case SHOVEL -> {
+                        return itemTier instanceof ShovelItem;
+                    }
+                    case AXE -> {
+                        return itemTier instanceof AxeItem;
+                    }
+                    case HOE -> {
+                        return itemTier instanceof HoeItem;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 }

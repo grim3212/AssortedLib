@@ -18,12 +18,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TieredItem;
+import net.minecraft.world.item.Tiers;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.DungeonHooks;
-import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.*;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.AddReloadListenerEvent;
@@ -127,5 +128,43 @@ public class ForgePlatformHelper implements IPlatformHelper {
     @Override
     public <T extends AbstractContainerMenu> MenuType<T> createMenuType(MenuFactory<T> factory) {
         return IForgeMenuType.create(factory::create);
+    }
+
+    @Override
+    public int getFuelTime(ItemStack stack) {
+        return ForgeHooks.getBurnTime(stack, null);
+    }
+
+    @Override
+    public boolean isTieredTool(ItemStack stack, Tiers minTier, ToolType toolType) {
+        if (stack.getItem() instanceof TieredItem itemTier) {
+            // TODO: Possibly look into cross-platform support for ToolActions
+            if (stack.getItem().canPerformAction(stack, getToolActionForType(toolType))) {
+                if (TierSortingRegistry.isTierSorted(itemTier.getTier())) {
+                    return TierSortingRegistry.getTiersLowerThan(itemTier.getTier()).contains(minTier);
+                } else {
+                    return IPlatformHelper.super.isTieredTool(stack, minTier, toolType);
+                }
+            }
+        }
+        return false;
+    }
+
+    private ToolAction getToolActionForType(ToolType type) {
+        switch (type) {
+            case PICKAXE -> {
+                return ToolActions.PICKAXE_DIG;
+            }
+            case SHOVEL -> {
+                return ToolActions.SHOVEL_DIG;
+            }
+            case AXE -> {
+                return ToolActions.AXE_DIG;
+            }
+            case HOE -> {
+                return ToolActions.HOE_DIG;
+            }
+        }
+        return null;
     }
 }

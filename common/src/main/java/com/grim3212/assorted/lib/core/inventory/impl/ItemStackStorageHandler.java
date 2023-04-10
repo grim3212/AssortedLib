@@ -78,11 +78,11 @@ public class ItemStackStorageHandler implements IItemStorageHandler, ITagSeriali
 
         if (!simulate) {
             if (existing.isEmpty()) {
-                this.stacks.set(slot, reachedLimit ? Services.INVENTORY.copyStackWithSize(stack, limit) : stack);
+                this.setStackInSlot(slot, reachedLimit ? Services.INVENTORY.copyStackWithSize(stack, limit) : stack);
             } else {
                 existing.grow(reachedLimit ? limit : stack.getCount());
+                onContentsChanged(slot);
             }
-            onContentsChanged(slot);
         }
 
         return reachedLimit ? Services.INVENTORY.copyStackWithSize(stack, stack.getCount() - limit) : ItemStack.EMPTY;
@@ -105,16 +105,14 @@ public class ItemStackStorageHandler implements IItemStorageHandler, ITagSeriali
 
         if (existing.getCount() <= toExtract) {
             if (!simulate) {
-                this.stacks.set(slot, ItemStack.EMPTY);
-                onContentsChanged(slot);
+                this.setStackInSlot(slot, ItemStack.EMPTY);
                 return existing;
             } else {
                 return existing.copy();
             }
         } else {
             if (!simulate) {
-                this.stacks.set(slot, Services.INVENTORY.copyStackWithSize(existing, existing.getCount() - toExtract));
-                onContentsChanged(slot);
+                this.setStackInSlot(slot, Services.INVENTORY.copyStackWithSize(existing, existing.getCount() - toExtract));
             }
 
             return Services.INVENTORY.copyStackWithSize(existing, toExtract);

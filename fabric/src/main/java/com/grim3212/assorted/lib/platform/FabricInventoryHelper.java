@@ -4,10 +4,14 @@ import com.grim3212.assorted.lib.core.inventory.IInventoryBlockEntity;
 import com.grim3212.assorted.lib.core.inventory.IInventoryItem;
 import com.grim3212.assorted.lib.core.inventory.IItemStorageHandler;
 import com.grim3212.assorted.lib.core.inventory.IPlatformInventoryStorageHandler;
-import com.grim3212.assorted.lib.inventory.FabricPlatformInventoryStorageHandler;
+import com.grim3212.assorted.lib.inventory.FabricPlatformInventoryStorageHandlerSided;
+import com.grim3212.assorted.lib.inventory.FabricPlatformInventoryStorageHandlerUnsided;
 import com.grim3212.assorted.lib.inventory.FabricWrappedItemHandler;
 import com.grim3212.assorted.lib.platform.services.IInventoryHelper;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.Direction;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
@@ -16,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 public class FabricInventoryHelper implements IInventoryHelper {
     @Override
@@ -43,12 +48,10 @@ public class FabricInventoryHelper implements IInventoryHelper {
         if (stack.getItem() instanceof IInventoryItem itemStackStorage) {
             IPlatformInventoryStorageHandler storageHandler = itemStackStorage.getStorageHandler(stack);
             if (storageHandler != null) {
-                return Optional.of(storageHandler.getItemStorageHandler());
+                return Optional.of(storageHandler.getItemStorageHandler(null));
             }
         }
 
-        // TODO: Maybe look into trying to automatically generate a handler for other item storages that follow the same
-        // inventory on an ItemStack structure
         return Optional.empty();
     }
 
@@ -57,13 +60,17 @@ public class FabricInventoryHelper implements IInventoryHelper {
         if (blockEntity == null || blockEntity.isRemoved())
             return Optional.empty();
 
-        // TODO: Use fabrics ItemStorage.find first
-
         if (blockEntity instanceof IInventoryBlockEntity inventoryBlockEntity) {
             IPlatformInventoryStorageHandler storageHandler = inventoryBlockEntity.getStorageHandler();
             if (storageHandler != null) {
-                return Optional.of(storageHandler.getItemStorageHandler());
+                return Optional.of(storageHandler.getItemStorageHandler(direction));
             }
+        }
+
+        Storage<ItemVariant> inventory = ItemStorage.SIDED.find(blockEntity.getLevel(), blockEntity.getBlockPos(), direction);
+        if (inventory != null && inventory instanceof InventoryStorage inventoryStorage) {
+            // TODO: Look into supporting the base Storage<ItemVariant>
+            return Optional.of(new FabricWrappedItemHandler(blockEntity, inventoryStorage));
         }
 
         if (blockEntity instanceof Container container) {
@@ -75,6 +82,11 @@ public class FabricInventoryHelper implements IInventoryHelper {
 
     @Override
     public IPlatformInventoryStorageHandler createStorageInventoryHandler(IItemStorageHandler handler) {
-        return new FabricPlatformInventoryStorageHandler(handler);
+        return new FabricPlatformInventoryStorageHandlerUnsided(handler);
+    }
+
+    @Override
+    public IPlatformInventoryStorageHandler createSidedStorageInventoryHandler(Function<Direction, IItemStorageHandler> handler) {
+        return new FabricPlatformInventoryStorageHandlerSided(handler);
     }
 }

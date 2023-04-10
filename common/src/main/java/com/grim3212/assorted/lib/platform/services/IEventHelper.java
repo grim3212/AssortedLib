@@ -9,6 +9,5 @@ public interface IEventHelper {
 
     <T extends GenericEvent> void handleEvents(T event);
 
-    // TODO: change events to be able to be registered regardles of if AssortedLib loads first or last
     void registerEvent(Class<? extends GenericEvent> eventType, Consumer<?> handler);
 }

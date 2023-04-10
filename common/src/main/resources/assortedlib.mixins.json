@@ -24,7 +24,8 @@
   ],
   "client": [
     "client.AccessorBlockModel",
-    "client.AccessorMinecraft"
+    "client.AccessorMinecraft",
+    "client.particle.ParticleEngineMixin"
   ],
   "injectors": {
     "defaultRequire": 1

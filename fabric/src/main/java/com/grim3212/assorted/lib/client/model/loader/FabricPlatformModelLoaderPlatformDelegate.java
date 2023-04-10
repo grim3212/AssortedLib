@@ -27,12 +27,14 @@ import java.util.Optional;
 public final class FabricPlatformModelLoaderPlatformDelegate<L extends IModelSpecificationLoader<S>, S extends IModelSpecification<S>> implements ModelResourceProvider {
 
     private final Gson gson;
+    private final String name;
 
     public FabricPlatformModelLoaderPlatformDelegate(final ResourceLocation name, final L delegate) {
+        this.name = name.toString();
         this.gson = (new GsonBuilder())
                 .registerTypeAdapter(ResourceLocation.class, new ResourceLocation.Serializer())
-                .registerTypeHierarchyAdapter(UnbakedModel.class, new FabricExtendedBlockModelDeserializer(name.toString(), delegate))
-                .registerTypeHierarchyAdapter(BlockModel.class, new FabricExtendedBlockModelDeserializer(name.toString(), delegate))
+                .registerTypeHierarchyAdapter(UnbakedModel.class, new FabricExtendedBlockModelDeserializer(this.name, delegate))
+                .registerTypeHierarchyAdapter(BlockModel.class, new FabricExtendedBlockModelDeserializer(this.name, delegate))
                 .registerTypeAdapter(BlockElement.class, new BlockElement.Deserializer() {
                 })
                 .registerTypeAdapter(BlockElementFace.class, new BlockElementFace.Deserializer() {
@@ -79,6 +81,9 @@ public final class FabricPlatformModelLoaderPlatformDelegate<L extends IModelSpe
                 return null;
             }
 
+            if (!modelSpecification.get("loader").getAsString().equals(this.name))
+                return null;
+
             return this.gson.fromJson(modelSpecification, UnbakedModel.class);
         } catch (IOException e) {
             throw new ModelProviderException("Failed to find and read resource", e);
@@ -104,9 +109,11 @@ public final class FabricPlatformModelLoaderPlatformDelegate<L extends IModelSpe
             return null;
 
         final JsonObject modelSpecification = specificationData.getAsJsonObject();
-        if (!modelSpecification.has("loader")) {
+        if (!modelSpecification.has("loader"))
             return null;
-        }
+
+        if (!modelSpecification.get("loader").getAsString().equals(this.name))
+            return null;
 
         return this.gson.fromJson(modelSpecification, UnbakedModel.class);
     }

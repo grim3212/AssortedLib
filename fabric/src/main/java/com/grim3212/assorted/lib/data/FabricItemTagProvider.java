@@ -19,6 +19,6 @@ public class FabricItemTagProvider extends VanillaItemTagsProvider {
 
     @Override
     protected void addTags(HolderLookup.Provider lookup) {
-        this.commonItems.addCommonTags(this::tag, (pair) -> this.copy(pair.getA(), pair.getB()));
+        this.commonItems.addCommonTags(this::tag, this::copy);
     }
 }

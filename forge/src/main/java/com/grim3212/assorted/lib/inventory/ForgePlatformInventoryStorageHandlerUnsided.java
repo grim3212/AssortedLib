@@ -2,8 +2,10 @@ package com.grim3212.assorted.lib.inventory;
 
 import com.grim3212.assorted.lib.core.inventory.IItemStorageHandler;
 import com.grim3212.assorted.lib.core.inventory.IPlatformInventoryStorageHandler;
+import net.minecraft.core.Direction;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
+import org.jetbrains.annotations.Nullable;
 
 public class ForgePlatformInventoryStorageHandlerUnsided implements IPlatformInventoryStorageHandler {
 
@@ -25,7 +27,7 @@ public class ForgePlatformInventoryStorageHandlerUnsided implements IPlatformInv
     }
 
     @Override
-    public IItemStorageHandler getItemStorageHandler() {
+    public IItemStorageHandler getItemStorageHandler(@Nullable Direction direction) {
         return this.handler;
     }
 

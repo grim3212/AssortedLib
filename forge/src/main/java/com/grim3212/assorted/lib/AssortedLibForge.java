@@ -30,6 +30,8 @@ import java.util.concurrent.CompletableFuture;
 @Mod(LibConstants.MOD_ID)
 public class AssortedLibForge {
     public AssortedLibForge() {
+        LibConstants.LOG.info(LibConstants.MOD_NAME + " starting up...");
+
         final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         modBus.addListener(this::gatherData);
         modBus.addListener(this::registerRecipeSerializers);
