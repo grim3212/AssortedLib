@@ -15,9 +15,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.Random;
 
-public class EffectUtils {
+public class ClientEffectUtils {
     private static final Random RANDOM = new Random();
-
+    
     public static void addBlockDestroyEffects(final LevelReader levelReader, final BlockPos pos, final BlockState primaryState, final ParticleEngine manager, final Level renderingWorld) {
         if (!primaryState.isAir()) {
             final VoxelShape voxelshape = levelReader.getBlockState(pos).getShape(levelReader, pos);
