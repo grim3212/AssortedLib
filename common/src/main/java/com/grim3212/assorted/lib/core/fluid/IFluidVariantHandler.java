@@ -14,8 +14,6 @@ public interface IFluidVariantHandler {
 
     /**
      * Return the sound corresponding to this fluid being filled, or none if no sound is available.
-     *
-     * <p>If a non-empty sound event is returned, {@link Fluid#getPickupSound} will return that sound.
      */
     Optional<SoundEvent> getFillSound(FluidInformation variant);
 
