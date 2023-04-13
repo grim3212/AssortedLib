@@ -11,7 +11,7 @@
     "issues": "${issue_tracker}"
   },
   "license": "${license}",
-  "icon": "icon.png",
+  "icon": "logo.png",
   "environment": "*",
   "entrypoints": {
     "main": [

@@ -3,7 +3,7 @@ loaderVersion = "[44,)"
 license = "${license}"
 logoBlur = false
 issueTrackerURL = "${issue_tracker}"
-logoFile = "icon.png"
+logoFile = "logo.png"
 [[mods]]
 modId = "${mod_id}"
 version = "${version}"
