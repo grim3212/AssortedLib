@@ -17,6 +17,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
@@ -101,7 +102,7 @@ public final class ForgeBakedModelDelegate implements BakedModel, IDelegatingBak
     }
 
     @Override
-    public @NotNull BakedModel applyTransform(final ItemTransforms.@NotNull TransformType transformType, final @NotNull PoseStack poseStack, final boolean applyLeftHandTransform) {
+    public @NotNull BakedModel applyTransform(final ItemDisplayContext transformType, final @NotNull PoseStack poseStack, final boolean applyLeftHandTransform) {
         return ClientServices.MODELS.adaptToPlatform(delegate.applyTransform(transformType, poseStack, applyLeftHandTransform));
     }
 

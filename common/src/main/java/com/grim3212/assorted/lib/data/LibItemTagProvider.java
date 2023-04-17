@@ -2,7 +2,6 @@ package com.grim3212.assorted.lib.data;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.data.tags.VanillaItemTagsProvider;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -15,7 +14,7 @@ import java.util.function.Function;
 
 public abstract class LibItemTagProvider extends VanillaItemTagsProvider {
 
-    public LibItemTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookup, TagsProvider<Block> blockTags) {
+    public LibItemTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookup, CompletableFuture<TagLookup<Block>> blockTags) {
         super(output, lookup, blockTags);
     }
 

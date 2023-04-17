@@ -38,7 +38,7 @@ public class SlotStorageHandler extends Slot {
     }
 
     @Override
-    public void initialize(ItemStack stack) {
+    public void setByPlayer(ItemStack stack) {
         this.getItemHandler().setStackInSlot(getContainerSlot(), stack);
         this.setChanged();
     }

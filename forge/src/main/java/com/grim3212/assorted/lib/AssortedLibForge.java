@@ -91,7 +91,7 @@ public class AssortedLibForge {
 
     private void registerCreativeTabs(final CreativeModeTabEvent.Register event) {
         for (ForgePlatformHelper.TabRegister tab : ForgePlatformHelper.tabsToRegister.values()) {
-            event.registerCreativeModeTab(tab.id(), builder -> builder.title(tab.title()).icon(tab.icon()).displayItems((enabledFlags, populator, hasPermissions) -> populator.acceptAll(tab.displayStacks().get())));
+            event.registerCreativeModeTab(tab.id(), builder -> builder.title(tab.title()).icon(tab.icon()).displayItems((displayParameters, output) -> output.acceptAll(tab.displayStacks().get())));
         }
     }
 
@@ -103,7 +103,7 @@ public class AssortedLibForge {
 
         ForgeBlockTagProvider blockTagProvider = new ForgeBlockTagProvider(packOutput, lookupProvider, fileHelper, LibConstants.MOD_ID, new LibCommonTagProvider.BlockTagProvider(packOutput, lookupProvider));
         datagenerator.addProvider(event.includeServer(), blockTagProvider);
-        datagenerator.addProvider(event.includeServer(), new ForgeItemTagProvider(packOutput, lookupProvider, blockTagProvider, fileHelper, LibConstants.MOD_ID, new LibCommonTagProvider.ItemTagProvider(packOutput, lookupProvider, blockTagProvider)));
+        datagenerator.addProvider(event.includeServer(), new ForgeItemTagProvider(packOutput, lookupProvider, blockTagProvider.contentsGetter(), fileHelper, LibConstants.MOD_ID, new LibCommonTagProvider.ItemTagProvider(packOutput, lookupProvider, blockTagProvider.contentsGetter())));
         datagenerator.addProvider(event.includeServer(), new ForgeBiomeTagProvider(packOutput, lookupProvider, fileHelper, LibConstants.MOD_ID, new LibCommonTagProvider.BiomeTagProvider(packOutput, lookupProvider)));
     }
 }

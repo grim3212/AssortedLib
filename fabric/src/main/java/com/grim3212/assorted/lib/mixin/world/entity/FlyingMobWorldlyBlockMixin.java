@@ -30,7 +30,7 @@ public abstract class FlyingMobWorldlyBlockMixin extends Mob {
     }
 
     private float assortedlib_handleInjectionPoint(final float current) {
-        final BlockPos pPos = new BlockPos(this.getX(), this.getY() - 1.0D, this.getZ());
+        final BlockPos pPos = new BlockPos(this.getBlockX(), this.getBlockY(), this.getBlockZ()).below();
         final BlockState blockState = this.level.getBlockState(pPos);
 
         if (blockState.getBlock() instanceof IBlockExtraProperties extraProperties) {
