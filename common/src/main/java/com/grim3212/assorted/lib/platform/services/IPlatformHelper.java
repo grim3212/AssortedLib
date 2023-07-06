@@ -7,7 +7,6 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -73,7 +72,7 @@ public interface IPlatformHelper {
 
     <T> ILoaderRegistry<T> getRegistry(ResourceKey<? extends Registry<T>> key);
 
-    void registerCreativeTab(ResourceLocation id, Component title, Supplier<ItemStack> icon, Supplier<List<ItemStack>> displayStacks);
+    void modifyCreativeTab(final ResourceKey<CreativeModeTab> key, Supplier<List<ItemStack>> displayStacks);
 
     void addReloadListener(ResourceLocation identifier, PreparableReloadListener reloadListener);
 

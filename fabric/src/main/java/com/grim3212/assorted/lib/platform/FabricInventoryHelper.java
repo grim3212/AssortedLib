@@ -25,7 +25,7 @@ import java.util.function.Function;
 public class FabricInventoryHelper implements IInventoryHelper {
     @Override
     public boolean canItemStacksStack(@NotNull ItemStack a, @NotNull ItemStack b) {
-        if (a.isEmpty() || !a.sameItem(b) || a.hasTag() != b.hasTag())
+        if (a.isEmpty() || !ItemStack.isSameItem(a, b) || a.hasTag() != b.hasTag())
             return false;
 
         return (!a.hasTag() || a.getTag().equals(b.getTag()));

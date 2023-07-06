@@ -3,7 +3,6 @@ package com.grim3212.assorted.lib.platform;
 import com.grim3212.assorted.lib.dist.Dist;
 import com.grim3212.assorted.lib.platform.services.IPlatformHelper;
 import com.grim3212.assorted.lib.registry.ILoaderRegistry;
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
@@ -98,9 +97,8 @@ public class FabricPlatformHelper implements IPlatformHelper {
     }
 
     @Override
-    public void registerCreativeTab(ResourceLocation id, Component title, Supplier<ItemStack> icon, Supplier<List<ItemStack>> displayStacks) {
-        CreativeModeTab createdTab = FabricItemGroup.builder(id).title(title).icon(icon).build();
-        ItemGroupEvents.modifyEntriesEvent(createdTab).register(populator -> {
+    public void modifyCreativeTab(ResourceKey<CreativeModeTab> key, Supplier<List<ItemStack>> displayStacks) {
+        ItemGroupEvents.modifyEntriesEvent(key).register(populator -> {
             populator.acceptAll(displayStacks.get());
         });
     }

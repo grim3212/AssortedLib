@@ -12,7 +12,7 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 
@@ -86,7 +86,7 @@ public class FabricLevelPropertyAccessor implements ILevelPropertyAccessor {
     }
 
     @Override
-    public MaterialColor getMapColor(BlockState state, BlockGetter level, BlockPos pos, MaterialColor defaultColor) {
+    public MapColor getMapColor(BlockState state, BlockGetter level, BlockPos pos, MapColor defaultColor) {
         if (state.getBlock() instanceof IBlockMapColor extraProperties) {
             return extraProperties.getMapColor(state, level, pos, defaultColor);
         }

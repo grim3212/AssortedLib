@@ -3,6 +3,7 @@ package com.grim3212.assorted.lib.mixin.world.entity;
 import com.grim3212.assorted.lib.core.block.IBlockExtraProperties;
 import com.grim3212.assorted.lib.core.block.IBlockSoundType;
 import com.grim3212.assorted.lib.core.block.effects.IBlockLandingEffects;
+import com.grim3212.assorted.lib.mixin.entity.EntityAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
@@ -32,11 +33,14 @@ public abstract class LivingEntityWorldlyBlockMixin extends Entity {
             slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getBlockPosBelowThatAffectsMyMovement()Lnet/minecraft/core/BlockPos;")),
             at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/world/level/block/Block;getFriction()F"), ordinal = 0
     )
-    private float assortedlib_rewriteFrictionValueForWorldlyBlocks(float original) { // shut, MCDev
+    private float assortedlib_rewriteFrictionValueForWorldlyBlocks(float original) {
+        if (!(this instanceof EntityAccessor entityAccessor))
+            return original;
+
         final BlockPos pos = this.getBlockPosBelowThatAffectsMyMovement();
-        final BlockState blockState = this.level.getBlockState(pos);
+        final BlockState blockState = entityAccessor.getLevel().getBlockState(pos);
         if (blockState.getBlock() instanceof IBlockExtraProperties extraProperties) {
-            return extraProperties.getFriction(blockState, this.level, pos, this);
+            return extraProperties.getFriction(blockState, entityAccessor.getLevel(), pos, this);
         }
 
         return original;
@@ -53,14 +57,17 @@ public abstract class LivingEntityWorldlyBlockMixin extends Entity {
             ordinal = 0
     )
     private SoundType assortedlib_injectGetBlockStateSoundType(final SoundType current) {
+        if (!(this instanceof EntityAccessor entityAccessor))
+            return current;
+
         int i = Mth.floor(this.getX());
         int j = Mth.floor(this.getY() - (double) 0.2F);
         int k = Mth.floor(this.getZ());
         final BlockPos pos = new BlockPos(i, j, k);
-        BlockState blockState = this.level.getBlockState(pos);
+        BlockState blockState = entityAccessor.getLevel().getBlockState(pos);
 
         if (blockState.getBlock() instanceof IBlockSoundType extraProperties) {
-            return extraProperties.getSoundType(blockState, level, pos, this);
+            return extraProperties.getSoundType(blockState, entityAccessor.getLevel(), pos, this);
         }
         return current;
     }
@@ -75,8 +82,11 @@ public abstract class LivingEntityWorldlyBlockMixin extends Entity {
             locals = LocalCapture.CAPTURE_FAILHARD,
             cancellable = true
     )
-    protected void assortedlib_checkFallEffects(double y, boolean onGround, BlockState state, BlockPos pos, CallbackInfo ci, float f, double d, int i) {
-        if (state.getBlock() instanceof IBlockLandingEffects extraProps && extraProps.addLandingEffects(state, (ServerLevel) level, pos, state, (LivingEntity) (Object) this, i)) {
+    protected void assortedlib_checkFallEffects(double y, boolean onGround, BlockState state, BlockPos pos, CallbackInfo ci, double d, double e, double f, BlockPos blockPos, float j, double k, int count) {
+        if (!(this instanceof EntityAccessor entityAccessor))
+            return;
+
+        if (state.getBlock() instanceof IBlockLandingEffects extraProps && extraProps.addLandingEffects(state, (ServerLevel) entityAccessor.getLevel(), pos, state, (LivingEntity) (Object) this, count)) {
             super.checkFallDamage(y, onGround, state, pos);
             ci.cancel();
         }

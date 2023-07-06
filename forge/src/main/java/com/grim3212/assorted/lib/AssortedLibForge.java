@@ -15,7 +15,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.event.AnvilUpdateEvent;
-import net.minecraftforge.event.CreativeModeTabEvent;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -35,7 +35,7 @@ public class AssortedLibForge {
         final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         modBus.addListener(this::gatherData);
         modBus.addListener(this::registerRecipeSerializers);
-        modBus.addListener(this::registerCreativeTabs);
+        modBus.addListener(this::modifyCreativeTabs);
 
         Services.EVENTS.registerEventType(UseBlockEvent.class, () -> {
             MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, (final PlayerInteractEvent.RightClickBlock event) -> {
@@ -73,7 +73,7 @@ public class AssortedLibForge {
 
         Services.EVENTS.registerEventType(LootTableModifyEvent.class, () -> {
             MinecraftForge.EVENT_BUS.addListener((final LootTableLoadEvent event) -> {
-                final LootTableModifyEvent newEvent = new LootTableModifyEvent(event.getLootTableManager(), event.getName(), new ForgeLootTableModificationContext(event.getTable()), true);
+                final LootTableModifyEvent newEvent = new LootTableModifyEvent(event.getTable(), event.getName(), new ForgeLootTableModificationContext(event.getTable()), true);
                 Services.EVENTS.handleEvents(newEvent);
             });
         });
@@ -89,9 +89,11 @@ public class AssortedLibForge {
         }
     }
 
-    private void registerCreativeTabs(final CreativeModeTabEvent.Register event) {
-        for (ForgePlatformHelper.TabRegister tab : ForgePlatformHelper.tabsToRegister.values()) {
-            event.registerCreativeModeTab(tab.id(), builder -> builder.title(tab.title()).icon(tab.icon()).displayItems((displayParameters, output) -> output.acceptAll(tab.displayStacks().get())));
+    private void modifyCreativeTabs(final BuildCreativeModeTabContentsEvent event) {
+        for (var tab : ForgePlatformHelper.tabsToRegister.entrySet()) {
+            if (event.getTabKey() == tab.getKey()) {
+                event.acceptAll(tab.getValue().get());
+            }
         }
     }
 

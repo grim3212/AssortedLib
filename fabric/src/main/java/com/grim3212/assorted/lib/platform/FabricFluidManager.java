@@ -25,7 +25,7 @@ import java.util.Optional;
 public class FabricFluidManager implements IFluidManager {
     @Override
     public Optional<FluidInformation> get(final ItemStack stack) {
-        final Storage<FluidVariant> target = FluidStorage.ITEM.find(stack, ContainerItemContext.withInitial(stack));
+        final Storage<FluidVariant> target = FluidStorage.ITEM.find(stack, ContainerItemContext.withConstant(stack));
         if (target == null)
             return Optional.empty();
 
@@ -50,7 +50,7 @@ public class FabricFluidManager implements IFluidManager {
 
             return contained.map(fluid -> {
                 final FluidVariant variant = makeVariant(fluid);
-                final ContainerItemContext containerContext = ContainerItemContext.withInitial(stack);
+                final ContainerItemContext containerContext = ContainerItemContext.withConstant(stack);
 
                 FluidStorage.ITEM.find(stack, containerContext).extract(variant, amount, context);
 
@@ -68,7 +68,7 @@ public class FabricFluidManager implements IFluidManager {
 
             return contained.map(fluid -> {
                 final FluidVariant variant = makeVariant(fluid);
-                final ContainerItemContext containerContext = ContainerItemContext.withInitial(stack);
+                final ContainerItemContext containerContext = ContainerItemContext.withConstant(stack);
 
                 FluidStorage.ITEM.find(stack, containerContext).insert(variant, fluidInformation.amount(), context);
 

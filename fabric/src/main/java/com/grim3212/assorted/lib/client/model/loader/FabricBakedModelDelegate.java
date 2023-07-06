@@ -96,8 +96,8 @@ public class FabricBakedModelDelegate implements BakedModel, IDelegatingBakedMod
     public void emitBlockQuads(
             final BlockAndTintGetter blockAndTintGetter, final BlockState blockState, final BlockPos blockPos, final Supplier<RandomSource> supplier, final RenderContext renderContext) {
         if (!(getDelegate() instanceof final IDataAwareBakedModel dataAwareBakedModel)) {
-            if (getDelegate() instanceof FabricBakedModel fabricBakedModel) {
-                fabricBakedModel.emitBlockQuads(blockAndTintGetter, blockState, blockPos, supplier, renderContext);
+            if (getDelegate() instanceof FabricBakedModel) {
+                ((FabricBakedModel) getDelegate()).emitBlockQuads(blockAndTintGetter, blockState, blockPos, supplier, renderContext);
             } else {
                 renderContext.fallbackConsumer().accept(getDelegate());
             }
@@ -155,8 +155,8 @@ public class FabricBakedModelDelegate implements BakedModel, IDelegatingBakedMod
     @Override
     public void emitItemQuads(final ItemStack itemStack, final Supplier<RandomSource> supplier, final RenderContext renderContext) {
         if (!(getDelegate() instanceof final IDataAwareBakedModel dataAwareBakedModel)) {
-            if (getDelegate() instanceof FabricBakedModel fabricBakedModel) {
-                fabricBakedModel.emitItemQuads(itemStack, supplier, renderContext);
+            if (getDelegate() instanceof FabricBakedModel) {
+                ((FabricBakedModel) getDelegate()).emitItemQuads(itemStack, supplier, renderContext);
             } else {
                 renderContext.fallbackConsumer().accept(getDelegate());
             }

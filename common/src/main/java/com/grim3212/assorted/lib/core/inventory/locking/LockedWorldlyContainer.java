@@ -3,8 +3,7 @@ package com.grim3212.assorted.lib.core.inventory.locking;
 import net.minecraft.core.Direction;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.item.ItemStack;
-
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public interface LockedWorldlyContainer extends WorldlyContainer {
 

@@ -65,7 +65,7 @@ public class FabricEventHelper implements IEventHelper {
         }));
 
         Services.EVENTS.registerEventType(LootTableModifyEvent.class, () -> LootTableEvents.MODIFY.register((resourceManager, lootManager, id, tableBuilder, source) -> {
-            final LootTableModifyEvent event = new LootTableModifyEvent(lootManager, id, new FabricLootTableModificationContext(tableBuilder), source.isBuiltin());
+            final LootTableModifyEvent event = new LootTableModifyEvent(lootManager.getLootTable(id), id, new FabricLootTableModificationContext(tableBuilder), source.isBuiltin());
             Services.EVENTS.handleEvents(event);
         }));
     }

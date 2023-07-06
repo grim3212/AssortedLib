@@ -8,12 +8,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.SignalGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
-
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public class ExtraPropertyBlock extends Block implements IBlockExtraProperties, IBlockSoundType, IBlockCloneStack, IBlockCanHarvest, IBlockLightEmission {
     public ExtraPropertyBlock(Properties props) {
@@ -21,8 +21,8 @@ public class ExtraPropertyBlock extends Block implements IBlockExtraProperties, 
     }
 
     @Override
-    public boolean shouldCheckWeakPower(BlockState state, LevelReader levelReader, BlockPos pos, Direction side) {
-        return state.isRedstoneConductor(levelReader, pos);
+    public boolean shouldCheckWeakPower(BlockState state, SignalGetter signalGetter, BlockPos pos, Direction side) {
+        return state.isRedstoneConductor(signalGetter, pos);
     }
 
     @Override

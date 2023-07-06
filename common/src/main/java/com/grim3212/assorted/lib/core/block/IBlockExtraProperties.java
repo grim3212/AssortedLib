@@ -6,9 +6,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.SignalGetter;
 import net.minecraft.world.level.block.state.BlockState;
-
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * From https://github.com/marchermans/Multi-Platform-Template
@@ -16,7 +16,7 @@ import javax.annotation.Nullable;
  */
 public interface IBlockExtraProperties {
 
-    boolean shouldCheckWeakPower(BlockState state, LevelReader levelReader, BlockPos pos, Direction side);
+    boolean shouldCheckWeakPower(BlockState state, SignalGetter signalGetter, BlockPos pos, Direction side);
 
     float getFriction(BlockState state, LevelReader levelReader, BlockPos pos, @Nullable Entity entity);
 

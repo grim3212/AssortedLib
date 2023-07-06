@@ -6,7 +6,6 @@ import com.grim3212.assorted.lib.registry.ILoaderRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -17,6 +16,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TieredItem;
 import net.minecraft.world.item.Tiers;
@@ -75,7 +75,7 @@ public class ForgePlatformHelper implements IPlatformHelper {
 
     @Override
     public double getPlayerReachDistance(Player player) {
-        return player.getReachDistance();
+        return player.getBlockReach();
     }
 
     @Override
@@ -97,17 +97,11 @@ public class ForgePlatformHelper implements IPlatformHelper {
         return ForgeRegistryWrapper.getRegistry(key);
     }
 
-    public static Map<ResourceLocation, TabRegister> tabsToRegister = new HashMap<>();
+    public static Map<ResourceKey<CreativeModeTab>, Supplier<List<ItemStack>>> tabsToRegister = new HashMap<>();
 
     @Override
-    public void registerCreativeTab(ResourceLocation id, Component title, Supplier<ItemStack> icon, Supplier<List<ItemStack>> displayStacks) {
-        tabsToRegister.put(id, new TabRegister(id, title, icon, displayStacks));
-    }
-
-    public record TabRegister(ResourceLocation id,
-                              Component title,
-                              Supplier<ItemStack> icon,
-                              Supplier<List<ItemStack>> displayStacks) {
+    public void modifyCreativeTab(ResourceKey<CreativeModeTab> key, Supplier<List<ItemStack>> displayStacks) {
+        tabsToRegister.put(key, displayStacks);
     }
 
     @Override

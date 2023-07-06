@@ -18,14 +18,17 @@
     "world.item.ItemStackMixin",
     "world.item.enchantment.EnchantmentHelperMixin",
     "world.item.enchantment.EnchantmentMixin",
+    "world.level.BlockBehaviourPropertiesMixin",
     "world.level.BlockBehaviourWorldlyBlockMixin",
     "world.level.BlockGetterWorldlyBlockMixin",
     "world.level.ExplosionDamageCalculatorWorldlyBlockMixin",
     "world.level.LevelWorldlyBlockMixin",
     "world.level.ServerPlayerGameModeMixin",
-    "world.level.chunk.LevelChunkWorldlyBlockMixin",
-    "world.level.chunk.ProtoChunkWorldlyBlockMixin",
-    "world.level.chunk.storage.ChunkSerializerWorldlyBlockMixin"
+    "world.level.SignalGetterMixin",
+    "world.level.lighting.BlockLightEngineMixin",
+    "world.level.lighting.LayerLightSectionStorageAccessor",
+    "world.level.lighting.LightEngineAccessor",
+    "world.level.lighting.LightEngineMixin"
   ],
   "client": [
     "client.model.BlockModelAccessorMixin",

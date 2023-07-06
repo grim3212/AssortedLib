@@ -283,7 +283,7 @@ public class ForgeClientHelper implements IClientHelper {
         @SubscribeEvent
         public void registerParticles(final RegisterParticleProvidersEvent event) {
             for (Map.Entry<Supplier<ParticleType<?>>, Function<SpriteSet, ParticleProvider<?>>> entry : particleProviders.entrySet()) {
-                event.register((ParticleType<ParticleOptions>) entry.getKey().get(), sprites -> (ParticleProvider<ParticleOptions>) entry.getValue().apply(sprites));
+                event.registerSpriteSet((ParticleType<ParticleOptions>) entry.getKey().get(), sprites -> (ParticleProvider<ParticleOptions>) entry.getValue().apply(sprites));
             }
         }
     }

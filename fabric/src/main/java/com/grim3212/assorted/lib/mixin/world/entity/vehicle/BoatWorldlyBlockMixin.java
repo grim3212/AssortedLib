@@ -1,6 +1,7 @@
 package com.grim3212.assorted.lib.mixin.world.entity.vehicle;
 
 import com.grim3212.assorted.lib.core.block.IBlockExtraProperties;
+import com.grim3212.assorted.lib.mixin.entity.EntityAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -65,8 +66,11 @@ public abstract class BoatWorldlyBlockMixin extends Entity {
             ordinal = 0
     )
     private float assortedlib_injectGetFrictionAdaptorForState(final float current) {
+        if (!(this instanceof EntityAccessor entityAccessor))
+            return current;
+
         if (this.workingState.getBlock() instanceof IBlockExtraProperties extraProperties) {
-            return extraProperties.getFriction(this.workingState, this.level, this.workingPos, this);
+            return extraProperties.getFriction(this.workingState, entityAccessor.getLevel(), this.workingPos, this);
         }
 
         return current;

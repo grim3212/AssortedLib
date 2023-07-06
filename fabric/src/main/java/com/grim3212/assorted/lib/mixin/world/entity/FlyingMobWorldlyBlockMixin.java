@@ -1,6 +1,7 @@
 package com.grim3212.assorted.lib.mixin.world.entity;
 
 import com.grim3212.assorted.lib.core.block.IBlockExtraProperties;
+import com.grim3212.assorted.lib.mixin.entity.EntityAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.FlyingMob;
@@ -30,11 +31,14 @@ public abstract class FlyingMobWorldlyBlockMixin extends Mob {
     }
 
     private float assortedlib_handleInjectionPoint(final float current) {
+        if (!(this instanceof EntityAccessor entityAccessor))
+            return current;
+
         final BlockPos pPos = new BlockPos(this.getBlockX(), this.getBlockY(), this.getBlockZ()).below();
-        final BlockState blockState = this.level.getBlockState(pPos);
+        final BlockState blockState = entityAccessor.getLevel().getBlockState(pPos);
 
         if (blockState.getBlock() instanceof IBlockExtraProperties extraProperties) {
-            return extraProperties.getFriction(blockState, this.level, pPos, this) * 0.91f;
+            return extraProperties.getFriction(blockState, entityAccessor.getLevel(), pPos, this) * 0.91f;
         }
         return current;
     }

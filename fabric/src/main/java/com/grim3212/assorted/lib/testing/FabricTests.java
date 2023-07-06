@@ -8,7 +8,8 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
+import net.minecraft.world.level.material.MapColor;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -18,7 +19,7 @@ public class FabricTests {
     public static final RegistryProvider<Block> BLOCKS = RegistryProvider.create(Registries.BLOCK, LibConstants.MOD_ID);
     public static final RegistryProvider<Item> ITEMS = RegistryProvider.create(Registries.ITEM, LibConstants.MOD_ID);
 
-    public static final IRegistryObject<BlockBreakCancelTest> blockBreakTest = register("test", () -> new BlockBreakCancelTest(BlockBehaviour.Properties.of(Material.STONE)));
+    public static final IRegistryObject<BlockBreakCancelTest> blockBreakTest = register("test", () -> new BlockBreakCancelTest(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM)));
 
     private static <T extends Block> IRegistryObject<T> register(String name, Supplier<? extends T> sup) {
         return register(name, sup, block -> item(block));

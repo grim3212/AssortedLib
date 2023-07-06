@@ -85,7 +85,7 @@ public class LibFluidIngredient {
                     ItemStack stack = new ItemStack(itm);
                     Services.FLUIDS.get(stack).ifPresent((itemFluid) -> {
                         if (itemFluid.fluid().isSame(fluid) && itemFluid.amount() >= Services.FLUIDS.getBucketAmount()) {
-                            if (this.itemStacks.stream().noneMatch(i -> ItemStack.isSame(i, stack))) {
+                            if (this.itemStacks.stream().noneMatch(i -> ItemStack.matches(i, stack))) {
                                 this.itemStacks.add(stack);
                             }
                         }

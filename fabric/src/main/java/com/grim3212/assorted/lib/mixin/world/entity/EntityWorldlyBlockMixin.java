@@ -23,9 +23,6 @@ public abstract class EntityWorldlyBlockMixin {
     public Level level;
 
     @Shadow
-    public abstract Level getLevel();
-
-    @Shadow
     public abstract void playSound(final SoundEvent sound, final float volume, final float pitch);
 
     private Entity getThis() {
@@ -41,7 +38,7 @@ public abstract class EntityWorldlyBlockMixin {
             cancellable = true
     )
     public void assortedlib_redirectGetOffsetBlockStateSoundType(BlockPos pos, BlockState state, CallbackInfo ci) {
-        if (!state.getMaterial().isLiquid()) {
+        if (!state.liquid()) {
             BlockState blockState = this.level.getBlockState(pos.above());
             blockState = blockState.is(BlockTags.INSIDE_STEP_SOUND_BLOCKS) ? blockState : state;
 
@@ -62,7 +59,7 @@ public abstract class EntityWorldlyBlockMixin {
             locals = LocalCapture.CAPTURE_FAILHARD,
             cancellable = true
     )
-    public void assortedlib_spawnSprintParticle(CallbackInfo ci, int i, int j, int k, BlockPos blockPos) {
+    public void assortedlib_spawnSprintParticle(CallbackInfo ci, BlockPos blockPos) {
         BlockState state = this.level.getBlockState(blockPos);
         if (state.getBlock() instanceof IBlockRunningEffects extraProperties && extraProperties.addRunningEffects(state, level, blockPos, (Entity) (Object) this)) {
             ci.cancel();
