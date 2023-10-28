@@ -2,19 +2,17 @@ package com.grim3212.assorted.lib.core.inventory.slot;
 
 import com.grim3212.assorted.lib.core.inventory.IItemStorageHandler;
 import com.grim3212.assorted.lib.core.inventory.locking.LockedStorageHandler;
-import net.minecraft.world.Container;
-import net.minecraft.world.SimpleContainer;
+import com.grim3212.assorted.lib.platform.Services;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class SlotStorageHandler extends Slot {
-    private static Container emptyInventory = new SimpleContainer(0);
     private final IItemStorageHandler itemHandler;
 
     public SlotStorageHandler(IItemStorageHandler itemHandler, int slotIndex, int xPosition, int yPosition) {
-        super(emptyInventory, slotIndex, xPosition, yPosition);
+        super(Services.INVENTORY.wrapStorageHandler(itemHandler), slotIndex, xPosition, yPosition);
         this.itemHandler = itemHandler;
     }
 

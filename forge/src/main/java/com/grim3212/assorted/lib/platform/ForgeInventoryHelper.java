@@ -10,6 +10,8 @@ import com.grim3212.assorted.lib.inventory.ForgePlatformInventoryStorageHandlerU
 import com.grim3212.assorted.lib.inventory.ForgeWrappedItemHandler;
 import com.grim3212.assorted.lib.platform.services.IInventoryHelper;
 import net.minecraft.core.Direction;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
@@ -86,5 +88,13 @@ public class ForgeInventoryHelper implements IInventoryHelper {
     @Override
     public IPlatformInventoryStorageHandler createSidedStorageInventoryHandler(Function<Direction, IItemStorageHandler> handler) {
         return new ForgePlatformInventoryStorageHandlerSided(handler);
+    }
+
+    private static Container emptyInventory = new SimpleContainer(0);
+
+    @Override
+    public Container wrapStorageHandler(IItemStorageHandler handler) {
+        // Forge should work without needing any Vanilla containers
+        return emptyInventory;
     }
 }
