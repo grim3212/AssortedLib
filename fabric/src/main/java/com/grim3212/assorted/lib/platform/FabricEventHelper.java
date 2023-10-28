@@ -2,6 +2,7 @@ package com.grim3212.assorted.lib.platform;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.grim3212.assorted.lib.LibConstants;
 import com.grim3212.assorted.lib.events.FabricLootTableModificationContext;
 import com.grim3212.assorted.lib.events.GenericEvent;
 import com.grim3212.assorted.lib.events.LootTableModifyEvent;
@@ -44,6 +45,8 @@ public class FabricEventHelper implements IEventHelper {
         Runnable initializer = eventInits.remove(eventType);
         if (initializer != null) {
             initializer.run();
+        } else {
+            LibConstants.LOG.error("Could not find event initializer for " + eventType.getName());
         }
         eventHandlers.put(eventType, handler);
     }
