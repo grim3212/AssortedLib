@@ -1,0 +1,122 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev' version "${moddev_version}"
+    id 'maven-publish'
+    id 'idea'
+}
+
+base.archivesName = "${mod_id}-neoforge-${minecraft_version}"
+
+neoForge {
+    version = project.neoforge_version
+
+    if (project.hasProperty('neoforge_ats_enabled') && project.findProperty('neoforge_ats_enabled').toBoolean()) {
+        accessTransformers.from('src/main/resources/META-INF/accesstransformer.cfg')
+    }
+
+    // NeoForge has shipped official mappings at runtime since 1.20.5, so mixin refmaps
+    // are no longer generated or needed. mixingradle is gone with them.
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+            sourceSet project(":common").sourceSets.main
+        }
+    }
+
+    runs {
+        client {
+            client()
+            gameDirectory = project.file('run')
+        }
+
+        server {
+            server()
+            gameDirectory = project.file('run')
+            programArgument '--nogui'
+        }
+
+        data {
+            clientData()
+            gameDirectory = project.file('run')
+            programArguments.addAll '--mod', mod_id, '--all',
+                    '--output', file('../common/src/generated/resources/').getAbsolutePath(),
+                    '--existing', file('../common/src/main/resources/').getAbsolutePath()
+        }
+
+        configureEach {
+            jvmArgument '-XX:+AllowEnhancedClassRedefinition'
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
+    }
+}
+
+sourceSets.main.resources {
+    srcDir 'src/generated/resources'
+    srcDir '../common/src/generated/resources'
+    exclude 'src/generated/**/.cache'
+}
+
+dependencies {
+    compileOnly project(":common")
+}
+
+tasks.withType(JavaCompile).configureEach {
+    source(project(":common").sourceSets.main.allSource)
+}
+
+// neoforge.mods.toml is templated out of src/main/templates, matching the modern MDK layout.
+tasks.register('generateModMetadata', ProcessResources) {
+    var replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neoforge_version       : neoforge_version,
+            neoforge_version_range : neoforge_version_range,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_author             : mod_author,
+            mod_description        : mod_description,
+            issue_tracker          : issue_tracker,
+            license                : license,
+            version                : version,
+    ]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from 'src/main/templates'
+    into "${layout.buildDirectory.get()}/generated/sources/modMetadata"
+}
+sourceSets.main.resources.srcDir tasks.named('generateModMetadata')
+neoForge.ideSyncTask tasks.named('generateModMetadata')
+
+processResources {
+    from project(":common").sourceSets.main.resources
+    duplicatesStrategy(DuplicatesStrategy.FAIL)
+    exclude 'pack.mcmeta'
+    exclude '.cache'
+    exclude "${mod_id}_common.accesswidener"
+}
+
+// pack.mcmeta needs the mod name expanded, so it is handled separately from the bulk copy above.
+tasks.register('copyPackMeta', Copy) {
+    from(project(":common").sourceSets.main.resources) {
+        include 'pack.mcmeta'
+        expand 'mod_name': mod_name
+    }
+    into "${layout.buildDirectory.get()}/resources/main/"
+}
+processResources.finalizedBy('copyPackMeta')
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId project.group
+            artifactId project.base.archivesName.get()
+            version project.version
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url "file://" + System.getenv("local_maven")
+        }
+    }
+}

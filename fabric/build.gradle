@@ -1,20 +1,16 @@
 plugins {
-    id 'fabric-loom' version '1.0-SNAPSHOT'
+    id 'fabric-loom' version "${loom_version}"
     id 'maven-publish'
     id 'idea'
-    id 'com.matthewprenger.cursegradle' version '1.4.0'
 }
 
-group = "${group}"
-version = "${version}"
-archivesBaseName = "${mod_id}-fabric-${minecraft_version}"
+base.archivesName = "${mod_id}-fabric-${minecraft_version}"
 
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"
-    mappings(loom.layered {
-        officialMojangMappings()
-        parchment("org.parchmentmc.data:parchment-${parchment_mc_version}:${parchment_version}@zip")
-    })
+    // Parchment has not published mappings for 26.x, so this is plain official Mojang mappings.
+    mappings loom.officialMojangMappings()
+
     modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
@@ -23,7 +19,12 @@ dependencies {
 
 loom {
     accessWidenerPath = file("src/main/resources/${mod_id}_fabric.accesswidener")
-    mixin.defaultRefmapName = "${mod_id}.refmap.json"
+
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
 
     runs {
         client {
@@ -31,16 +32,18 @@ loom {
             setConfigName("Fabric Client")
             ideConfigGenerated(true)
             runDir("run")
+            vmArg("-XX:+AllowEnhancedClassRedefinition")
         }
         server {
             server()
             setConfigName("Fabric Server")
             ideConfigGenerated(true)
             runDir("run")
+            vmArg("-XX:+AllowEnhancedClassRedefinition")
         }
         datagenClient {
             inherit client
-            name "Data Generation"
+            name "Fabric Datagen"
             vmArg "-Dfabric-api.datagen"
             vmArg "-Dfabric-api.datagen.output-dir=${file("src/generated/resources/")}"
             vmArg "-Dfabric-api.datagen.modid=${mod_id}"
@@ -50,7 +53,7 @@ loom {
 }
 
 sourceSets {
-    main.resources.srcDirs += ['src/generated/resources']
+    main.resources.srcDirs += ['src/generated/resources', '../common/src/generated/resources']
 }
 
 processResources {
@@ -67,35 +70,27 @@ processResources {
         expand 'mod_name': project.mod_name
     }
 
-    filesMatching('*.mixins.json') {
-        expand "refmap_target": "${archivesBaseName}-"
-    }
-
     // Exclude datagenerator .cache directory
     exclude '.cache'
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     source(project(":common").sourceSets.main.allSource)
 }
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifactId = mod_id + "-fabric"
-            version = project.version + "+" + minecraft_version
-
+            groupId project.group
+            artifactId project.base.archivesName.get()
+            version project.version
             from components.java
         }
     }
 
     repositories {
         maven {
-            url "https://maven.grimoid.com/mods"
-            credentials(PasswordCredentials)
-            authentication {
-                basic(BasicAuthentication)
-            }
+            url "file://" + System.getenv("local_maven")
         }
     }
 }
