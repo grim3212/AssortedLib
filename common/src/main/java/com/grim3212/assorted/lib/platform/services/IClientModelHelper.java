@@ -4,7 +4,7 @@ import com.grim3212.assorted.lib.client.model.data.IBlockModelData;
 import com.grim3212.assorted.lib.client.model.data.IModelDataBuilder;
 import com.grim3212.assorted.lib.client.model.data.IModelDataKey;
 import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
@@ -65,14 +65,14 @@ public interface IClientModelHelper {
 
 
     /**
-     * Adapts a given baked model to the current platform.
-     * Adaptation might not be necessary in all cases, but this method allows the underlying platform to adapt a default vanilla {@link BakedModel},
+     * Adapts a given block state model to the current platform.
+     * Adaptation might not be necessary in all cases, but this method allows the underlying platform to adapt a default vanilla {@link BlockStateModel},
      * to platform specific implementations, unlocking additional functionality.
      *
-     * @param bakedModel The baked model to adapt.
+     * @param model The model to adapt.
      * @return The adapted model.
      */
-    BakedModel adaptToPlatform(final BakedModel bakedModel);
+    BlockStateModel adaptToPlatform(final BlockStateModel model);
 
     /**
      * Indicates if the blockstate needs to be rendered in the render type.
@@ -102,18 +102,19 @@ public interface IClientModelHelper {
      * @return The render types for the given block state, data and model.
      */
     @NotNull
-    Collection<RenderType> getRenderTypesFor(BakedModel model, BlockState state, RandomSource rand, IBlockModelData data);
+    Collection<RenderType> getRenderTypesFor(BlockStateModel model, BlockState state, RandomSource rand, IBlockModelData data);
 
-    /**
-     * Retrieves the {@linkplain RenderType render types} for the given model, itemstack and if we are running in fabulous or not.
-     *
-     * @param model      The model to get the types for.
-     * @param stack      The stack to get the types for.
-     * @param isFabulous True when fabulous is enabled, false when not.
-     * @return The render types for the given block state, data and model.
-     */
-    @NotNull
-    Collection<RenderType> getRenderTypesFor(BakedModel model, ItemStack stack, boolean isFabulous);
+    // TODO(26.2): the item-side getRenderTypesFor(model, stack, isFabulous) has no equivalent and is
+    //  removed rather than stubbed.
+    //  What it used to do: asked a BakedModel which RenderTypes it would draw an ItemStack in, so
+    //  callers could pre-sort or re-render those passes themselves.
+    //  Why it cannot be expressed: item rendering is push-only now. An ItemModel does not report its
+    //  render types; ItemModel#update mutates an ItemStackRenderState, and each
+    //  ItemStackRenderState.LayerRenderState carries its own RenderType internally as a write-only
+    //  sink. The render types therefore only exist for the duration of one update() call. A caller
+    //  that genuinely needs them must run update() against its own ItemStackRenderState and read the
+    //  resulting layers, which is a different shape and belongs at the call site. "Fabulous" is also
+    //  no longer a per-item rendering distinction.
 
     RenderType getItemUnlitUnsortedTranslucentRenderType();
 
