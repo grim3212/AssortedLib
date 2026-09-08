@@ -2,23 +2,34 @@ package com.grim3212.assorted.lib.inventory;
 
 import com.grim3212.assorted.lib.core.inventory.IItemStorageHandler;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandlerModifiable;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.SnapshotJournal;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * TODO(26.2): {@link IItemHandlerModifiable} (and {@link net.neoforged.neoforge.items.IItemHandler}
- * as a whole) is deprecated for removal in favour of NeoForge's transfer API - the item handler
- * capabilities are {@code BlockCapability<ResourceHandler<ItemResource>, Direction>} now
- * ({@code Capabilities.Item.BLOCK} / {@code .ENTITY} / {@code .ITEM}), and there is only an adapter
- * in the {@code ResourceHandler -> IItemHandler} direction ({@code IItemHandler.of}), not back.
- * Exposing an {@link IItemStorageHandler} as a capability therefore has to go through a real
- * {@code ResourceHandler<ItemResource>} implementation with transaction support, which is a redesign
- * of {@code IItemStorageHandler} rather than a rename; the deprecated interface is kept here so the
- * existing behaviour is preserved until that happens.
+ * Exposes an {@link IItemStorageHandler} as NeoForge's {@link ResourceHandler}, the type behind
+ * {@code Capabilities.Item.*}.
+ * <p>
+ * {@code IItemHandler} is deprecated for removal and is deliberately not used anywhere here. The
+ * two models differ in more than naming: a {@link ResourceHandler} works in terms of an
+ * {@link ItemResource} (an item plus its component patch, with no count) and an explicit amount,
+ * and every mutation takes part in a {@link TransactionContext} that may later be rolled back,
+ * where the old interface used a {@code simulate} flag.
+ * <p>
+ * Rollback is provided by snapshotting the backing slots through a {@link SnapshotJournal}. The
+ * whole slot list is copied per transaction rather than tracking individual slots; the handlers
+ * this wraps are machine inventories of a few slots, so the simplicity is worth more than the
+ * saved copies.
  */
-public class ForgeItemStorageHandler implements IItemHandlerModifiable {
+public class ForgeItemStorageHandler implements ResourceHandler<ItemResource> {
 
     private final IItemStorageHandler storage;
+    private final SlotJournal journal = new SlotJournal();
 
     public ForgeItemStorageHandler(@NotNull IItemStorageHandler storage) {
         this.storage = storage;
@@ -29,37 +40,71 @@ public class ForgeItemStorageHandler implements IItemHandlerModifiable {
     }
 
     @Override
-    public void setStackInSlot(int slot, @NotNull ItemStack stack) {
-        this.storage.setStackInSlot(slot, stack);
-    }
-
-    @Override
-    public int getSlots() {
+    public int size() {
         return this.storage.getSlots();
     }
 
     @Override
-    public @NotNull ItemStack getStackInSlot(int slot) {
-        return this.storage.getStackInSlot(slot);
+    public ItemResource getResource(int index) {
+        return ItemResource.of(this.storage.getStackInSlot(index));
     }
 
     @Override
-    public @NotNull ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
-        return this.storage.insertItem(slot, stack, simulate);
+    public long getAmountAsLong(int index) {
+        return this.storage.getStackInSlot(index).getCount();
     }
 
     @Override
-    public @NotNull ItemStack extractItem(int slot, int amount, boolean simulate) {
-        return this.storage.extractItem(slot, amount, simulate);
+    public long getCapacityAsLong(int index, ItemResource resource) {
+        return this.storage.getSlotLimit(index);
     }
 
     @Override
-    public int getSlotLimit(int slot) {
-        return this.storage.getSlotLimit(slot);
+    public boolean isValid(int index, ItemResource resource) {
+        return this.storage.isItemValid(index, resource.toStack(1));
     }
 
     @Override
-    public boolean isItemValid(int slot, @NotNull ItemStack stack) {
-        return this.storage.isItemValid(slot, stack);
+    public int insert(int index, ItemResource resource, int amount, TransactionContext transaction) {
+        if (resource.isEmpty() || amount <= 0) {
+            return 0;
+        }
+
+        this.journal.updateSnapshots(transaction);
+        ItemStack remainder = this.storage.insertItem(index, resource.toStack(amount), false);
+        return amount - remainder.getCount();
+    }
+
+    @Override
+    public int extract(int index, ItemResource resource, int amount, TransactionContext transaction) {
+        if (resource.isEmpty() || amount <= 0 || !resource.matches(this.storage.getStackInSlot(index))) {
+            return 0;
+        }
+
+        this.journal.updateSnapshots(transaction);
+        return this.storage.extractItem(index, amount, false).getCount();
+    }
+
+    /**
+     * Copies every slot on the first mutation inside a transaction and restores them if that
+     * transaction is rolled back.
+     */
+    private final class SlotJournal extends SnapshotJournal<List<ItemStack>> {
+
+        @Override
+        protected List<ItemStack> createSnapshot() {
+            List<ItemStack> snapshot = new ArrayList<>(storage.getSlots());
+            for (int slot = 0; slot < storage.getSlots(); slot++) {
+                snapshot.add(storage.getStackInSlot(slot).copy());
+            }
+            return snapshot;
+        }
+
+        @Override
+        protected void revertToSnapshot(List<ItemStack> snapshot) {
+            for (int slot = 0; slot < snapshot.size(); slot++) {
+                storage.setStackInSlot(slot, snapshot.get(slot));
+            }
+        }
     }
 }

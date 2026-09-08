@@ -7,27 +7,23 @@ import com.grim3212.assorted.lib.client.model.loaders.IModelSpecificationLoader;
 import com.grim3212.assorted.lib.client.render.IBEWLR;
 import com.grim3212.assorted.lib.client.screen.LibScreenFactory;
 import com.grim3212.assorted.lib.platform.services.IClientHelper;
-import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.block.BlockColors;
-import net.minecraft.client.color.item.ItemColor;
-import net.minecraft.client.color.item.ItemColors;
-import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.color.block.BlockTintSource;
+import net.minecraft.client.color.item.ItemTintSource;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SpriteSet;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
-import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.Identifier;
@@ -37,20 +33,29 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.client.event.*;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.ModelEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
+import net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent;
+import net.neoforged.neoforge.common.NeoForge;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -59,30 +64,38 @@ import java.util.function.Supplier;
 public class ForgeClientHelper implements IClientHelper {
 
     private static final Map<String, Registrations> registrationsMap = Maps.newConcurrentMap();
-    private static final Map<Item, BlockEntityWithoutLevelRenderer> bewlrs = Maps.newConcurrentMap();
+
+    // Key mapping categories are shared state on one event instance, so a category may only be
+    // registered once no matter how many mods asked for it.
+    private static final Set<Identifier> registeredCategories = Collections.synchronizedSet(new HashSet<>());
 
     @Override
     public <T extends AbstractContainerMenu, S extends Screen & MenuAccess<T>> void registerScreen(Supplier<MenuType<? extends T>> menuType, LibScreenFactory<T, S> factory) {
         getRegistration().menuTypes.put(menuType::get, factory);
     }
 
+    // TODO(26.2): extra models can no longer be requested by plain identifier. ModelEvent
+    //  .RegisterAdditional is gone; its replacement, ModelEvent.RegisterStandalone, is keyed by a
+    //  StandaloneModelKey<T> that the requester creates and then reads back with
+    //  ModelManager#getStandaloneModel(key) - the model is no longer reachable by the id it was
+    //  loaded from. Honouring this would mean handing the caller a key back, which is a common side
+    //  interface change, so the request is dropped rather than silently half-implemented.
     @Override
     public void registerAdditionalModel(List<Identifier> modelLocations) {
-        getRegistration().extraModels.addAll(modelLocations);
     }
 
     @Override
     public void addReloadListener(Identifier identifier, PreparableReloadListener reloadListener) {
-        getRegistration().clientReloadListeners.add(reloadListener);
+        getRegistration().clientReloadListeners.put(identifier, reloadListener);
     }
 
     @Override
     public void registerBEWLR(final Consumer<IBEWLR> register) {
-        getRegistration().blockEntityWithoutLevelInitializers.add(register);
+        getRegistration().specialModelRendererInitializers.add(register);
     }
 
     @Override
-    public <E extends BlockEntity> void registerBlockEntityRenderer(Supplier<? extends BlockEntityType<? extends E>> entityType, BlockEntityRendererProvider<E> entityRendererFactory) {
+    public <E extends BlockEntity, S extends BlockEntityRenderState> void registerBlockEntityRenderer(Supplier<? extends BlockEntityType<? extends E>> entityType, BlockEntityRendererProvider<E, S> entityRendererFactory) {
         getRegistration().blockEntityRenderers.put((Supplier<BlockEntityType<?>>) (Supplier<? extends BlockEntityType<?>>) entityType, entityRendererFactory);
     }
 
@@ -97,13 +110,13 @@ public class ForgeClientHelper implements IClientHelper {
     }
 
     @Override
-    public void registerBlockColor(BlockColor color, Supplier<List<Block>> blocks) {
+    public void registerBlockColor(BlockTintSource color, Supplier<List<Block>> blocks) {
         getRegistration().blockColors.put(color, blocks);
     }
 
     @Override
-    public void registerItemColor(ItemColor color, Supplier<List<Item>> items) {
-        getRegistration().itemColors.put(color, items);
+    public void registerItemTintSource(Identifier id, MapCodec<? extends ItemTintSource> source) {
+        getRegistration().itemTintSources.put(id, source);
     }
 
     @Override
@@ -112,23 +125,16 @@ public class ForgeClientHelper implements IClientHelper {
     }
 
     @Override
-    public ItemColors getItemColors() {
-        return Minecraft.getInstance().getItemColors();
-    }
-
-    @Override
     public void registerModelLoader(Identifier name, IModelSpecificationLoader<?> modelLoader) {
         getRegistration().modelLoaders.put(name, modelLoader);
     }
 
-    @Override
-    public void registerItemProperty(Supplier<Item> item, Identifier location, ClampedItemPropertyFunction itemPropertyFunction) {
-        getRegistration().itemProperties.put(item, Pair.of(location, itemPropertyFunction));
-    }
-
+    // TODO(26.2): a block's render layer can no longer be set from code. ItemBlockRenderTypes is
+    //  gone; the pass a block draws in is a ChunkSectionLayer derived per quad from the transparency
+    //  of the sprite the model uses (see BakedQuad.MaterialInfo#of), so it is decided by the model's
+    //  textures and by "render_type" in the model json, not by a registration.
     @Override
     public void registerRenderType(Supplier<Block> block, RenderType renderType) {
-        getRegistration().renderTypes.put(block, renderType);
     }
 
     @Override
@@ -138,20 +144,13 @@ public class ForgeClientHelper implements IClientHelper {
 
     @Override
     public void registerClientTickStart(ClientTickHandler handler) {
-        MinecraftForge.EVENT_BUS.addListener((TickEvent.ClientTickEvent orig) -> {
-            if (orig.phase == TickEvent.Phase.START) {
-                handler.handle(Minecraft.getInstance());
-            }
-        });
+        // TickEvent.ClientTickEvent with a phase became two separate events.
+        NeoForge.EVENT_BUS.addListener((ClientTickEvent.Pre event) -> handler.handle(Minecraft.getInstance()));
     }
 
     @Override
     public void registerClientTickEnd(ClientTickHandler handler) {
-        MinecraftForge.EVENT_BUS.addListener((TickEvent.ClientTickEvent orig) -> {
-            if (orig.phase == TickEvent.Phase.END) {
-                handler.handle(Minecraft.getInstance());
-            }
-        });
+        NeoForge.EVENT_BUS.addListener((ClientTickEvent.Post event) -> handler.handle(Minecraft.getInstance()));
     }
 
     @Override
@@ -165,41 +164,37 @@ public class ForgeClientHelper implements IClientHelper {
     }
 
     public static Registrations getRegistration() {
-        String modId = ModLoadingContext.get().getActiveContainer().getModId();
+        final var container = ModLoadingContext.get().getActiveContainer();
+        final String modId = container.getModId();
         if (registrationsMap.containsKey(modId)) {
             return registrationsMap.get(modId);
         } else {
             Registrations newRegistration = new Registrations();
             registrationsMap.put(modId, newRegistration);
-            FMLJavaModLoadingContext.get().getModEventBus().register(newRegistration);
+            // FMLJavaModLoadingContext is gone; every container hands out its own event bus.
+            container.getEventBus().register(newRegistration);
             return newRegistration;
         }
     }
 
-    public static Optional<BlockEntityWithoutLevelRenderer> getRenderer(Item item) {
-        return Optional.ofNullable(bewlrs.get(item));
-    }
-
     public static class Registrations {
-        private final Map<Supplier<BlockEntityType<?>>, BlockEntityRendererProvider<?>> blockEntityRenderers = new HashMap<>();
+        private final Map<Supplier<BlockEntityType<?>>, BlockEntityRendererProvider<?, ?>> blockEntityRenderers = new HashMap<>();
         private final Map<Supplier<EntityType<?>>, EntityRendererProvider<?>> entityRenderers = new HashMap<>();
         private final Map<ModelLayerLocation, Supplier<LayerDefinition>> entityLayers = new HashMap<>();
-        private final Map<BlockColor, Supplier<List<Block>>> blockColors = new HashMap<>();
-        private final Map<ItemColor, Supplier<List<Item>>> itemColors = new HashMap<>();
-        private final Map<Supplier<Item>, Pair<Identifier, ClampedItemPropertyFunction>> itemProperties = new HashMap<>();
-        private final Map<Supplier<Block>, RenderType> renderTypes = new HashMap<>();
+        private final Map<BlockTintSource, Supplier<List<Block>>> blockColors = new HashMap<>();
+        private final Map<Identifier, MapCodec<? extends ItemTintSource>> itemTintSources = new HashMap<>();
         private final List<KeyMapping> keyMappings = new ArrayList<>();
-        private final List<Identifier> extraModels = new ArrayList<>();
-        private final List<Consumer<IBEWLR>> blockEntityWithoutLevelInitializers = Collections.synchronizedList(new ArrayList<>());
-        private final List<PreparableReloadListener> clientReloadListeners = new ArrayList<>();
+        private final List<Consumer<IBEWLR>> specialModelRendererInitializers = Collections.synchronizedList(new ArrayList<>());
+        private final Map<Identifier, PreparableReloadListener> clientReloadListeners = new HashMap<>();
         private final Map<Identifier, IModelSpecificationLoader<?>> modelLoaders = new HashMap<>();
         private final Map<Supplier<ParticleType<?>>, Function<SpriteSet, ParticleProvider<?>>> particleProviders = new HashMap<>();
         private final Map<Supplier<MenuType<?>>, LibScreenFactory<?, ?>> menuTypes = new HashMap<>();
 
         @SubscribeEvent
+        @SuppressWarnings("unchecked")
         public void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-            for (Map.Entry<Supplier<BlockEntityType<?>>, BlockEntityRendererProvider<?>> entry : blockEntityRenderers.entrySet()) {
-                event.registerBlockEntityRenderer(entry.getKey().get(), (BlockEntityRendererProvider<BlockEntity>) entry.getValue());
+            for (Map.Entry<Supplier<BlockEntityType<?>>, BlockEntityRendererProvider<?, ?>> entry : blockEntityRenderers.entrySet()) {
+                event.registerBlockEntityRenderer(entry.getKey().get(), (BlockEntityRendererProvider<BlockEntity, BlockEntityRenderState>) entry.getValue());
             }
 
             for (Map.Entry<Supplier<EntityType<?>>, EntityRendererProvider<?>> entry : entityRenderers.entrySet()) {
@@ -215,72 +210,66 @@ public class ForgeClientHelper implements IClientHelper {
         }
 
         @SubscribeEvent
-        public void registerBlockColors(final RegisterColorHandlersEvent.Block event) {
-            for (Map.Entry<BlockColor, Supplier<List<Block>>> entry : blockColors.entrySet()) {
-                event.register(entry.getKey(), entry.getValue().get().toArray(Block[]::new));
+        public void registerBlockColors(final RegisterColorHandlersEvent.BlockTintSources event) {
+            // A block's tints are an ordered list of sources now, so each source is registered on its
+            // own for the blocks it was given.
+            for (Map.Entry<BlockTintSource, Supplier<List<Block>>> entry : blockColors.entrySet()) {
+                event.register(List.of(entry.getKey()), entry.getValue().get().toArray(Block[]::new));
             }
         }
 
         @SubscribeEvent
-        public void registerItemColors(final RegisterColorHandlersEvent.Item event) {
-            for (Map.Entry<ItemColor, Supplier<List<Item>>> entry : itemColors.entrySet()) {
-                event.register(entry.getKey(), entry.getValue().get().toArray(ItemLike[]::new));
+        public void registerItemTintSources(final RegisterColorHandlersEvent.ItemTintSources event) {
+            for (Map.Entry<Identifier, MapCodec<? extends ItemTintSource>> entry : itemTintSources.entrySet()) {
+                event.register(entry.getKey(), entry.getValue());
             }
         }
 
         @SubscribeEvent
-        @SuppressWarnings("removal")
-        public void clientSetup(final FMLClientSetupEvent event) {
-            event.enqueueWork(() -> {
-                for (Map.Entry<Supplier<Item>, Pair<Identifier, ClampedItemPropertyFunction>> entry : itemProperties.entrySet()) {
-                    ItemProperties.register(entry.getKey().get(), entry.getValue().getFirst(), entry.getValue().getSecond());
-                }
-            });
-
-            for (Map.Entry<Supplier<Block>, RenderType> entry : renderTypes.entrySet()) {
-                ItemBlockRenderTypes.setRenderLayer(entry.getKey().get(), entry.getValue());
-            }
-
+        @SuppressWarnings("rawtypes")
+        public void registerMenuScreens(final RegisterMenuScreensEvent event) {
+            // Screens are registered from their own event now rather than from client setup.
             for (Map.Entry<Supplier<MenuType<?>>, LibScreenFactory<?, ?>> entry : menuTypes.entrySet()) {
-                this.registerMenu(entry.getKey()::get, (LibScreenFactory) entry.getValue());
+                this.registerMenu(event, entry.getKey()::get, (LibScreenFactory) entry.getValue());
             }
-
-            blockEntityWithoutLevelInitializers.forEach(callback -> callback.accept((item, renderer) -> bewlrs.put(item, renderer)));
         }
 
-        private <T extends AbstractContainerMenu, S extends Screen & MenuAccess<T>> void registerMenu(Supplier<MenuType<? extends T>> menuType, LibScreenFactory<T, S> factory) {
-            MenuScreens.register(menuType.get(), factory::create);
+        private <T extends AbstractContainerMenu, S extends Screen & MenuAccess<T>> void registerMenu(RegisterMenuScreensEvent event, Supplier<MenuType<? extends T>> menuType, LibScreenFactory<T, S> factory) {
+            event.register(menuType.get(), factory::create);
+        }
+
+        @SubscribeEvent
+        public void registerSpecialModelRenderers(final RegisterSpecialModelRendererEvent event) {
+            final IBEWLR register = event::register;
+            specialModelRendererInitializers.forEach(callback -> callback.accept(register));
         }
 
         @SubscribeEvent
         public void registerKeyMapping(final RegisterKeyMappingsEvent event) {
             for (KeyMapping key : keyMappings) {
+                if (registeredCategories.add(key.getCategory().id())) {
+                    event.registerCategory(key.getCategory());
+                }
                 event.register(key);
             }
         }
 
         @SubscribeEvent
-        public void registerAdditionalModels(final ModelEvent.RegisterAdditional event) {
-            for (Identifier location : extraModels) {
-                event.register(location);
+        public void registerClientReloadListeners(final AddClientReloadListenersEvent event) {
+            for (Map.Entry<Identifier, PreparableReloadListener> entry : clientReloadListeners.entrySet()) {
+                event.addListener(entry.getKey(), entry.getValue());
             }
         }
 
         @SubscribeEvent
-        public void registerAdditionalModels(final RegisterClientReloadListenersEvent event) {
-            for (PreparableReloadListener reloadListener : clientReloadListeners) {
-                event.registerReloadListener(reloadListener);
-            }
-        }
-
-        @SubscribeEvent
-        public void registerModelLoaders(final ModelEvent.RegisterGeometryLoaders event) {
+        public void registerModelLoaders(final ModelEvent.RegisterLoaders event) {
             for (Map.Entry<Identifier, IModelSpecificationLoader<?>> entry : modelLoaders.entrySet()) {
-                event.register(entry.getKey().getPath(), new ForgePlatformModelLoaderPlatformDelegate<>(entry.getValue()));
+                event.register(entry.getKey(), new ForgePlatformModelLoaderPlatformDelegate<>(entry.getValue()));
             }
         }
 
         @SubscribeEvent
+        @SuppressWarnings("unchecked")
         public void registerParticles(final RegisterParticleProvidersEvent event) {
             for (Map.Entry<Supplier<ParticleType<?>>, Function<SpriteSet, ParticleProvider<?>>> entry : particleProviders.entrySet()) {
                 event.registerSpriteSet((ParticleType<ParticleOptions>) entry.getKey().get(), sprites -> (ParticleProvider<ParticleOptions>) entry.getValue().apply(sprites));

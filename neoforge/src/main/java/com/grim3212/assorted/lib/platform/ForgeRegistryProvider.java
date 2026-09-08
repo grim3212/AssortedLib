@@ -7,10 +7,9 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.javafmlmod.FMLModContainer;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import net.neoforged.neoforge.registries.RegistryManager;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -26,14 +25,13 @@ public class ForgeRegistryProvider implements IRegistryFactory {
         final var containerOpt = ModList.get().getModContainerById(modId);
         if (containerOpt.isEmpty())
             throw new NullPointerException("Cannot find mod container for id " + modId);
-        final var cont = containerOpt.get();
-        if (cont instanceof FMLModContainer fmlModContainer) {
-            final var register = DeferredRegister.create(resourceKey, modId);
-            register.register(fmlModContainer.getEventBus());
-            return new Provider<>(register);
-        } else {
-            throw new ClassCastException("The container of the mod " + modId + " is not a FML one!");
-        }
+
+        // Every container exposes its event bus now, so there is no need to check for the java
+        // specific FMLModContainer first.
+        final ModContainer container = containerOpt.get();
+        final var register = DeferredRegister.create(resourceKey, modId);
+        register.register(container.getEventBus());
+        return new Provider<>(register);
     }
 
     private static class Provider<T> implements RegistryProvider<T> {
@@ -54,7 +52,9 @@ public class ForgeRegistryProvider implements IRegistryFactory {
 
                 @Override
                 public ResourceKey<I> getResourceKey() {
-                    return obj.getKey();
+                    // A DeferredHolder is keyed by the registry's type rather than the registered
+                    // type, so the narrowing this interface promises has to be done here.
+                    return (ResourceKey<I>) obj.getKey();
                 }
 
                 @Override
@@ -69,7 +69,8 @@ public class ForgeRegistryProvider implements IRegistryFactory {
 
                 @Override
                 public Holder<I> asHolder() {
-                    return obj.getHolder().orElseThrow();
+                    // DeferredHolder is itself the Holder now; getHolder() is gone.
+                    return (Holder<I>) obj;
                 }
             };
             entries.add((IRegistryObject<T>) ro);
@@ -88,7 +89,7 @@ public class ForgeRegistryProvider implements IRegistryFactory {
 
         @Override
         public Optional<T> getValue(Identifier resourceLocation) {
-            Optional<T> value = entriesView.stream().filter(x -> x.getResourceKey().equals(resourceLocation)).map(x -> x.get()).findFirst();
+            Optional<T> value = entriesView.stream().filter(x -> x.getId().equals(resourceLocation)).map(x -> x.get()).findFirst();
             return value;
         }
 
@@ -104,7 +105,7 @@ public class ForgeRegistryProvider implements IRegistryFactory {
 
         @Override
         public Identifier getRegistryName(T entry) {
-            return RegistryManager.ACTIVE.getRegistry(this.registry.getRegistryKey()).getKey(entry);
+            return this.registry.getRegistry().get().getKey(entry);
         }
     }
 }

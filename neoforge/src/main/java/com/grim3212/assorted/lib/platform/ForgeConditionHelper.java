@@ -1,85 +1,67 @@
 package com.grim3212.assorted.lib.platform;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.grim3212.assorted.lib.LibConstants;
-import com.grim3212.assorted.lib.conditions.*;
+import com.grim3212.assorted.lib.conditions.BlockExistsCondition;
+import com.grim3212.assorted.lib.conditions.ForgeConditionProvider;
+import com.grim3212.assorted.lib.conditions.LibConditions;
+import com.grim3212.assorted.lib.conditions.PartEnabledCondition;
+import com.grim3212.assorted.lib.conditions.TagPopulatedCondition;
 import com.grim3212.assorted.lib.core.conditions.LibCondition;
 import com.grim3212.assorted.lib.core.conditions.LibConditionProvider;
 import com.grim3212.assorted.lib.platform.services.IConditionHelper;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.crafting.conditions.*;
+import net.neoforged.neoforge.common.conditions.ICondition;
+import net.neoforged.neoforge.common.conditions.NeoForgeConditions;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class ForgeConditionHelper implements IConditionHelper {
-    private static final Set<IConditionSerializer<?>> CONDITIONS = ConcurrentHashMap.newKeySet();
-    public static final Map<String, Supplier<Boolean>> REGISTERED_PARTS = new HashMap<>();
 
+    /**
+     * Nothing left to do at construction time: a condition type is a {@code MapCodec} in the
+     * {@code NeoForgeRegistries.CONDITION_SERIALIZERS} registry, which can only be written to from a
+     * {@code RegisterEvent}, so {@link LibConditions} collects them and the mod entrypoint flushes
+     * them when that event fires.
+     */
     @Override
     public void init() {
-        CONDITIONS.forEach(CraftingHelper::register);
-        CraftingHelper.register(PartEnabledCondition.Serializer.INSTANCE);
-        CraftingHelper.register(TagPopulatedCondition.ItemTagPopulatedCondition.SERIALIZER);
-        CraftingHelper.register(TagPopulatedCondition.BlockTagPopulatedCondition.SERIALIZER);
     }
 
     @Override
-    public void write(JsonObject conditionalObject, LibConditionProvider... conditions) {
-        if (conditions.length == 0)
-            return;
-
-        if (conditionalObject.has("conditions"))
-            throw new IllegalArgumentException("Object already has a condition entry: " + conditionalObject);
-
-        JsonArray conditionsJson = new JsonArray();
-        for (LibConditionProvider condition : conditions) {
-            JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("type", condition.getName().toString());
-            condition.write(jsonObject);
-            conditionsJson.add(jsonObject);
-        }
-        conditionalObject.add("conditions", conditionsJson);
+    public RecipeOutput conditionalOutput(RecipeOutput output, Map<Identifier, List<LibConditionProvider>> conditions) {
+        return new ConditionalOutput(output, conditions);
     }
 
     @Override
     public void register(Identifier name, LibCondition condition) {
-        if (!CONDITIONS.add(new RecipeConditionWrapper.Serializer(name, condition)))
-            LibConstants.LOG.warn("Duplicate condition with id: " + name);
-    }
-
-    @Override
-    public boolean test(JsonObject json) {
-        return CraftingHelper.processConditions(json, "conditions", ICondition.IContext.EMPTY);
-    }
-
-    @Override
-    public String getConditionsKey() {
-        return "conditions";
+        LibConditions.register(name, condition);
     }
 
     @Override
     public LibConditionProvider and(LibConditionProvider... values) {
-        return wrap(new AndCondition(Arrays.stream(values).map(x -> new ConditionWrapper((ForgeConditionProvider) x)).toArray(ICondition[]::new)));
+        return wrap(NeoForgeConditions.and(unwrapAll(values)));
     }
 
     @Override
     public LibConditionProvider not(LibConditionProvider value) {
-        return wrap(new NotCondition(new ConditionWrapper((ForgeConditionProvider) value)));
+        return wrap(NeoForgeConditions.not(unwrap(value)));
     }
 
     @Override
     public LibConditionProvider or(LibConditionProvider... values) {
-        return wrap(new OrCondition(Arrays.stream(values).map(x -> new ConditionWrapper((ForgeConditionProvider) x)).toArray(ICondition[]::new)));
+        return wrap(NeoForgeConditions.or(unwrapAll(values)));
     }
 
     @Override
@@ -89,7 +71,8 @@ public class ForgeConditionHelper implements IConditionHelper {
 
     @Override
     public LibConditionProvider itemExists(Identifier item) {
-        return wrap(new ItemExistsCondition(item));
+        // NeoForge ships this one itself now, as a generic "is this key registered" condition.
+        return wrap(NeoForgeConditions.itemRegistered(item));
     }
 
     @Override
@@ -104,7 +87,7 @@ public class ForgeConditionHelper implements IConditionHelper {
 
     @Override
     public LibConditionProvider modLoaded(String modId) {
-        return wrap(new ModLoadedCondition(modId));
+        return wrap(NeoForgeConditions.modLoaded(modId));
     }
 
     @Override
@@ -114,36 +97,54 @@ public class ForgeConditionHelper implements IConditionHelper {
 
     @Override
     public void registerPartCondition(String part, Supplier<Boolean> check) {
-        if (REGISTERED_PARTS.containsKey(part)) {
-            throw new IllegalArgumentException("Can't have registered part with the same name as another");
-        }
-        REGISTERED_PARTS.put(part, check);
+        LibConditions.registerPartCondition(part, check);
     }
 
     public static ForgeConditionProvider wrap(ICondition condition) {
         return new ForgeConditionProvider(condition);
     }
 
-    public static class ConditionWrapper implements ICondition {
+    public static ICondition unwrap(LibConditionProvider provider) {
+        if (!(provider instanceof ForgeConditionProvider forgeConditionProvider))
+            throw new IllegalArgumentException("The given condition is not compatible with the forge platform!");
 
-        public final ForgeConditionProvider provider;
+        return forgeConditionProvider.getCondition();
+    }
 
-        public ConditionWrapper(ForgeConditionProvider provider) {
-            this.provider = provider;
-        }
+    private static ICondition[] unwrapAll(LibConditionProvider... providers) {
+        return Arrays.stream(providers).map(ForgeConditionHelper::unwrap).toArray(ICondition[]::new);
+    }
 
-        public ConditionWrapper(ICondition provider) {
-            this.provider = wrap(provider);
+    /**
+     * Attaches the conditions registered for a recipe id to that recipe as it is written.
+     * <p>
+     * {@code RecipeOutput#withConditions} only covers the "same conditions for everything" case, and
+     * recipes are no longer handed to the provider as a {@code JsonObject} it could edit, so this
+     * dispatches on the recipe key instead. The map is read on every accept so a provider may still
+     * fill it in after the output has been wrapped.
+     */
+    private record ConditionalOutput(RecipeOutput delegate, Map<Identifier, List<LibConditionProvider>> conditions) implements RecipeOutput {
+
+        @Override
+        public void accept(ResourceKey<Recipe<?>> key, Recipe<?> recipe, @Nullable AdvancementHolder advancement, ICondition... extraConditions) {
+            List<LibConditionProvider> registered = this.conditions.get(key.identifier());
+            if (registered == null || registered.isEmpty()) {
+                this.delegate.accept(key, recipe, advancement, extraConditions);
+                return;
+            }
+
+            ICondition[] all = Stream.concat(Arrays.stream(extraConditions), registered.stream().map(ForgeConditionHelper::unwrap)).toArray(ICondition[]::new);
+            this.delegate.accept(key, recipe, advancement, all);
         }
 
         @Override
-        public Identifier getID() {
-            return this.provider.getName();
+        public Advancement.Builder advancement() {
+            return this.delegate.advancement();
         }
 
         @Override
-        public boolean test(IContext context) {
-            return provider.condition.test(context);
+        public void includeRootAdvancement() {
+            this.delegate.includeRootAdvancement();
         }
     }
 }

@@ -2,28 +2,41 @@ package com.grim3212.assorted.lib.platform;
 
 import com.grim3212.assorted.lib.crafting.ingredient.ForgeFluidIngredient;
 import com.grim3212.assorted.lib.platform.services.IIngredientHelper;
+import net.minecraft.core.Registry;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.crafting.*;
+import net.neoforged.neoforge.common.crafting.CompoundIngredient;
+import net.neoforged.neoforge.common.crafting.DataComponentIngredient;
+import net.neoforged.neoforge.common.crafting.DifferenceIngredient;
+import net.neoforged.neoforge.common.crafting.IntersectionIngredient;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
 public class ForgeIngredientHelper implements IIngredientHelper {
+
+    /**
+     * Custom ingredients are no longer recipe serializers registered through {@code CraftingHelper};
+     * an {@link net.neoforged.neoforge.common.crafting.IngredientType} lives in its own registry.
+     * This is called from the {@code RegisterEvent} for that registry, while it is still open.
+     */
     @Override
     public void register() {
-        CraftingHelper.register(ForgeFluidIngredient.SERIALIZER.getIdentifier(), ForgeFluidIngredient.SERIALIZER);
+        Registry.register(NeoForgeRegistries.INGREDIENT_TYPES, ForgeFluidIngredient.NAME, ForgeFluidIngredient.TYPE);
     }
 
     @Override
     public Ingredient and(Ingredient... ingredients) {
-        return ingredients.length == 0 ? Ingredient.EMPTY : ingredients.length == 1 ? ingredients[0] : IntersectionIngredient.of(ingredients);
+        requireNotEmpty(ingredients);
+        return ingredients.length == 1 ? ingredients[0] : IntersectionIngredient.of(ingredients);
     }
 
     @Override
     public Ingredient or(Ingredient... ingredients) {
-        return ingredients.length == 0 ? Ingredient.EMPTY : CompoundIngredient.of(ingredients);
+        requireNotEmpty(ingredients);
+        return ingredients.length == 1 ? ingredients[0] : CompoundIngredient.of(ingredients);
     }
 
     @Override
@@ -33,11 +46,24 @@ public class ForgeIngredientHelper implements IIngredientHelper {
 
     @Override
     public Ingredient nbt(ItemStack item) {
-        return StrictNBTIngredient.of(item.copy());
+        // StrictNBTIngredient is gone with the tag it matched on; the component based equivalent
+        // takes the whole stack and, with strict set, requires an exact component match.
+        return DataComponentIngredient.of(true, item.copy());
     }
 
     @Override
     public Ingredient fluid(@Nullable TagKey<Item> itemTagKey, TagKey<Fluid> fluidTagKey, long amount) {
-        return ForgeFluidIngredient.of(itemTagKey, fluidTagKey, (int) amount);
+        return ForgeFluidIngredient.of(itemTagKey, fluidTagKey, amount).toVanilla();
+    }
+
+    // TODO(26.2): Ingredient.EMPTY has no replacement - an Ingredient may not be empty at all any
+    //  more (its constructor throws on an empty holder set), and "no ingredient" is expressed as an
+    //  Optional<Ingredient> by every vanilla recipe. The old and()/or() quietly handed back
+    //  Ingredient.EMPTY for a zero length argument list, which can only fail later now, so it fails
+    //  here instead.
+    private static void requireNotEmpty(Ingredient... ingredients) {
+        if (ingredients.length == 0) {
+            throw new IllegalArgumentException("Cannot combine zero ingredients; an Ingredient can no longer be empty");
+        }
     }
 }

@@ -5,18 +5,21 @@ import com.grim3212.assorted.lib.config.ConfigurationType;
 import com.grim3212.assorted.lib.config.ForgeDelegateConfigurationBuilder;
 import com.grim3212.assorted.lib.config.IConfigurationBuilder;
 import com.grim3212.assorted.lib.platform.services.IConfigHelper;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
 
 public class ForgeConfigHelper implements IConfigHelper {
 
     @Override
     public IConfigurationBuilder createBuilder(final ConfigurationType type, final String name) {
-        return new ForgeDelegateConfigurationBuilder(forgeConfigSpec -> {
+        return new ForgeDelegateConfigurationBuilder(configSpec -> {
             final String configName = String.format("%s.toml", name);
-            final ModConfig config = new ModConfig(remapType(type), forgeConfigSpec, ModLoadingContext.get().getActiveContainer(), configName);
-            LibConstants.LOG.info(String.format("Building config '%s' for %s", configName, ModLoadingContext.get().getActiveContainer().getModId()));
-            ModLoadingContext.get().getActiveContainer().addConfig(config);
+            // ModConfig's constructor is package private now; a container registers its own configs
+            // and builds the ModConfig itself.
+            final ModContainer container = ModLoadingContext.get().getActiveContainer();
+            LibConstants.LOG.info(String.format("Building config '%s' for %s", configName, container.getModId()));
+            container.registerConfig(remapType(type), configSpec, configName);
         });
     }
 

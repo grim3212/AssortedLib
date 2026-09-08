@@ -1,64 +1,57 @@
 package com.grim3212.assorted.lib.platform;
 
-import com.grim3212.assorted.lib.LibConstants;
+import com.grim3212.assorted.lib.core.network.LibPayload;
 import com.grim3212.assorted.lib.platform.services.INetworkHelper;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.Identifier;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
-import net.neoforged.neoforge.network.registration.NetworkRegistry;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.handling.IPayloadHandler;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * {@code SimpleChannel}, {@code NetworkRegistry}, {@code NetworkEvent} and {@code NetworkDirection}
+ * are all gone: a packet is a {@link CustomPacketPayload} with a {@link StreamCodec} and a typed id,
+ * registered through {@link RegisterPayloadHandlersEvent}. Messages keep their loader agnostic shape
+ * by being carried inside {@link LibPayload}, which builds that codec out of the encoder/decoder
+ * pair {@link MessageHandler} already has - the Fabric side wraps them the same way, so the wire
+ * format stays identical.
+ */
 public class ForgeNetworkHelper implements INetworkHelper {
 
-    private static final Map<Class<?>, MessageHandler<?>> messageHandlers = new ConcurrentHashMap<>();
-    private static final Map<String, Integer> idCounter = new ConcurrentHashMap<>();
-    private static NetworkEvent.Context replyContext;
+    private static final String PROTOCOL = "7";
+
+    private static final Map<Class<?>, Registration<?>> messageHandlers = new ConcurrentHashMap<>();
+    private static final Map<String, Registrations> registrationsMap = new ConcurrentHashMap<>();
 
     @Override
     public <MSG> void register(MessageHandler<MSG> handler) {
-        messageHandlers.put(handler.messageType(), handler);
+        final CustomPacketPayload.Type<LibPayload<MSG>> type = LibPayload.type(handler.id());
+        final Registration<MSG> registration = new Registration<>(handler, type, LibPayload.codec(type, handler.encoder(), handler.decoder()));
 
-        String modId = handler.id().getNamespace();
-        SimpleChannel channel = Channels.get(modId);
-
-        channel.registerMessage(nextId(modId), handler.messageType(), handler.encoder(), handler.decoder(), (message, contextSupplier) -> {
-            NetworkEvent.Context context = contextSupplier.get();
-            NetworkDirection expectedDirection = handler.side() == MessageBoundSide.CLIENT ? NetworkDirection.PLAY_TO_CLIENT : NetworkDirection.PLAY_TO_SERVER;
-
-            if (context.getDirection() != expectedDirection) {
-                LibConstants.LOG.warn("Received {} on incorrect side. Expected on {}", handler.id(), context.getDirection());
-                return;
-            }
-
-            context.enqueueWork(() -> {
-                replyContext = context;
-                ServerPlayer player = context.getSender();
-                handler.messageConsumer().accept(message, player);
-                replyContext = null;
-            });
-            context.setPacketHandled(true);
-        });
+        messageHandlers.put(handler.messageType(), registration);
+        getRegistrations().add(registration);
     }
 
     @Override
     public <MSG> void sendToNearby(Level world, BlockPos pos, MSG toSend) {
-        if (world instanceof ServerLevel) {
-            MessageHandler<MSG> handler = (MessageHandler<MSG>) messageHandlers.get(toSend.getClass());
-
-            ServerLevel ws = (ServerLevel) world;
-            SimpleChannel channel = Channels.get(handler.id().getNamespace());
-            ws.getChunkSource().chunkMap.getPlayers(new ChunkPos(pos), false).stream().filter(p -> p.distanceToSqr(pos.getX(), pos.getY(), pos.getZ()) < 64 * 64).forEach(p -> channel.send(PacketDistributor.PLAYER.with(() -> p), toSend));
+        if (world instanceof ServerLevel serverLevel) {
+            PacketDistributor.sendToPlayersNear(serverLevel, null, pos.getX(), pos.getY(), pos.getZ(), 64, payload(toSend));
         }
     }
 
@@ -69,32 +62,68 @@ public class ForgeNetworkHelper implements INetworkHelper {
 
     @Override
     public <MSG> void sendTo(Player player, MSG toSend) {
-        MessageHandler<MSG> handler = (MessageHandler<MSG>) messageHandlers.get(toSend.getClass());
-        SimpleChannel channel = Channels.get(handler.id().getNamespace());
-        channel.send(PacketDistributor.PLAYER.with(() -> ((ServerPlayer) player)), toSend);
+        PacketDistributor.sendToPlayer((ServerPlayer) player, payload(toSend));
     }
 
     @Override
     public <MSG> void sendToServer(MSG toSend) {
-        MessageHandler<MSG> handler = (MessageHandler<MSG>) messageHandlers.get(toSend.getClass());
-        SimpleChannel channel = Channels.get(handler.id().getNamespace());
-        channel.sendToServer(toSend);
+        ClientPacketDistributor.sendToServer(payload(toSend));
     }
 
-    private static int nextId(String modId) {
-        return idCounter.compute(modId, (key, prev) -> prev != null ? prev + 1 : 0);
+    @SuppressWarnings("unchecked")
+    private static <MSG> LibPayload<MSG> payload(MSG message) {
+        final Registration<MSG> registration = (Registration<MSG>) messageHandlers.get(message.getClass());
+        if (registration == null) {
+            throw new IllegalArgumentException("Tried to send an unregistered message: " + message.getClass().getName());
+        }
+
+        return new LibPayload<>(registration.type(), message);
     }
 
+    /**
+     * Payloads may only be registered from the mod event bus, so every mod that registers a message
+     * gets one listener holding all of its registrations. The mod is the one currently being
+     * constructed, which is what {@code ForgeClientHelper} keys its own registrations on too.
+     */
+    private static Registrations getRegistrations() {
+        final var container = ModLoadingContext.get().getActiveContainer();
+        return registrationsMap.computeIfAbsent(container.getModId(), modId -> {
+            final Registrations newRegistrations = new Registrations();
+            container.getEventBus().register(newRegistrations);
+            return newRegistrations;
+        });
+    }
 
-    class Channels {
-        private static final String PROTOCOL = "7";
-        private static final Map<String, SimpleChannel> channels = new ConcurrentHashMap<>();
+    public static class Registrations {
+        private final List<Registration<?>> registrations = new ArrayList<>();
 
-        public static SimpleChannel get(String modId) {
-            return channels.computeIfAbsent(modId, key -> {
-                Identifier channelName = Identifier.fromNamespaceAndPath(key, "channel");
-                return NetworkRegistry.newSimpleChannel(channelName, () -> PROTOCOL, PROTOCOL::equals, PROTOCOL::equals);
-            });
+        private void add(Registration<?> registration) {
+            this.registrations.add(registration);
+        }
+
+        @SubscribeEvent
+        public void registerPayloads(final RegisterPayloadHandlersEvent event) {
+            final PayloadRegistrar registrar = event.registrar(PROTOCOL);
+            for (Registration<?> registration : this.registrations) {
+                registration.register(registrar);
+            }
+        }
+    }
+
+    private record Registration<MSG>(MessageHandler<MSG> handler,
+                                     CustomPacketPayload.Type<LibPayload<MSG>> type,
+                                     StreamCodec<RegistryFriendlyByteBuf, LibPayload<MSG>> codec) {
+
+        private void register(PayloadRegistrar registrar) {
+            // The registrar already hands handlers to the main thread, and it registers the payload
+            // for one direction only, so the explicit side check the old channel needed is gone.
+            final IPayloadHandler<LibPayload<MSG>> payloadHandler = (payload, context) -> this.handler.messageConsumer().accept(payload.message(), context.player());
+
+            if (this.handler.side() == MessageBoundSide.CLIENT) {
+                registrar.playToClient(this.type, this.codec, payloadHandler);
+            } else {
+                registrar.playToServer(this.type, this.codec, payloadHandler);
+            }
         }
     }
 }

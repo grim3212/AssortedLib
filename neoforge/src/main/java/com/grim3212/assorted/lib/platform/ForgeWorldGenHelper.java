@@ -29,12 +29,12 @@ public class ForgeWorldGenHelper implements IWorldGenHelper {
     public static void modifyBiome(Holder<Biome> biome, BiomeModifier.Phase phase, ModifiableBiomeInfo.BiomeInfo.Builder builder) {
         if (phase == BiomeModifier.Phase.ADD) {
             for (var biomeModification : biomeModifications) {
-                Identifier location = biome.unwrapKey().map(ResourceKey::location).orElse(null);
+                Identifier location = biome.unwrapKey().map(ResourceKey::identifier).orElse(null);
                 if (location != null && biomeModification.getBiomePredicate().test(location, biome)) {
                     Registry<PlacedFeature> placedFeatures = ServerLifecycleHooks.getCurrentServer()
                             .registryAccess()
-                            .registryOrThrow(Registries.PLACED_FEATURE);
-                    placedFeatures.getHolder(biomeModification.getConfiguredFeatureKey())
+                            .lookupOrThrow(Registries.PLACED_FEATURE);
+                    placedFeatures.get(biomeModification.getConfiguredFeatureKey())
                             .ifPresent(placedFeature -> builder.getGenerationSettings().addFeature(biomeModification.getStep(), placedFeature));
                 }
             }

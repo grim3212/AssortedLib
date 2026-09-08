@@ -10,28 +10,22 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.MenuProvider;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TieredItem;
-import net.minecraft.world.item.Tiers;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.*;
-import net.minecraftforge.common.extensions.IForgeMenuType;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.common.util.FakePlayer;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.FMLLoader;
-import net.minecraftforge.network.NetworkHooks;
+import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 
 import java.util.HashMap;
 import java.util.List;
@@ -54,7 +48,9 @@ public class ForgePlatformHelper implements IPlatformHelper {
 
     @Override
     public void openMenu(ServerPlayer player, MenuProvider provider, Consumer<FriendlyByteBuf> extraDataWriter) {
-        NetworkHooks.openScreen(player, provider, extraDataWriter);
+        // NetworkHooks is gone; opening a menu with extra data is a player extension now. The buffer
+        // it hands over is a RegistryFriendlyByteBuf, which is a FriendlyByteBuf.
+        player.openMenu(provider, buf -> extraDataWriter.accept(buf));
     }
 
     @Override
@@ -65,7 +61,7 @@ public class ForgePlatformHelper implements IPlatformHelper {
 
     @Override
     public boolean isProduction() {
-        return FMLLoader.isProduction();
+        return FMLEnvironment.isProduction();
     }
 
     @Override
@@ -75,12 +71,13 @@ public class ForgePlatformHelper implements IPlatformHelper {
 
     @Override
     public double getPlayerReachDistance(Player player) {
-        return player.getBlockReach();
+        // Reach is an attribute now, split into a block and an entity range.
+        return player.blockInteractionRange();
     }
 
     @Override
     public Dist getCurrentDistribution() {
-        return switch (FMLEnvironment.dist) {
+        return switch (FMLEnvironment.getDist()) {
             case CLIENT -> Dist.CLIENT;
             case DEDICATED_SERVER -> Dist.DEDICATED_SERVER;
         };
@@ -106,26 +103,31 @@ public class ForgePlatformHelper implements IPlatformHelper {
 
     @Override
     public void addReloadListener(Identifier identifier, PreparableReloadListener reloadListener) {
-        MinecraftForge.EVENT_BUS.addListener((AddReloadListenerEvent event) -> event.addListener(reloadListener));
+        // AddReloadListenerEvent was split per side and listeners are named now, so the identifier
+        // this interface has always carried finally has a use.
+        NeoForge.EVENT_BUS.addListener((AddServerReloadListenersEvent event) -> event.addListener(identifier, reloadListener));
     }
 
-    @Override
-    public EntityType<?> getRandomDungeonEntity(RandomSource random) {
-        return DungeonHooks.getRandomDungeonMob(random);
-    }
+    // getRandomDungeonEntity is no longer overridden here. Forge's DungeonHooks is gone and there is
+    // no modded dungeon mob list to consult, so IPlatformHelper's default - which reads vanilla's own
+    // list off the monster room feature - is correct on both loaders.
 
     @Override
     public <T extends BlockEntity> BlockEntityType<T> createBlockEntityType(BiFunction<BlockPos, BlockState, T> builder, Block... blocks) {
-        return BlockEntityType.Builder.of(builder::apply, blocks).build(null);
+        // BlockEntityType.Builder is gone; the type takes its factory and valid blocks directly.
+        return new BlockEntityType<>(builder::apply, blocks);
     }
 
     @Override
     public <T extends AbstractContainerMenu> MenuType<T> createMenuType(MenuFactory<T> factory) {
-        return IForgeMenuType.create(factory::create);
+        return IMenuTypeExtension.create(factory::create);
     }
 
     // isTieredTool is no longer overridden here. Forge's ToolActions and TierSortingRegistry are
     // both gone, and 26.2 expresses tool type and mining tier entirely through vanilla item tags and
     // the TOOL data component, so the default implementation in IPlatformHelper is correct on both
     // loaders.
+
+    // getFuelTime is no longer overridden here either. Burn times are data driven and resolved
+    // through Level#fuelValues(), which both loaders share.
 }

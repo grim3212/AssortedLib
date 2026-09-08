@@ -48,7 +48,14 @@ public class ForgeLevelPropertyAccessor implements ILevelPropertyAccessor {
 
     @Override
     public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter blockGetter, BlockPos pos, Player player) {
-        return state.getCloneItemStack(target, blockGetter, pos, player);
+        // The hook no longer takes the hit result, and it needs a LevelReader rather than a plain
+        // BlockGetter because copying the block's data goes through the level now. The boolean says
+        // whether that data should be copied onto the stack, which is what the old hook always did.
+        if (blockGetter instanceof LevelReader levelReader) {
+            return state.getCloneItemStack(pos, levelReader, true, player);
+        }
+
+        return new ItemStack(state.getBlock());
     }
 
     @Override
