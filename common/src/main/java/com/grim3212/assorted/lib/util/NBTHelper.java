@@ -1,100 +1,104 @@
 package com.grim3212.assorted.lib.util;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 
+import java.util.function.Consumer;
+
+/**
+ * Helpers for the free form NBT that used to live directly on an ItemStack.
+ * <p>
+ * Stack NBT no longer exists, so every ItemStack based method here now reads and
+ * writes the {@link DataComponents#CUSTOM_DATA} component instead, which is the
+ * data component that carries arbitrary modded NBT.
+ * <p>
+ * Two behaviours had to change:
+ * <ul>
+ * <li>{@link CustomData} is immutable, so every read hands back a detached copy.
+ * Mutating a CompoundTag returned from here no longer writes through to the
+ * stack, it has to be handed back through the matching put method.</li>
+ * <li>The getters no longer persist their fallback onto the stack when the key
+ * is missing, they only return it. Writing a component changes stack equality
+ * and would stop otherwise identical stacks from stacking together.</li>
+ * </ul>
+ */
 public class NBTHelper {
 
-    public static boolean hasTag(ItemStack itemStack, String keyName) {
-        return !itemStack.isEmpty() && itemStack.getTag() != null && itemStack.getTag().contains(keyName);
-    }
-
-    public static void removeTag(ItemStack itemStack, String keyName) {
-        if (itemStack.getTag() != null) {
-            itemStack.getTag().remove(keyName);
-        }
+    /**
+     * Reads the custom data component off the given ItemStack as a detached
+     * CompoundTag, an empty one if the stack carries no custom data at all
+     *
+     * @param itemStack The ItemStack to read the custom data of
+     */
+    private static CompoundTag customData(ItemStack itemStack) {
+        return itemStack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
     }
 
     /**
-     * Initializes the NBT Tag Compound for the given ItemStack if it is null
+     * Applies the given change to a copy of the ItemStack's custom data and
+     * stores the result back onto the stack
      *
-     * @param itemStack The ItemStack for which its NBT Tag Compound is being
-     *                  checked for initialization
+     * @param itemStack The ItemStack whose custom data is being modified
+     * @param modifier  The change to apply
      */
-    private static void initCompoundNBT(ItemStack itemStack) {
-        if (itemStack.getTag() == null) {
-            itemStack.setTag(new CompoundTag());
-        }
+    private static void updateCustomData(ItemStack itemStack, Consumer<CompoundTag> modifier) {
+        CustomData.update(DataComponents.CUSTOM_DATA, itemStack, modifier);
     }
 
-    private static void initCompoundNBT(CompoundTag compound) {
-        if (compound == null) {
-            compound = new CompoundTag();
-        }
+    public static boolean hasTag(ItemStack itemStack, String keyName) {
+        return !itemStack.isEmpty() && customData(itemStack).contains(keyName);
+    }
+
+    public static void removeTag(ItemStack itemStack, String keyName) {
+        updateCustomData(itemStack, (tag) -> tag.remove(keyName));
     }
 
     public static CompoundTag getTag(CompoundTag compound, String keyName) {
-        if (compound == null || !compound.contains(keyName)) {
+        if (compound == null) {
             return new CompoundTag();
         }
 
-        return compound.getCompound(keyName);
+        return compound.getCompoundOrEmpty(keyName);
     }
 
     public static CompoundTag getTag(ItemStack stack, String keyName) {
-        initCompoundNBT(stack);
-
-        if (!stack.getTag().contains(keyName)) {
-            putTag(stack, keyName, new CompoundTag());
-        }
-
-        return stack.getTag().getCompound(keyName);
+        return customData(stack).getCompoundOrEmpty(keyName);
     }
 
     public static void putTag(ItemStack stack, String keyName, CompoundTag compound) {
-        initCompoundNBT(stack);
-
-        stack.getTag().put(keyName, compound);
+        updateCustomData(stack, (tag) -> tag.put(keyName, compound));
     }
 
     // =============== STRING ===============
     public static String getString(CompoundTag compound, String keyName) {
-        initCompoundNBT(compound);
-
-        if (compound == null || !compound.contains(keyName)) {
-            putString(compound, keyName, "");
+        if (compound == null) {
+            return "";
         }
 
-        return compound.getString(keyName);
+        return compound.getStringOr(keyName, "");
     }
 
     public static void putString(CompoundTag compound, String keyName, String keyValue) {
-        initCompoundNBT(compound);
+        if (compound == null) {
+            return;
+        }
 
         compound.putString(keyName, keyValue);
     }
 
     public static String getString(ItemStack itemStack, String keyName) {
-        initCompoundNBT(itemStack);
-
-        if (!itemStack.getTag().contains(keyName)) {
-            putString(itemStack, keyName, "");
-        }
-
-        return itemStack.getTag().getString(keyName);
+        return customData(itemStack).getStringOr(keyName, "");
     }
 
     public static void putString(ItemStack itemStack, String keyName, String keyValue) {
-        initCompoundNBT(itemStack);
-
-        itemStack.getTag().putString(keyName, keyValue);
+        updateCustomData(itemStack, (tag) -> tag.putString(keyName, keyValue));
     }
 
     public static ItemStack putStringItemStack(ItemStack itemStack, String keyName, String keyValue) {
-        initCompoundNBT(itemStack);
-
-        itemStack.getTag().putString(keyName, keyValue);
+        putString(itemStack, keyName, keyValue);
 
         return itemStack;
     }
@@ -102,25 +106,15 @@ public class NBTHelper {
 
     // =============== BOOLEAN ===============
     public static boolean getBoolean(ItemStack itemStack, String keyName) {
-        initCompoundNBT(itemStack);
-
-        if (!itemStack.getTag().contains(keyName)) {
-            putBoolean(itemStack, keyName, false);
-        }
-
-        return itemStack.getTag().getBoolean(keyName);
+        return customData(itemStack).getBooleanOr(keyName, false);
     }
 
     public static void putBoolean(ItemStack itemStack, String keyName, boolean keyValue) {
-        initCompoundNBT(itemStack);
-
-        itemStack.getTag().putBoolean(keyName, keyValue);
+        updateCustomData(itemStack, (tag) -> tag.putBoolean(keyName, keyValue));
     }
 
     public static ItemStack putBooleanItemStack(ItemStack itemStack, String keyName, boolean keyValue) {
-        initCompoundNBT(itemStack);
-
-        itemStack.getTag().putBoolean(keyName, keyValue);
+        putBoolean(itemStack, keyName, keyValue);
 
         return itemStack;
     }
@@ -128,25 +122,15 @@ public class NBTHelper {
 
     // =============== BYTE ===============
     public static byte getByte(ItemStack itemStack, String keyName) {
-        initCompoundNBT(itemStack);
-
-        if (!itemStack.getTag().contains(keyName)) {
-            putByte(itemStack, keyName, (byte) 0);
-        }
-
-        return itemStack.getTag().getByte(keyName);
+        return customData(itemStack).getByteOr(keyName, (byte) 0);
     }
 
     public static void putByte(ItemStack itemStack, String keyName, byte keyValue) {
-        initCompoundNBT(itemStack);
-
-        itemStack.getTag().putByte(keyName, keyValue);
+        updateCustomData(itemStack, (tag) -> tag.putByte(keyName, keyValue));
     }
 
     public static ItemStack putByteItemStack(ItemStack itemStack, String keyName, byte keyValue) {
-        initCompoundNBT(itemStack);
-
-        itemStack.getTag().putByte(keyName, keyValue);
+        putByte(itemStack, keyName, keyValue);
 
         return itemStack;
     }
@@ -154,76 +138,51 @@ public class NBTHelper {
 
     // =============== SHORT ===============
     public static short getShort(ItemStack itemStack, String keyName) {
-        initCompoundNBT(itemStack);
-
-        if (!itemStack.getTag().contains(keyName)) {
-            putShort(itemStack, keyName, (short) 0);
-        }
-
-        return itemStack.getTag().getShort(keyName);
+        return customData(itemStack).getShortOr(keyName, (short) 0);
     }
 
     public static void putShort(ItemStack itemStack, String keyName, short keyValue) {
-        initCompoundNBT(itemStack);
-
-        itemStack.getTag().putShort(keyName, keyValue);
+        updateCustomData(itemStack, (tag) -> tag.putShort(keyName, keyValue));
     }
 
     public static ItemStack putShortItemStack(ItemStack itemStack, String keyName, short keyValue) {
-        initCompoundNBT(itemStack);
+        putShort(itemStack, keyName, keyValue);
 
-        itemStack.getTag().putShort(keyName, keyValue);
         return itemStack;
     }
     // =============== END SHORT ===============
 
     // =============== INTEGER ===============
     public static int getInt(CompoundTag compound, String keyName) {
-        initCompoundNBT(compound);
-
-        if (compound == null || !compound.contains(keyName)) {
-            putInt(compound, keyName, 0);
+        if (compound == null) {
+            return 0;
         }
 
-        return compound.getInt(keyName);
+        return compound.getIntOr(keyName, 0);
     }
 
     public static void putInt(CompoundTag compound, String keyName, int keyValue) {
-        initCompoundNBT(compound);
+        if (compound == null) {
+            return;
+        }
 
         compound.putInt(keyName, keyValue);
     }
 
     public static int getInt(ItemStack itemStack, String keyName) {
-        initCompoundNBT(itemStack);
-
-        if (!itemStack.getTag().contains(keyName)) {
-            putInt(itemStack, keyName, 0);
-        }
-
-        return itemStack.getTag().getInt(keyName);
+        return getInt(itemStack, keyName, 0);
     }
 
     public static int getInt(ItemStack itemStack, String keyName, int fallback) {
-        initCompoundNBT(itemStack);
-
-        if (!itemStack.getTag().contains(keyName)) {
-            putInt(itemStack, keyName, fallback);
-        }
-
-        return itemStack.getTag().getInt(keyName);
+        return customData(itemStack).getIntOr(keyName, fallback);
     }
 
     public static void putInt(ItemStack itemStack, String keyName, int keyValue) {
-        initCompoundNBT(itemStack);
-
-        itemStack.getTag().putInt(keyName, keyValue);
+        updateCustomData(itemStack, (tag) -> tag.putInt(keyName, keyValue));
     }
 
     public static ItemStack putIntItemStack(ItemStack itemStack, String keyName, int keyValue) {
-        initCompoundNBT(itemStack);
-
-        itemStack.getTag().putInt(keyName, keyValue);
+        putInt(itemStack, keyName, keyValue);
 
         return itemStack;
     }
@@ -231,41 +190,31 @@ public class NBTHelper {
 
     // =============== LONG ===============
     public static long getLong(CompoundTag compound, String keyName) {
-        initCompoundNBT(compound);
-
-        if (compound == null || !compound.contains(keyName)) {
-            putLong(compound, keyName, 0);
+        if (compound == null) {
+            return 0;
         }
 
-        return compound.getLong(keyName);
+        return compound.getLongOr(keyName, 0);
     }
 
     public static void putLong(CompoundTag compound, String keyName, long keyValue) {
-        initCompoundNBT(compound);
+        if (compound == null) {
+            return;
+        }
 
         compound.putLong(keyName, keyValue);
     }
 
     public static long getLong(ItemStack itemStack, String keyName) {
-        initCompoundNBT(itemStack);
-
-        if (!itemStack.getTag().contains(keyName)) {
-            putLong(itemStack, keyName, 0);
-        }
-
-        return itemStack.getTag().getLong(keyName);
+        return customData(itemStack).getLongOr(keyName, 0);
     }
 
     public static void putLong(ItemStack itemStack, String keyName, long keyValue) {
-        initCompoundNBT(itemStack);
-
-        itemStack.getTag().putLong(keyName, keyValue);
+        updateCustomData(itemStack, (tag) -> tag.putLong(keyName, keyValue));
     }
 
     public static ItemStack putLongItemStack(ItemStack itemStack, String keyName, long keyValue) {
-        initCompoundNBT(itemStack);
-
-        itemStack.getTag().putLong(keyName, keyValue);
+        putLong(itemStack, keyName, keyValue);
 
         return itemStack;
     }
@@ -273,25 +222,15 @@ public class NBTHelper {
 
     // =============== FLOAT ===============
     public static float getFloat(ItemStack itemStack, String keyName) {
-        initCompoundNBT(itemStack);
-
-        if (!itemStack.getTag().contains(keyName)) {
-            putFloat(itemStack, keyName, 0);
-        }
-
-        return itemStack.getTag().getFloat(keyName);
+        return customData(itemStack).getFloatOr(keyName, 0);
     }
 
     public static void putFloat(ItemStack itemStack, String keyName, float keyValue) {
-        initCompoundNBT(itemStack);
-
-        itemStack.getTag().putFloat(keyName, keyValue);
+        updateCustomData(itemStack, (tag) -> tag.putFloat(keyName, keyValue));
     }
 
     public static ItemStack putFloatItemStack(ItemStack itemStack, String keyName, float keyValue) {
-        initCompoundNBT(itemStack);
-
-        itemStack.getTag().putFloat(keyName, keyValue);
+        putFloat(itemStack, keyName, keyValue);
 
         return itemStack;
     }
@@ -299,25 +238,15 @@ public class NBTHelper {
 
     // =============== DOUBLE ===============
     public static double getDouble(ItemStack itemStack, String keyName) {
-        initCompoundNBT(itemStack);
-
-        if (!itemStack.getTag().contains(keyName)) {
-            putDouble(itemStack, keyName, 0);
-        }
-
-        return itemStack.getTag().getDouble(keyName);
+        return customData(itemStack).getDoubleOr(keyName, 0);
     }
 
     public static void putDouble(ItemStack itemStack, String keyName, double keyValue) {
-        initCompoundNBT(itemStack);
-
-        itemStack.getTag().putDouble(keyName, keyValue);
+        updateCustomData(itemStack, (tag) -> tag.putDouble(keyName, keyValue));
     }
 
     public static ItemStack putDoubleItemStack(ItemStack itemStack, String keyName, double keyValue) {
-        initCompoundNBT(itemStack);
-
-        itemStack.getTag().putDouble(keyName, keyValue);
+        putDouble(itemStack, keyName, keyValue);
 
         return itemStack;
     }
@@ -325,43 +254,40 @@ public class NBTHelper {
 
     // =============== BLOCK POS ===============
     public static BlockPos getBlockPos(ItemStack itemStack, String keyName) {
-        initCompoundNBT(itemStack);
-
-        if (!itemStack.getTag().contains(keyName)) {
-            putBlockPos(itemStack, keyName, new BlockPos(0, 0, 0));
-        }
-
-        int[] pos = itemStack.getTag().getIntArray(keyName);
-        return new BlockPos(pos[0], pos[1], pos[2]);
+        return readBlockPos(customData(itemStack), keyName);
     }
 
     public static BlockPos getBlockPos(CompoundTag tag, String keyName) {
-        initCompoundNBT(tag);
-
-        if (!tag.contains(keyName)) {
-            putBlockPos(tag, keyName, new BlockPos(0, 0, 0));
+        if (tag == null) {
+            return BlockPos.ZERO;
         }
 
-        int[] pos = tag.getIntArray(keyName);
+        return readBlockPos(tag, keyName);
+    }
+
+    private static BlockPos readBlockPos(CompoundTag tag, String keyName) {
+        int[] pos = tag.getIntArray(keyName).orElse(null);
+        if (pos == null || pos.length < 3) {
+            return BlockPos.ZERO;
+        }
+
         return new BlockPos(pos[0], pos[1], pos[2]);
     }
 
     public static void putBlockPos(CompoundTag tag, String keyName, BlockPos keyValue) {
-        initCompoundNBT(tag);
+        if (tag == null) {
+            return;
+        }
 
         tag.putIntArray(keyName, new int[]{keyValue.getX(), keyValue.getY(), keyValue.getZ()});
     }
 
     public static void putBlockPos(ItemStack itemStack, String keyName, BlockPos keyValue) {
-        initCompoundNBT(itemStack);
-
-        itemStack.getTag().putIntArray(keyName, new int[]{keyValue.getX(), keyValue.getY(), keyValue.getZ()});
+        updateCustomData(itemStack, (tag) -> tag.putIntArray(keyName, new int[]{keyValue.getX(), keyValue.getY(), keyValue.getZ()}));
     }
 
     public static ItemStack putBlockPosItemStack(ItemStack itemStack, String keyName, BlockPos keyValue) {
-        initCompoundNBT(itemStack);
-
-        itemStack.getTag().putIntArray(keyName, new int[]{keyValue.getX(), keyValue.getY(), keyValue.getZ()});
+        putBlockPos(itemStack, keyName, keyValue);
 
         return itemStack;
     }

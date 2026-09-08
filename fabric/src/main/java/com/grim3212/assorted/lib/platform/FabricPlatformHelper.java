@@ -128,12 +128,6 @@ public class FabricPlatformHelper implements IPlatformHelper {
         return new ExtendedScreenHandlerType(factory::create);
     }
 
-    @Override
-    public int getFuelTime(ItemStack stack) {
-        Integer fuelTime = FuelRegistry.INSTANCE.get(stack.getItem());
-        return fuelTime != null ? fuelTime : 0;
-    }
-
     public static class ExtendedScreenHandlerImpl implements ExtendedScreenHandlerFactory {
         private final MenuProvider provider;
         private final Consumer<FriendlyByteBuf> extraDataWriter;

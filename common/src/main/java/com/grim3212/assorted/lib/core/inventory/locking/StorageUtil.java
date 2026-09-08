@@ -3,25 +3,29 @@ package com.grim3212.assorted.lib.core.inventory.locking;
 import com.grim3212.assorted.lib.core.inventory.IItemStorageHandler;
 import com.grim3212.assorted.lib.core.inventory.impl.ItemStackStorageHandler;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Nullable;
 
 public class StorageUtil {
+    private static final String LOCK_KEY = "Storage_Lock";
+
     public static void writeLock(CompoundTag nbt, String lock) {
         if (!lock.isEmpty()) {
-            nbt.putString("Storage_Lock", lock);
+            nbt.putString(LOCK_KEY, lock);
         }
     }
 
     public static String readLock(CompoundTag nbt) {
         if (nbt == null) return "";
 
-        return nbt.contains("Storage_Lock", 8) ? nbt.getString("Storage_Lock") : "";
+        return nbt.getStringOr(LOCK_KEY, "");
     }
 
     public static ItemStack setCodeOnStack(String code, ItemStack stack) {
@@ -30,14 +34,10 @@ public class StorageUtil {
         return output;
     }
 
+    // Stacks no longer carry a free-form tag; the equivalent is the CUSTOM_DATA component, which
+    // holds an immutable CompoundTag that has to be replaced rather than mutated in place.
     public static void writeCodeToStack(String code, ItemStack stack) {
-        if (stack.hasTag()) {
-            writeLock(stack.getTag(), code);
-        } else {
-            CompoundTag tag = new CompoundTag();
-            writeLock(tag, code);
-            stack.setTag(tag);
-        }
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> writeLock(tag, code));
     }
 
     public static String getCode(BlockEntity te) {
@@ -48,10 +48,7 @@ public class StorageUtil {
     }
 
     public static String getCode(ItemStack stack) {
-        if (stack.hasTag()) {
-            return readLock(stack.getTag());
-        }
-        return "";
+        return readLock(stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag());
     }
 
     public static boolean hasCodeWithMatch(ItemStack stack, String testCode) {

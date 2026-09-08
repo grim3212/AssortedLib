@@ -22,15 +22,15 @@ public interface ILevelPropertyAccessor {
 
     int getLightEmission(BlockGetter getter, BlockPos blockPos);
 
+    // Both of these became position-independent in 26.x: light dampening and skylight propagation
+    // are now properties of the block state alone. The getter/pos parameters are kept so callers in
+    // the other Assorted mods do not have to change.
     default int getLightBlock(BlockGetter blockGetter, BlockPos blockPos) {
-        return blockGetter.getBlockState(blockPos).getLightBlock(
-                blockGetter,
-                blockPos
-        );
+        return blockGetter.getBlockState(blockPos).getLightDampening();
     }
 
     default boolean propagatesSkylightDown(BlockGetter blockGetter, BlockPos blockPos) {
-        return blockGetter.getBlockState(blockPos).propagatesSkylightDown(blockGetter, blockPos);
+        return blockGetter.getBlockState(blockPos).propagatesSkylightDown();
     }
 
     boolean canHarvestBlock(BlockGetter blockGetter, BlockPos pos, Player player);

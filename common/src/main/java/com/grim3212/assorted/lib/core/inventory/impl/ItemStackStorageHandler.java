@@ -2,16 +2,15 @@ package com.grim3212.assorted.lib.core.inventory.impl;
 
 import com.grim3212.assorted.lib.LibConstants;
 import com.grim3212.assorted.lib.core.inventory.IItemStorageHandler;
+import com.grim3212.assorted.lib.core.inventory.IValueSerializable;
 import com.grim3212.assorted.lib.platform.Services;
-import com.grim3212.assorted.lib.util.ITagSerializable;
 import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
 
-public class ItemStackStorageHandler implements IItemStorageHandler, ITagSerializable<CompoundTag> {
+public class ItemStackStorageHandler implements IItemStorageHandler, IValueSerializable {
     protected NonNullList<ItemStack> stacks;
 
     public ItemStackStorageHandler() {
@@ -134,32 +133,25 @@ public class ItemStackStorageHandler implements IItemStorageHandler, ITagSeriali
     }
 
     @Override
-    public CompoundTag serializeNBT() {
-        ListTag nbtTagList = new ListTag();
+    public void serialize(ValueOutput output) {
+        ValueOutput.ValueOutputList items = output.childrenList("Items");
         for (int i = 0; i < stacks.size(); i++) {
             if (!stacks.get(i).isEmpty()) {
-                CompoundTag itemTag = new CompoundTag();
-                itemTag.putInt("Slot", i);
-                stacks.get(i).save(itemTag);
-                nbtTagList.add(itemTag);
+                ValueOutput itemOutput = items.addChild();
+                itemOutput.putInt("Slot", i);
+                itemOutput.store("Item", ItemStack.CODEC, stacks.get(i));
             }
         }
-        CompoundTag nbt = new CompoundTag();
-        nbt.put("Items", nbtTagList);
-        nbt.putInt("Size", stacks.size());
-        return nbt;
+        output.putInt("Size", stacks.size());
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        setSize(nbt.contains("Size", Tag.TAG_INT) ? nbt.getInt("Size") : stacks.size());
-        ListTag tagList = nbt.getList("Items", Tag.TAG_COMPOUND);
-        for (int i = 0; i < tagList.size(); i++) {
-            CompoundTag itemTags = tagList.getCompound(i);
-            int slot = itemTags.getInt("Slot");
-
+    public void deserialize(ValueInput input) {
+        setSize(input.getIntOr("Size", stacks.size()));
+        for (ValueInput itemInput : input.childrenListOrEmpty("Items")) {
+            int slot = itemInput.getIntOr("Slot", -1);
             if (slot >= 0 && slot < stacks.size()) {
-                stacks.set(slot, ItemStack.of(itemTags));
+                itemInput.read("Item", ItemStack.CODEC).ifPresent(stack -> stacks.set(slot, stack));
             }
         }
         onLoad();

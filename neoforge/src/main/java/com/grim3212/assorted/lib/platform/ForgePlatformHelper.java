@@ -124,41 +124,8 @@ public class ForgePlatformHelper implements IPlatformHelper {
         return IForgeMenuType.create(factory::create);
     }
 
-    @Override
-    public int getFuelTime(ItemStack stack) {
-        return ForgeHooks.getBurnTime(stack, null);
-    }
-
-    @Override
-    public boolean isTieredTool(ItemStack stack, Tiers minTier, ToolType toolType) {
-        if (stack.getItem() instanceof TieredItem itemTier) {
-            // TODO: Possibly look into cross-platform support for ToolActions
-            if (stack.getItem().canPerformAction(stack, getToolActionForType(toolType))) {
-                if (TierSortingRegistry.isTierSorted(itemTier.getTier())) {
-                    return TierSortingRegistry.getTiersLowerThan(itemTier.getTier()).contains(minTier);
-                } else {
-                    return IPlatformHelper.super.isTieredTool(stack, minTier, toolType);
-                }
-            }
-        }
-        return false;
-    }
-
-    private ToolAction getToolActionForType(ToolType type) {
-        switch (type) {
-            case PICKAXE -> {
-                return ToolActions.PICKAXE_DIG;
-            }
-            case SHOVEL -> {
-                return ToolActions.SHOVEL_DIG;
-            }
-            case AXE -> {
-                return ToolActions.AXE_DIG;
-            }
-            case HOE -> {
-                return ToolActions.HOE_DIG;
-            }
-        }
-        return null;
-    }
+    // isTieredTool is no longer overridden here. Forge's ToolActions and TierSortingRegistry are
+    // both gone, and 26.2 expresses tool type and mining tier entirely through vanilla item tags and
+    // the TOOL data component, so the default implementation in IPlatformHelper is correct on both
+    // loaders.
 }
