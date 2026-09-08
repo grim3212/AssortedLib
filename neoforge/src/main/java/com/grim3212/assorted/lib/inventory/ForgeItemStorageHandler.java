@@ -2,7 +2,7 @@ package com.grim3212.assorted.lib.inventory;
 
 import com.grim3212.assorted.lib.core.inventory.IItemStorageHandler;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.IItemHandlerModifiable;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import org.jetbrains.annotations.NotNull;
 
 public class ForgeItemStorageHandler implements IItemHandlerModifiable {

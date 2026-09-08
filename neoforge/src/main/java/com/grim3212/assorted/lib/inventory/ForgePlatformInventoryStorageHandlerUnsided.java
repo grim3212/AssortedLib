@@ -4,7 +4,7 @@ import com.grim3212.assorted.lib.core.inventory.IItemStorageHandler;
 import com.grim3212.assorted.lib.core.inventory.IPlatformInventoryStorageHandler;
 import net.minecraft.core.Direction;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
+import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.Nullable;
 
 public class ForgePlatformInventoryStorageHandlerUnsided implements IPlatformInventoryStorageHandler {

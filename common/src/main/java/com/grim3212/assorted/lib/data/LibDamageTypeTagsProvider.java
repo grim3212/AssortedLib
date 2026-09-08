@@ -3,6 +3,7 @@ package com.grim3212.assorted.lib.data;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.DamageTypeTagsProvider;
+import net.minecraft.data.tags.TagAppender;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageType;
 import org.apache.commons.lang3.NotImplementedException;

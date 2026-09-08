@@ -141,9 +141,9 @@ public class LibFluidIngredient {
             TagKey<Item> itemTag = null;
 
             if (hasItemTag) {
-                itemTag = TagKey.create(Registries.ITEM, buf.readResourceLocation());
+                itemTag = TagKey.create(Registries.ITEM, buf.readIdentifier());
             }
-            TagKey<Fluid> fluidTag = TagKey.create(Registries.FLUID, buf.readResourceLocation());
+            TagKey<Fluid> fluidTag = TagKey.create(Registries.FLUID, buf.readIdentifier());
             long amount = buf.readLong();
             return create(itemTag, fluidTag, amount);
         }
@@ -151,11 +151,11 @@ public class LibFluidIngredient {
         public void write(FriendlyByteBuf buf, T ingredient) {
             if (ingredient.itemTag != null) {
                 buf.writeBoolean(true);
-                buf.writeResourceLocation(ingredient.itemTag.location());
+                buf.writeIdentifier(ingredient.itemTag.location());
             } else {
                 buf.writeBoolean(false);
             }
-            buf.writeResourceLocation(ingredient.fluidTag.location());
+            buf.writeIdentifier(ingredient.fluidTag.location());
             buf.writeLong(ingredient.amount);
         }
 

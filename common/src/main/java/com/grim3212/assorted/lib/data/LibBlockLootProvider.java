@@ -2,11 +2,11 @@ package com.grim3212.assorted.lib.data;
 
 import com.grim3212.assorted.lib.annotations.LoaderImplement;
 import com.grim3212.assorted.lib.mixin.data.AccessorBlockLootSubProvider;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.loot.packs.VanillaBlockLoot;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootTable;
 
 import java.util.HashSet;
@@ -20,7 +20,8 @@ public abstract class LibBlockLootProvider extends VanillaBlockLoot {
     private final Supplier<Iterable<Block>> knownBlocks;
 
 
-    public LibBlockLootProvider(Supplier<Iterable<Block>> knownBlocks) {
+    public LibBlockLootProvider(HolderLookup.Provider registries, Supplier<Iterable<Block>> knownBlocks) {
+        super(registries);
         this.knownBlocks = knownBlocks;
     }
 
@@ -28,22 +29,24 @@ public abstract class LibBlockLootProvider extends VanillaBlockLoot {
     public abstract void generate();
 
     @Override
-    public void generate(BiConsumer<Identifier, LootTable.Builder> biConsumer) {
+    public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> biConsumer) {
         this.generate();
-        Set<Identifier> set = new HashSet<>();
+        Set<ResourceKey<LootTable>> set = new HashSet<>();
         AccessorBlockLootSubProvider provider = ((AccessorBlockLootSubProvider) this);
 
         for (Block block : getKnownBlocks()) {
             if (block.isEnabled(provider.assortedlib_getEnabledFeatures())) {
-                Identifier resourcelocation = block.getLootTable();
-                if (resourcelocation != BuiltInLootTables.EMPTY && set.add(resourcelocation)) {
-                    LootTable.Builder loottable$builder = provider.assortedlib_getMap().remove(resourcelocation);
-                    if (loottable$builder == null) {
-                        throw new IllegalStateException(String.format(Locale.ROOT, "Missing loottable '%s' for '%s'", resourcelocation, BuiltInRegistries.BLOCK.getKey(block)));
-                    }
+                // Blocks without a loot table are simply empty now instead of pointing at BuiltInLootTables.EMPTY
+                block.getLootTable().ifPresent((lootTable) -> {
+                    if (set.add(lootTable)) {
+                        LootTable.Builder loottable$builder = provider.assortedlib_getMap().remove(lootTable);
+                        if (loottable$builder == null) {
+                            throw new IllegalStateException(String.format(Locale.ROOT, "Missing loottable '%s' for '%s'", lootTable.identifier(), BuiltInRegistries.BLOCK.getKey(block)));
+                        }
 
-                    biConsumer.accept(resourcelocation, loottable$builder);
-                }
+                        biConsumer.accept(lootTable, loottable$builder);
+                    }
+                });
             }
         }
 

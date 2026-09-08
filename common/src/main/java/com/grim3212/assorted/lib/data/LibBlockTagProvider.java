@@ -2,6 +2,7 @@ package com.grim3212.assorted.lib.data;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
+import net.minecraft.data.tags.TagAppender;
 import net.minecraft.data.tags.VanillaBlockTagsProvider;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
@@ -21,10 +22,5 @@ public abstract class LibBlockTagProvider extends VanillaBlockTagsProvider {
         throw new NotImplementedException();
     }
 
-    @Override
-    protected IntrinsicTagAppender<Block> tag(TagKey<Block> tag) {
-        throw new NotImplementedException();
-    }
-
-    public abstract void addCommonTags(Function<TagKey<Block>, IntrinsicTagAppender<Block>> tagger);
+    public abstract void addCommonTags(Function<TagKey<Block>, TagAppender<Block>> tagger);
 }

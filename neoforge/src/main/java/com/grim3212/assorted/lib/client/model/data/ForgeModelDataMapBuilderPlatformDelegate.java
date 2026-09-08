@@ -1,7 +1,7 @@
 package com.grim3212.assorted.lib.client.model.data;
 
-import net.minecraftforge.client.model.data.ModelData;
-import net.minecraftforge.client.model.data.ModelProperty;
+import net.neoforged.neoforge.model.data.ModelData;
+import net.neoforged.neoforge.model.data.ModelProperty;
 
 public class ForgeModelDataMapBuilderPlatformDelegate implements IModelDataBuilder {
 

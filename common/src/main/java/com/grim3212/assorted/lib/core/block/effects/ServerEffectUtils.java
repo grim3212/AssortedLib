@@ -28,7 +28,7 @@ public class ServerEffectUtils {
         if (state != null && !state.isAir()) {
             Vec3 vec3 = entity.getDeltaMovement();
             EntityDimensions dimensions = entity.getType().getDimensions();
-            level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, state), entity.getX() + (RANDOM.nextDouble() - 0.5) * (double) dimensions.width, entity.getY() + 0.1, entity.getZ() + (RANDOM.nextDouble() - 0.5) * (double) dimensions.width, vec3.x * -4.0, 1.5, vec3.z * -4.0);
+            level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, state), entity.getX() + (RANDOM.nextDouble() - 0.5) * (double) dimensions.width(), entity.getY() + 0.1, entity.getZ() + (RANDOM.nextDouble() - 0.5) * (double) dimensions.width(), vec3.x * -4.0, 1.5, vec3.z * -4.0);
             return true;
         }
 

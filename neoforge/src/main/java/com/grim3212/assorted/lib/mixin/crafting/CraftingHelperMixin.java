@@ -3,7 +3,7 @@ package com.grim3212.assorted.lib.mixin.crafting;
 import com.google.gson.JsonObject;
 import com.grim3212.assorted.lib.platform.ForgeConditionHelper;
 import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.neoforged.neoforge.common.conditions.ICondition;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

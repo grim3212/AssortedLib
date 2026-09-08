@@ -3,7 +3,7 @@ package com.grim3212.assorted.lib.conditions;
 import com.google.gson.JsonObject;
 import com.grim3212.assorted.lib.core.conditions.LibCondition;
 import net.minecraft.resources.Identifier;
-import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.neoforged.neoforge.common.conditions.ICondition;
 import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
 
 public class RecipeConditionWrapper implements ICondition {

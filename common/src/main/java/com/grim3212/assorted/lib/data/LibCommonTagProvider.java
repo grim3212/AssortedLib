@@ -6,12 +6,14 @@ import com.grim3212.assorted.lib.util.LibCommonTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
+import net.minecraft.data.tags.TagAppender;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.BiomeTags;
+import net.minecraft.tags.BlockItemTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.biome.Biome;
@@ -29,6 +31,14 @@ import java.util.function.Function;
 
 public class LibCommonTagProvider {
 
+    private static ResourceKey<Block> key(Block block) {
+        return block.builtInRegistryHolder().key();
+    }
+
+    private static ResourceKey<Item> key(Item item) {
+        return item.builtInRegistryHolder().key();
+    }
+
     public static class BlockTagProvider extends LibBlockTagProvider {
 
         public BlockTagProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> lookup) {
@@ -36,80 +46,80 @@ public class LibCommonTagProvider {
         }
 
         @Override
-        public void addCommonTags(Function<TagKey<Block>, IntrinsicTagAppender<Block>> tagger) {
+        public void addCommonTags(Function<TagKey<Block>, TagAppender<Block>> tagger) {
             if (!Services.PLATFORM.getPlatformName().equals("Forge")) {
                 tagger.apply(LibCommonTags.Blocks.BARRELS).addTag(LibCommonTags.Blocks.BARRELS_WOODEN);
-                tagger.apply(LibCommonTags.Blocks.BARRELS_WOODEN).add(Blocks.BARREL);
-                tagger.apply(LibCommonTags.Blocks.BOOKSHELVES).add(Blocks.BOOKSHELF);
+                tagger.apply(LibCommonTags.Blocks.BARRELS_WOODEN).add(key(Blocks.BARREL));
+                tagger.apply(LibCommonTags.Blocks.BOOKSHELVES).add(key(Blocks.BOOKSHELF));
                 tagger.apply(LibCommonTags.Blocks.CHESTS).addTag(LibCommonTags.Blocks.CHESTS_ENDER);
                 tagger.apply(LibCommonTags.Blocks.CHESTS).addTag(LibCommonTags.Blocks.CHESTS_TRAPPED);
                 tagger.apply(LibCommonTags.Blocks.CHESTS).addTag(LibCommonTags.Blocks.CHESTS_WOODEN);
-                tagger.apply(LibCommonTags.Blocks.CHESTS_ENDER).add(Blocks.ENDER_CHEST);
-                tagger.apply(LibCommonTags.Blocks.CHESTS_TRAPPED).add(Blocks.TRAPPED_CHEST);
-                tagger.apply(LibCommonTags.Blocks.CHESTS_WOODEN).add(Blocks.CHEST, Blocks.TRAPPED_CHEST);
-                tagger.apply(LibCommonTags.Blocks.COBBLESTONE).add(Blocks.COBBLESTONE, Blocks.INFESTED_COBBLESTONE, Blocks.MOSSY_COBBLESTONE, Blocks.COBBLED_DEEPSLATE);
-                tagger.apply(LibCommonTags.Blocks.END_STONES).add(Blocks.END_STONE);
+                tagger.apply(LibCommonTags.Blocks.CHESTS_ENDER).add(key(Blocks.ENDER_CHEST));
+                tagger.apply(LibCommonTags.Blocks.CHESTS_TRAPPED).add(key(Blocks.TRAPPED_CHEST));
+                tagger.apply(LibCommonTags.Blocks.CHESTS_WOODEN).add(key(Blocks.CHEST), key(Blocks.TRAPPED_CHEST));
+                tagger.apply(LibCommonTags.Blocks.COBBLESTONE).add(key(Blocks.COBBLESTONE), key(Blocks.INFESTED_COBBLESTONE), key(Blocks.MOSSY_COBBLESTONE), key(Blocks.COBBLED_DEEPSLATE));
+                tagger.apply(LibCommonTags.Blocks.END_STONES).add(key(Blocks.END_STONE));
                 tagger.apply(LibCommonTags.Blocks.FENCE_GATES).addTag(LibCommonTags.Blocks.FENCE_GATES_WOODEN);
-                tagger.apply(LibCommonTags.Blocks.FENCE_GATES_WOODEN).add(Blocks.OAK_FENCE_GATE, Blocks.SPRUCE_FENCE_GATE, Blocks.BIRCH_FENCE_GATE, Blocks.JUNGLE_FENCE_GATE, Blocks.ACACIA_FENCE_GATE, Blocks.DARK_OAK_FENCE_GATE, Blocks.CRIMSON_FENCE_GATE, Blocks.WARPED_FENCE_GATE, Blocks.MANGROVE_FENCE_GATE);
+                tagger.apply(LibCommonTags.Blocks.FENCE_GATES_WOODEN).add(key(Blocks.OAK_FENCE_GATE), key(Blocks.SPRUCE_FENCE_GATE), key(Blocks.BIRCH_FENCE_GATE), key(Blocks.JUNGLE_FENCE_GATE), key(Blocks.ACACIA_FENCE_GATE), key(Blocks.DARK_OAK_FENCE_GATE), key(Blocks.CRIMSON_FENCE_GATE), key(Blocks.WARPED_FENCE_GATE), key(Blocks.MANGROVE_FENCE_GATE));
                 tagger.apply(LibCommonTags.Blocks.FENCES).addTag(LibCommonTags.Blocks.FENCES_WOODEN);
                 tagger.apply(LibCommonTags.Blocks.FENCES).addTag(LibCommonTags.Blocks.FENCES_NETHER_BRICK);
-                tagger.apply(LibCommonTags.Blocks.FENCES_NETHER_BRICK).add(Blocks.NETHER_BRICK_FENCE);
-                tagger.apply(LibCommonTags.Blocks.FENCES_WOODEN).addOptionalTag(BlockTags.WOODEN_FENCES.location());
-                tagger.apply(LibCommonTags.Blocks.GRAVEL).add(Blocks.GRAVEL);
-                tagger.apply(LibCommonTags.Blocks.NETHERRACK).add(Blocks.NETHERRACK);
-                tagger.apply(LibCommonTags.Blocks.OBSIDIAN).add(Blocks.OBSIDIAN);
+                tagger.apply(LibCommonTags.Blocks.FENCES_NETHER_BRICK).add(key(Blocks.NETHER_BRICK_FENCE));
+                tagger.apply(LibCommonTags.Blocks.FENCES_WOODEN).addOptionalTag(BlockTags.WOODEN_FENCES);
+                tagger.apply(LibCommonTags.Blocks.GRAVEL).add(key(Blocks.GRAVEL));
+                tagger.apply(LibCommonTags.Blocks.NETHERRACK).add(key(Blocks.NETHERRACK));
+                tagger.apply(LibCommonTags.Blocks.OBSIDIAN).add(key(Blocks.OBSIDIAN));
 
                 List<TagKey<Block>> oreTags = Arrays.asList(LibCommonTags.Blocks.ORES_COAL, LibCommonTags.Blocks.ORES_COPPER, LibCommonTags.Blocks.ORES_DIAMOND, LibCommonTags.Blocks.ORES_EMERALD, LibCommonTags.Blocks.ORES_GOLD, LibCommonTags.Blocks.ORES_IRON, LibCommonTags.Blocks.ORES_LAPIS, LibCommonTags.Blocks.ORES_REDSTONE, LibCommonTags.Blocks.ORES_QUARTZ, LibCommonTags.Blocks.ORES_NETHERITE_SCRAP);
                 for (TagKey<Block> oreTag : oreTags)
                     tagger.apply(LibCommonTags.Blocks.ORES).addTag(oreTag);
 
-                tagger.apply(LibCommonTags.Blocks.ORES_COAL).addOptionalTag(BlockTags.COAL_ORES.location());
-                tagger.apply(LibCommonTags.Blocks.ORES_COPPER).addOptionalTag(BlockTags.COPPER_ORES.location());
-                tagger.apply(LibCommonTags.Blocks.ORES_DIAMOND).addOptionalTag(BlockTags.DIAMOND_ORES.location());
-                tagger.apply(LibCommonTags.Blocks.ORES_EMERALD).addOptionalTag(BlockTags.EMERALD_ORES.location());
-                tagger.apply(LibCommonTags.Blocks.ORES_GOLD).addOptionalTag(BlockTags.GOLD_ORES.location());
-                tagger.apply(LibCommonTags.Blocks.ORES_IRON).addOptionalTag(BlockTags.IRON_ORES.location());
-                tagger.apply(LibCommonTags.Blocks.ORES_LAPIS).addOptionalTag(BlockTags.LAPIS_ORES.location());
-                tagger.apply(LibCommonTags.Blocks.ORES_QUARTZ).add(Blocks.NETHER_QUARTZ_ORE);
-                tagger.apply(LibCommonTags.Blocks.ORES_REDSTONE).addOptionalTag(BlockTags.REDSTONE_ORES.location());
-                tagger.apply(LibCommonTags.Blocks.ORES_NETHERITE_SCRAP).add(Blocks.ANCIENT_DEBRIS);
-                tagger.apply(LibCommonTags.Blocks.STONE).add(Blocks.ANDESITE, Blocks.DIORITE, Blocks.GRANITE, Blocks.INFESTED_STONE, Blocks.STONE, Blocks.POLISHED_ANDESITE, Blocks.POLISHED_DIORITE, Blocks.POLISHED_GRANITE, Blocks.DEEPSLATE, Blocks.POLISHED_DEEPSLATE, Blocks.INFESTED_DEEPSLATE, Blocks.TUFF);
+                tagger.apply(LibCommonTags.Blocks.ORES_COAL).addOptionalTag(BlockItemTags.COAL_ORES.block());
+                tagger.apply(LibCommonTags.Blocks.ORES_COPPER).addOptionalTag(BlockTags.COPPER_ORES);
+                tagger.apply(LibCommonTags.Blocks.ORES_DIAMOND).addOptionalTag(BlockItemTags.DIAMOND_ORES.block());
+                tagger.apply(LibCommonTags.Blocks.ORES_EMERALD).addOptionalTag(BlockItemTags.EMERALD_ORES.block());
+                tagger.apply(LibCommonTags.Blocks.ORES_GOLD).addOptionalTag(BlockTags.GOLD_ORES);
+                tagger.apply(LibCommonTags.Blocks.ORES_IRON).addOptionalTag(BlockTags.IRON_ORES);
+                tagger.apply(LibCommonTags.Blocks.ORES_LAPIS).addOptionalTag(BlockItemTags.LAPIS_ORES.block());
+                tagger.apply(LibCommonTags.Blocks.ORES_QUARTZ).add(key(Blocks.NETHER_QUARTZ_ORE));
+                tagger.apply(LibCommonTags.Blocks.ORES_REDSTONE).addOptionalTag(BlockItemTags.REDSTONE_ORES.block());
+                tagger.apply(LibCommonTags.Blocks.ORES_NETHERITE_SCRAP).add(key(Blocks.ANCIENT_DEBRIS));
+                tagger.apply(LibCommonTags.Blocks.STONE).add(key(Blocks.ANDESITE), key(Blocks.DIORITE), key(Blocks.GRANITE), key(Blocks.INFESTED_STONE), key(Blocks.STONE), key(Blocks.POLISHED_ANDESITE), key(Blocks.POLISHED_DIORITE), key(Blocks.POLISHED_GRANITE), key(Blocks.DEEPSLATE), key(Blocks.POLISHED_DEEPSLATE), key(Blocks.INFESTED_DEEPSLATE), key(Blocks.TUFF));
 
                 List<TagKey<Block>> storageTags = Arrays.asList(LibCommonTags.Blocks.STORAGE_BLOCKS_AMETHYST, LibCommonTags.Blocks.STORAGE_BLOCKS_COAL, LibCommonTags.Blocks.STORAGE_BLOCKS_COPPER, LibCommonTags.Blocks.STORAGE_BLOCKS_DIAMOND, LibCommonTags.Blocks.STORAGE_BLOCKS_EMERALD, LibCommonTags.Blocks.STORAGE_BLOCKS_GOLD, LibCommonTags.Blocks.STORAGE_BLOCKS_IRON, LibCommonTags.Blocks.STORAGE_BLOCKS_LAPIS, LibCommonTags.Blocks.STORAGE_BLOCKS_QUARTZ, LibCommonTags.Blocks.STORAGE_BLOCKS_RAW_COPPER, LibCommonTags.Blocks.STORAGE_BLOCKS_RAW_GOLD, LibCommonTags.Blocks.STORAGE_BLOCKS_RAW_IRON, LibCommonTags.Blocks.STORAGE_BLOCKS_REDSTONE, LibCommonTags.Blocks.STORAGE_BLOCKS_NETHERITE);
                 for (TagKey<Block> storageTag : storageTags)
                     tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS).addTag(storageTag);
 
-                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_AMETHYST).add(Blocks.AMETHYST_BLOCK);
-                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_COAL).add(Blocks.COAL_BLOCK);
-                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_COPPER).add(Blocks.COPPER_BLOCK);
-                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_DIAMOND).add(Blocks.DIAMOND_BLOCK);
-                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_EMERALD).add(Blocks.EMERALD_BLOCK);
-                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_GOLD).add(Blocks.GOLD_BLOCK);
-                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_IRON).add(Blocks.IRON_BLOCK);
-                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_LAPIS).add(Blocks.LAPIS_BLOCK);
-                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_QUARTZ).add(Blocks.QUARTZ_BLOCK);
-                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_RAW_COPPER).add(Blocks.RAW_COPPER_BLOCK);
-                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_RAW_GOLD).add(Blocks.RAW_GOLD_BLOCK);
-                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_RAW_IRON).add(Blocks.RAW_IRON_BLOCK);
-                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_REDSTONE).add(Blocks.REDSTONE_BLOCK);
-                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_NETHERITE).add(Blocks.NETHERITE_BLOCK);
+                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_AMETHYST).add(key(Blocks.AMETHYST_BLOCK));
+                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_COAL).add(key(Blocks.COAL_BLOCK));
+                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_COPPER).add(key(Blocks.COPPER_BLOCK.weathering().unaffected()));
+                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_DIAMOND).add(key(Blocks.DIAMOND_BLOCK));
+                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_EMERALD).add(key(Blocks.EMERALD_BLOCK));
+                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_GOLD).add(key(Blocks.GOLD_BLOCK));
+                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_IRON).add(key(Blocks.IRON_BLOCK));
+                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_LAPIS).add(key(Blocks.LAPIS_BLOCK));
+                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_QUARTZ).add(key(Blocks.QUARTZ_BLOCK));
+                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_RAW_COPPER).add(key(Blocks.RAW_COPPER_BLOCK));
+                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_RAW_GOLD).add(key(Blocks.RAW_GOLD_BLOCK));
+                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_RAW_IRON).add(key(Blocks.RAW_IRON_BLOCK));
+                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_REDSTONE).add(key(Blocks.REDSTONE_BLOCK));
+                tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_NETHERITE).add(key(Blocks.NETHERITE_BLOCK));
 
                 addColored(tagger.apply(LibCommonTags.Blocks.STAINED_GLASS)::add, LibCommonTags.Blocks.GLASS, "{color}_stained_glass", tagger);
                 addColored(tagger.apply(LibCommonTags.Blocks.STAINED_GLASS_PANES)::add, LibCommonTags.Blocks.GLASS_PANES, "{color}_stained_glass_pane", tagger);
 
-                tagger.apply(LibCommonTags.Blocks.GLASS).addTag(LibCommonTags.Blocks.GLASS_COLORLESS).addOptionalTag(LibCommonTags.Blocks.STAINED_GLASS.location()).addTag(LibCommonTags.Blocks.GLASS_TINTED);
-                tagger.apply(LibCommonTags.Blocks.GLASS_COLORLESS).add(Blocks.GLASS);
-                tagger.apply(LibCommonTags.Blocks.GLASS_TINTED).add(Blocks.TINTED_GLASS);
-                tagger.apply(LibCommonTags.Blocks.GLASS_PANES).addTag(LibCommonTags.Blocks.GLASS_PANES_COLORLESS).addOptionalTag(LibCommonTags.Blocks.STAINED_GLASS_PANES.location());
-                tagger.apply(LibCommonTags.Blocks.GLASS_PANES_COLORLESS).add(Blocks.GLASS_PANE);
+                tagger.apply(LibCommonTags.Blocks.GLASS).addTag(LibCommonTags.Blocks.GLASS_COLORLESS).addOptionalTag(LibCommonTags.Blocks.STAINED_GLASS).addTag(LibCommonTags.Blocks.GLASS_TINTED);
+                tagger.apply(LibCommonTags.Blocks.GLASS_COLORLESS).add(key(Blocks.GLASS));
+                tagger.apply(LibCommonTags.Blocks.GLASS_TINTED).add(key(Blocks.TINTED_GLASS));
+                tagger.apply(LibCommonTags.Blocks.GLASS_PANES).addTag(LibCommonTags.Blocks.GLASS_PANES_COLORLESS).addOptionalTag(LibCommonTags.Blocks.STAINED_GLASS_PANES);
+                tagger.apply(LibCommonTags.Blocks.GLASS_PANES_COLORLESS).add(key(Blocks.GLASS_PANE));
             }
 
-            DyeHelper.CONCRETE_BY_DYE.entrySet().stream().forEach((x) -> tagger.apply(LibCommonTags.Blocks.CONCRETE).add(x.getValue()));
-            DyeHelper.CONCRETE_POWDER_BY_DYE.entrySet().stream().forEach((x) -> tagger.apply(LibCommonTags.Blocks.CONCRETE_POWDER).add(x.getValue()));
-            DyeHelper.CARPET_BY_DYE.entrySet().stream().forEach((x) -> tagger.apply(LibCommonTags.Blocks.CARPET).add(x.getValue()));
+            DyeHelper.CONCRETE_BY_DYE.entrySet().stream().forEach((x) -> tagger.apply(LibCommonTags.Blocks.CONCRETE).add(key(x.getValue())));
+            DyeHelper.CONCRETE_POWDER_BY_DYE.entrySet().stream().forEach((x) -> tagger.apply(LibCommonTags.Blocks.CONCRETE_POWDER).add(key(x.getValue())));
+            DyeHelper.CARPET_BY_DYE.entrySet().stream().forEach((x) -> tagger.apply(LibCommonTags.Blocks.CARPET).add(key(x.getValue())));
         }
 
-        private void addColored(Consumer<Block> consumer, TagKey<Block> group, String pattern, Function<TagKey<Block>, IntrinsicTagAppender<Block>> tagger) {
+        private void addColored(Consumer<ResourceKey<Block>> consumer, TagKey<Block> group, String pattern, Function<TagKey<Block>, TagAppender<Block>> tagger) {
             String prefix = group.location().getPath().toUpperCase(Locale.ENGLISH) + '_';
             for (DyeColor color : DyeColor.values()) {
                 Identifier key = Identifier.fromNamespaceAndPath("minecraft", pattern.replace("{color}", color.getName()));
@@ -117,8 +127,8 @@ public class LibCommonTagProvider {
                 Block block = Services.PLATFORM.getRegistry(Registries.BLOCK).getValue(key).get();
                 if (block == null || block == Blocks.AIR)
                     throw new IllegalStateException("Unknown block: " + key.toString());
-                tagger.apply(tag).add(block);
-                consumer.accept(block);
+                tagger.apply(tag).add(key(block));
+                consumer.accept(key(block));
             }
         }
 
@@ -139,19 +149,19 @@ public class LibCommonTagProvider {
         }
 
         @Override
-        public void addCommonTags(Function<TagKey<Item>, IntrinsicTagAppender<Item>> tagger, BiConsumer<TagKey<Block>, TagKey<Item>> copier) {
+        public void addCommonTags(Function<TagKey<Item>, TagAppender<Item>> tagger, BiConsumer<TagKey<Block>, TagKey<Item>> copier) {
             if (!Services.PLATFORM.getPlatformName().equals("Forge")) {
                 copier.accept(LibCommonTags.Blocks.STONE, LibCommonTags.Items.STONE);
 
                 for (DyeColor color : DyeColor.values()) {
                     TagKey<Item> dyeTag = DyeHelper.getDyeTag(color);
                     tagger.apply(LibCommonTags.Items.DYES).addTag(dyeTag);
-                    tagger.apply(dyeTag).add(DyeItem.byColor(color));
+                    tagger.apply(dyeTag).add(key(Items.DYE.pick(color)));
                 }
 
                 copier.accept(LibCommonTags.Blocks.BARRELS, LibCommonTags.Items.BARRELS);
                 copier.accept(LibCommonTags.Blocks.BARRELS_WOODEN, LibCommonTags.Items.BARRELS_WOODEN);
-                tagger.apply(LibCommonTags.Items.BONES).add(Items.BONE);
+                tagger.apply(LibCommonTags.Items.BONES).add(key(Items.BONE));
                 copier.accept(LibCommonTags.Blocks.BOOKSHELVES, LibCommonTags.Items.BOOKSHELVES);
                 copier.accept(LibCommonTags.Blocks.CHESTS, LibCommonTags.Items.CHESTS);
                 copier.accept(LibCommonTags.Blocks.CHESTS_ENDER, LibCommonTags.Items.CHESTS_ENDER);
@@ -161,13 +171,13 @@ public class LibCommonTagProvider {
                 tagger.apply(LibCommonTags.Items.DUSTS).addTag(LibCommonTags.Items.DUSTS_GLOWSTONE);
                 tagger.apply(LibCommonTags.Items.DUSTS).addTag(LibCommonTags.Items.DUSTS_PRISMARINE);
                 tagger.apply(LibCommonTags.Items.DUSTS).addTag(LibCommonTags.Items.DUSTS_REDSTONE);
-                tagger.apply(LibCommonTags.Items.DUSTS_GLOWSTONE).add(Items.GLOWSTONE_DUST);
-                tagger.apply(LibCommonTags.Items.DUSTS_PRISMARINE).add(Items.PRISMARINE_SHARD);
-                tagger.apply(LibCommonTags.Items.DUSTS_REDSTONE).add(Items.REDSTONE);
-                tagger.apply(LibCommonTags.Items.EGGS).add(Items.EGG);
+                tagger.apply(LibCommonTags.Items.DUSTS_GLOWSTONE).add(key(Items.GLOWSTONE_DUST));
+                tagger.apply(LibCommonTags.Items.DUSTS_PRISMARINE).add(key(Items.PRISMARINE_SHARD));
+                tagger.apply(LibCommonTags.Items.DUSTS_REDSTONE).add(key(Items.REDSTONE));
+                tagger.apply(LibCommonTags.Items.EGGS).add(key(Items.EGG));
                 copier.accept(LibCommonTags.Blocks.END_STONES, LibCommonTags.Items.END_STONES);
-                tagger.apply(LibCommonTags.Items.ENDER_PEARLS).add(Items.ENDER_PEARL);
-                tagger.apply(LibCommonTags.Items.FEATHERS).add(Items.FEATHER);
+                tagger.apply(LibCommonTags.Items.ENDER_PEARLS).add(key(Items.ENDER_PEARL));
+                tagger.apply(LibCommonTags.Items.FEATHERS).add(key(Items.FEATHER));
                 copier.accept(LibCommonTags.Blocks.FENCE_GATES, LibCommonTags.Items.FENCE_GATES);
                 copier.accept(LibCommonTags.Blocks.FENCE_GATES_WOODEN, LibCommonTags.Items.FENCE_GATES_WOODEN);
                 copier.accept(LibCommonTags.Blocks.FENCES, LibCommonTags.Items.FENCES);
@@ -178,32 +188,32 @@ public class LibCommonTagProvider {
                 for (TagKey<Item> gemTag : gemTags)
                     tagger.apply(LibCommonTags.Items.GEMS).addTag(gemTag);
 
-                tagger.apply(LibCommonTags.Items.GEMS_AMETHYST).add(Items.AMETHYST_SHARD);
-                tagger.apply(LibCommonTags.Items.GEMS_DIAMOND).add(Items.DIAMOND);
-                tagger.apply(LibCommonTags.Items.GEMS_EMERALD).add(Items.EMERALD);
-                tagger.apply(LibCommonTags.Items.GEMS_LAPIS).add(Items.LAPIS_LAZULI);
-                tagger.apply(LibCommonTags.Items.GEMS_PRISMARINE).add(Items.PRISMARINE_CRYSTALS);
-                tagger.apply(LibCommonTags.Items.GEMS_QUARTZ).add(Items.QUARTZ);
+                tagger.apply(LibCommonTags.Items.GEMS_AMETHYST).add(key(Items.AMETHYST_SHARD));
+                tagger.apply(LibCommonTags.Items.GEMS_DIAMOND).add(key(Items.DIAMOND));
+                tagger.apply(LibCommonTags.Items.GEMS_EMERALD).add(key(Items.EMERALD));
+                tagger.apply(LibCommonTags.Items.GEMS_LAPIS).add(key(Items.LAPIS_LAZULI));
+                tagger.apply(LibCommonTags.Items.GEMS_PRISMARINE).add(key(Items.PRISMARINE_CRYSTALS));
+                tagger.apply(LibCommonTags.Items.GEMS_QUARTZ).add(key(Items.QUARTZ));
                 copier.accept(LibCommonTags.Blocks.GRAVEL, LibCommonTags.Items.GRAVEL);
-                tagger.apply(LibCommonTags.Items.GUNPOWDER).add(Items.GUNPOWDER);
+                tagger.apply(LibCommonTags.Items.GUNPOWDER).add(key(Items.GUNPOWDER));
 
                 List<TagKey<Item>> ingotTags = Arrays.asList(LibCommonTags.Items.INGOTS_BRICK, LibCommonTags.Items.INGOTS_COPPER, LibCommonTags.Items.INGOTS_GOLD, LibCommonTags.Items.INGOTS_IRON, LibCommonTags.Items.INGOTS_NETHERITE, LibCommonTags.Items.INGOTS_NETHER_BRICK);
                 for (TagKey<Item> ingotTag : ingotTags)
                     tagger.apply(LibCommonTags.Items.INGOTS).addTag(ingotTag);
 
-                tagger.apply(LibCommonTags.Items.INGOTS_BRICK).add(Items.BRICK);
-                tagger.apply(LibCommonTags.Items.INGOTS_COPPER).add(Items.COPPER_INGOT);
-                tagger.apply(LibCommonTags.Items.INGOTS_GOLD).add(Items.GOLD_INGOT);
-                tagger.apply(LibCommonTags.Items.INGOTS_IRON).add(Items.IRON_INGOT);
-                tagger.apply(LibCommonTags.Items.INGOTS_NETHERITE).add(Items.NETHERITE_INGOT);
-                tagger.apply(LibCommonTags.Items.INGOTS_NETHER_BRICK).add(Items.NETHER_BRICK);
-                tagger.apply(LibCommonTags.Items.LEATHER).add(Items.LEATHER);
-                tagger.apply(LibCommonTags.Items.NETHER_STARS).add(Items.NETHER_STAR);
+                tagger.apply(LibCommonTags.Items.INGOTS_BRICK).add(key(Items.BRICK));
+                tagger.apply(LibCommonTags.Items.INGOTS_COPPER).add(key(Items.COPPER_INGOT));
+                tagger.apply(LibCommonTags.Items.INGOTS_GOLD).add(key(Items.GOLD_INGOT));
+                tagger.apply(LibCommonTags.Items.INGOTS_IRON).add(key(Items.IRON_INGOT));
+                tagger.apply(LibCommonTags.Items.INGOTS_NETHERITE).add(key(Items.NETHERITE_INGOT));
+                tagger.apply(LibCommonTags.Items.INGOTS_NETHER_BRICK).add(key(Items.NETHER_BRICK));
+                tagger.apply(LibCommonTags.Items.LEATHER).add(key(Items.LEATHER));
+                tagger.apply(LibCommonTags.Items.NETHER_STARS).add(key(Items.NETHER_STAR));
                 copier.accept(LibCommonTags.Blocks.NETHERRACK, LibCommonTags.Items.NETHERRACK);
                 tagger.apply(LibCommonTags.Items.NUGGETS).addTag(LibCommonTags.Items.NUGGETS_GOLD);
                 tagger.apply(LibCommonTags.Items.NUGGETS).addTag(LibCommonTags.Items.NUGGETS_IRON);
-                tagger.apply(LibCommonTags.Items.NUGGETS_IRON).add(Items.IRON_NUGGET);
-                tagger.apply(LibCommonTags.Items.NUGGETS_GOLD).add(Items.GOLD_NUGGET);
+                tagger.apply(LibCommonTags.Items.NUGGETS_IRON).add(key(Items.IRON_NUGGET));
+                tagger.apply(LibCommonTags.Items.NUGGETS_GOLD).add(key(Items.GOLD_NUGGET));
                 copier.accept(LibCommonTags.Blocks.OBSIDIAN, LibCommonTags.Items.OBSIDIAN);
                 copier.accept(LibCommonTags.Blocks.ORES, LibCommonTags.Items.ORES);
                 copier.accept(LibCommonTags.Blocks.ORES_COAL, LibCommonTags.Items.ORES_COAL);
@@ -219,15 +229,15 @@ public class LibCommonTagProvider {
                 tagger.apply(LibCommonTags.Items.RAW_MATERIALS).addTag(LibCommonTags.Items.RAW_MATERIALS_COPPER);
                 tagger.apply(LibCommonTags.Items.RAW_MATERIALS).addTag(LibCommonTags.Items.RAW_MATERIALS_GOLD);
                 tagger.apply(LibCommonTags.Items.RAW_MATERIALS).addTag(LibCommonTags.Items.RAW_MATERIALS_IRON);
-                tagger.apply(LibCommonTags.Items.RAW_MATERIALS_COPPER).add(Items.RAW_COPPER);
-                tagger.apply(LibCommonTags.Items.RAW_MATERIALS_GOLD).add(Items.RAW_GOLD);
-                tagger.apply(LibCommonTags.Items.RAW_MATERIALS_IRON).add(Items.RAW_IRON);
+                tagger.apply(LibCommonTags.Items.RAW_MATERIALS_COPPER).add(key(Items.RAW_COPPER));
+                tagger.apply(LibCommonTags.Items.RAW_MATERIALS_GOLD).add(key(Items.RAW_GOLD));
+                tagger.apply(LibCommonTags.Items.RAW_MATERIALS_IRON).add(key(Items.RAW_IRON));
                 tagger.apply(LibCommonTags.Items.RODS).addTag(LibCommonTags.Items.RODS_WOODEN);
                 tagger.apply(LibCommonTags.Items.RODS).addTag(LibCommonTags.Items.RODS_BLAZE);
-                tagger.apply(LibCommonTags.Items.RODS_BLAZE).add(Items.BLAZE_ROD);
-                tagger.apply(LibCommonTags.Items.RODS_WOODEN).add(Items.STICK);
-                tagger.apply(LibCommonTags.Items.SHEARS).add(Items.SHEARS);
-                tagger.apply(LibCommonTags.Items.SLIMEBALLS).add(Items.SLIME_BALL);
+                tagger.apply(LibCommonTags.Items.RODS_BLAZE).add(key(Items.BLAZE_ROD));
+                tagger.apply(LibCommonTags.Items.RODS_WOODEN).add(key(Items.STICK));
+                tagger.apply(LibCommonTags.Items.SHEARS).add(key(Items.SHEARS));
+                tagger.apply(LibCommonTags.Items.SLIMEBALLS).add(key(Items.SLIME_BALL));
                 copier.accept(LibCommonTags.Blocks.STORAGE_BLOCKS, LibCommonTags.Items.STORAGE_BLOCKS);
                 copier.accept(LibCommonTags.Blocks.STORAGE_BLOCKS_AMETHYST, LibCommonTags.Items.STORAGE_BLOCKS_AMETHYST);
                 copier.accept(LibCommonTags.Blocks.STORAGE_BLOCKS_COAL, LibCommonTags.Items.STORAGE_BLOCKS_COAL);
@@ -243,26 +253,26 @@ public class LibCommonTagProvider {
                 copier.accept(LibCommonTags.Blocks.STORAGE_BLOCKS_RAW_GOLD, LibCommonTags.Items.STORAGE_BLOCKS_RAW_GOLD);
                 copier.accept(LibCommonTags.Blocks.STORAGE_BLOCKS_RAW_IRON, LibCommonTags.Items.STORAGE_BLOCKS_RAW_IRON);
                 copier.accept(LibCommonTags.Blocks.STORAGE_BLOCKS_NETHERITE, LibCommonTags.Items.STORAGE_BLOCKS_NETHERITE);
-                tagger.apply(LibCommonTags.Items.STRING).add(Items.STRING);
-                tagger.apply(LibCommonTags.Items.TOOLS_SWORDS).add(Items.WOODEN_SWORD, Items.STONE_SWORD, Items.IRON_SWORD, Items.GOLDEN_SWORD, Items.DIAMOND_SWORD, Items.NETHERITE_SWORD);
-                tagger.apply(LibCommonTags.Items.TOOLS_AXES).add(Items.WOODEN_AXE, Items.STONE_AXE, Items.IRON_AXE, Items.GOLDEN_AXE, Items.DIAMOND_AXE, Items.NETHERITE_AXE);
-                tagger.apply(LibCommonTags.Items.TOOLS_PICKAXES).add(Items.WOODEN_PICKAXE, Items.STONE_PICKAXE, Items.IRON_PICKAXE, Items.GOLDEN_PICKAXE, Items.DIAMOND_PICKAXE, Items.NETHERITE_PICKAXE);
-                tagger.apply(LibCommonTags.Items.TOOLS_SHOVELS).add(Items.WOODEN_SHOVEL, Items.STONE_SHOVEL, Items.IRON_SHOVEL, Items.GOLDEN_SHOVEL, Items.DIAMOND_SHOVEL, Items.NETHERITE_SHOVEL);
-                tagger.apply(LibCommonTags.Items.TOOLS_HOES).add(Items.WOODEN_HOE, Items.STONE_HOE, Items.IRON_HOE, Items.GOLDEN_HOE, Items.DIAMOND_HOE, Items.NETHERITE_HOE);
-                tagger.apply(LibCommonTags.Items.TOOLS_SHIELDS).add(Items.SHIELD);
-                tagger.apply(LibCommonTags.Items.TOOLS_BOWS).add(Items.BOW);
-                tagger.apply(LibCommonTags.Items.TOOLS_CROSSBOWS).add(Items.CROSSBOW);
-                tagger.apply(LibCommonTags.Items.TOOLS_FISHING_RODS).add(Items.FISHING_ROD);
-                tagger.apply(LibCommonTags.Items.TOOLS_TRIDENTS).add(Items.TRIDENT);
+                tagger.apply(LibCommonTags.Items.STRING).add(key(Items.STRING));
+                tagger.apply(LibCommonTags.Items.TOOLS_SWORDS).add(key(Items.WOODEN_SWORD), key(Items.STONE_SWORD), key(Items.IRON_SWORD), key(Items.GOLDEN_SWORD), key(Items.DIAMOND_SWORD), key(Items.NETHERITE_SWORD));
+                tagger.apply(LibCommonTags.Items.TOOLS_AXES).add(key(Items.WOODEN_AXE), key(Items.STONE_AXE), key(Items.IRON_AXE), key(Items.GOLDEN_AXE), key(Items.DIAMOND_AXE), key(Items.NETHERITE_AXE));
+                tagger.apply(LibCommonTags.Items.TOOLS_PICKAXES).add(key(Items.WOODEN_PICKAXE), key(Items.STONE_PICKAXE), key(Items.IRON_PICKAXE), key(Items.GOLDEN_PICKAXE), key(Items.DIAMOND_PICKAXE), key(Items.NETHERITE_PICKAXE));
+                tagger.apply(LibCommonTags.Items.TOOLS_SHOVELS).add(key(Items.WOODEN_SHOVEL), key(Items.STONE_SHOVEL), key(Items.IRON_SHOVEL), key(Items.GOLDEN_SHOVEL), key(Items.DIAMOND_SHOVEL), key(Items.NETHERITE_SHOVEL));
+                tagger.apply(LibCommonTags.Items.TOOLS_HOES).add(key(Items.WOODEN_HOE), key(Items.STONE_HOE), key(Items.IRON_HOE), key(Items.GOLDEN_HOE), key(Items.DIAMOND_HOE), key(Items.NETHERITE_HOE));
+                tagger.apply(LibCommonTags.Items.TOOLS_SHIELDS).add(key(Items.SHIELD));
+                tagger.apply(LibCommonTags.Items.TOOLS_BOWS).add(key(Items.BOW));
+                tagger.apply(LibCommonTags.Items.TOOLS_CROSSBOWS).add(key(Items.CROSSBOW));
+                tagger.apply(LibCommonTags.Items.TOOLS_FISHING_RODS).add(key(Items.FISHING_ROD));
+                tagger.apply(LibCommonTags.Items.TOOLS_TRIDENTS).add(key(Items.TRIDENT));
 
                 List<TagKey<Item>> toolTags = Arrays.asList(LibCommonTags.Items.TOOLS_SWORDS, LibCommonTags.Items.TOOLS_AXES, LibCommonTags.Items.TOOLS_PICKAXES, LibCommonTags.Items.TOOLS_SHOVELS, LibCommonTags.Items.TOOLS_HOES, LibCommonTags.Items.TOOLS_SHIELDS, LibCommonTags.Items.TOOLS_BOWS, LibCommonTags.Items.TOOLS_CROSSBOWS, LibCommonTags.Items.TOOLS_FISHING_RODS, LibCommonTags.Items.TOOLS_TRIDENTS);
                 for (TagKey<Item> toolTag : toolTags)
                     tagger.apply(LibCommonTags.Items.TOOLS).addTag(toolTag);
 
-                tagger.apply(LibCommonTags.Items.ARMORS_HELMETS).add(Items.LEATHER_HELMET, Items.TURTLE_HELMET, Items.CHAINMAIL_HELMET, Items.IRON_HELMET, Items.GOLDEN_HELMET, Items.DIAMOND_HELMET, Items.NETHERITE_HELMET);
-                tagger.apply(LibCommonTags.Items.ARMORS_CHESTPLATES).add(Items.LEATHER_CHESTPLATE, Items.CHAINMAIL_CHESTPLATE, Items.IRON_CHESTPLATE, Items.GOLDEN_CHESTPLATE, Items.DIAMOND_CHESTPLATE, Items.NETHERITE_CHESTPLATE);
-                tagger.apply(LibCommonTags.Items.ARMORS_LEGGINGS).add(Items.LEATHER_LEGGINGS, Items.CHAINMAIL_LEGGINGS, Items.IRON_LEGGINGS, Items.GOLDEN_LEGGINGS, Items.DIAMOND_LEGGINGS, Items.NETHERITE_LEGGINGS);
-                tagger.apply(LibCommonTags.Items.ARMORS_BOOTS).add(Items.LEATHER_BOOTS, Items.CHAINMAIL_BOOTS, Items.IRON_BOOTS, Items.GOLDEN_BOOTS, Items.DIAMOND_BOOTS, Items.NETHERITE_BOOTS);
+                tagger.apply(LibCommonTags.Items.ARMORS_HELMETS).add(key(Items.LEATHER_HELMET), key(Items.TURTLE_HELMET), key(Items.CHAINMAIL_HELMET), key(Items.IRON_HELMET), key(Items.GOLDEN_HELMET), key(Items.DIAMOND_HELMET), key(Items.NETHERITE_HELMET));
+                tagger.apply(LibCommonTags.Items.ARMORS_CHESTPLATES).add(key(Items.LEATHER_CHESTPLATE), key(Items.CHAINMAIL_CHESTPLATE), key(Items.IRON_CHESTPLATE), key(Items.GOLDEN_CHESTPLATE), key(Items.DIAMOND_CHESTPLATE), key(Items.NETHERITE_CHESTPLATE));
+                tagger.apply(LibCommonTags.Items.ARMORS_LEGGINGS).add(key(Items.LEATHER_LEGGINGS), key(Items.CHAINMAIL_LEGGINGS), key(Items.IRON_LEGGINGS), key(Items.GOLDEN_LEGGINGS), key(Items.DIAMOND_LEGGINGS), key(Items.NETHERITE_LEGGINGS));
+                tagger.apply(LibCommonTags.Items.ARMORS_BOOTS).add(key(Items.LEATHER_BOOTS), key(Items.CHAINMAIL_BOOTS), key(Items.IRON_BOOTS), key(Items.GOLDEN_BOOTS), key(Items.DIAMOND_BOOTS), key(Items.NETHERITE_BOOTS));
 
                 List<TagKey<Item>> armorTags = Arrays.asList(LibCommonTags.Items.ARMORS_HELMETS, LibCommonTags.Items.ARMORS_CHESTPLATES, LibCommonTags.Items.ARMORS_LEGGINGS, LibCommonTags.Items.ARMORS_BOOTS);
                 for (TagKey<Item> armorTag : armorTags)
@@ -275,18 +285,18 @@ public class LibCommonTagProvider {
                 copyColored(LibCommonTags.Blocks.GLASS_PANES, LibCommonTags.Items.GLASS_PANES, copier);
 
                 tagger.apply(LibCommonTags.Items.CROPS).addTag(LibCommonTags.Items.CROPS_BEETROOT).addTag(LibCommonTags.Items.CROPS_CARROT).addTag(LibCommonTags.Items.CROPS_NETHER_WART).addTag(LibCommonTags.Items.CROPS_POTATO).addTag(LibCommonTags.Items.CROPS_WHEAT);
-                tagger.apply(LibCommonTags.Items.CROPS_BEETROOT).add(Items.BEETROOT);
-                tagger.apply(LibCommonTags.Items.CROPS_CARROT).add(Items.CARROT);
-                tagger.apply(LibCommonTags.Items.CROPS_NETHER_WART).add(Items.NETHER_WART);
-                tagger.apply(LibCommonTags.Items.CROPS_POTATO).add(Items.POTATO);
-                tagger.apply(LibCommonTags.Items.CROPS_WHEAT).add(Items.WHEAT);
+                tagger.apply(LibCommonTags.Items.CROPS_BEETROOT).add(key(Items.BEETROOT));
+                tagger.apply(LibCommonTags.Items.CROPS_CARROT).add(key(Items.CARROT));
+                tagger.apply(LibCommonTags.Items.CROPS_NETHER_WART).add(key(Items.NETHER_WART));
+                tagger.apply(LibCommonTags.Items.CROPS_POTATO).add(key(Items.POTATO));
+                tagger.apply(LibCommonTags.Items.CROPS_WHEAT).add(key(Items.WHEAT));
             }
 
             copier.accept(LibCommonTags.Blocks.CONCRETE, LibCommonTags.Items.CONCRETE);
             copier.accept(LibCommonTags.Blocks.CONCRETE_POWDER, LibCommonTags.Items.CONCRETE_POWDER);
             copier.accept(LibCommonTags.Blocks.CARPET, LibCommonTags.Items.CARPET);
-            tagger.apply(LibCommonTags.Items.FLUID_CONTAINERS).add(Items.BUCKET, Items.WATER_BUCKET, Items.LAVA_BUCKET);
-            tagger.apply(LibCommonTags.Items.BUCKETS_MILK).add(Items.MILK_BUCKET);
+            tagger.apply(LibCommonTags.Items.FLUID_CONTAINERS).add(key(Items.BUCKET), key(Items.WATER_BUCKET), key(Items.LAVA_BUCKET));
+            tagger.apply(LibCommonTags.Items.BUCKETS_MILK).add(key(Items.MILK_BUCKET));
         }
 
         private void copyColored(TagKey<Block> blockGroup, TagKey<Item> itemGroup, BiConsumer<TagKey<Block>, TagKey<Item>> copier) {
@@ -382,14 +392,14 @@ public class LibCommonTagProvider {
                 tagAll(tagger, Biomes.MANGROVE_SWAMP, LibCommonTags.Biomes.IS_WET_OVERWORLD, LibCommonTags.Biomes.IS_HOT_OVERWORLD, LibCommonTags.Biomes.IS_SWAMP);
                 tagAll(tagger, Biomes.DEEP_DARK, LibCommonTags.Biomes.IS_CAVE, LibCommonTags.Biomes.IS_RARE, LibCommonTags.Biomes.IS_SPOOKY);
 
-                tagger.apply(LibCommonTags.Biomes.IS_HOT).addTag(LibCommonTags.Biomes.IS_HOT_OVERWORLD).addTag(LibCommonTags.Biomes.IS_HOT_NETHER).addOptionalTag(LibCommonTags.Biomes.IS_HOT_END.location());
-                tagger.apply(LibCommonTags.Biomes.IS_COLD).addTag(LibCommonTags.Biomes.IS_COLD_OVERWORLD).addOptionalTag(LibCommonTags.Biomes.IS_COLD_NETHER.location()).addTag(LibCommonTags.Biomes.IS_COLD_END);
-                tagger.apply(LibCommonTags.Biomes.IS_SPARSE).addTag(LibCommonTags.Biomes.IS_SPARSE_OVERWORLD).addOptionalTag(LibCommonTags.Biomes.IS_SPARSE_NETHER.location()).addOptionalTag(LibCommonTags.Biomes.IS_SPARSE_END.location());
-                tagger.apply(LibCommonTags.Biomes.IS_DENSE).addTag(LibCommonTags.Biomes.IS_DENSE_OVERWORLD).addOptionalTag(LibCommonTags.Biomes.IS_DENSE_NETHER.location()).addOptionalTag(LibCommonTags.Biomes.IS_DENSE_END.location());
-                tagger.apply(LibCommonTags.Biomes.IS_WET).addTag(LibCommonTags.Biomes.IS_WET_OVERWORLD).addOptionalTag(LibCommonTags.Biomes.IS_WET_NETHER.location()).addOptionalTag(LibCommonTags.Biomes.IS_WET_END.location());
+                tagger.apply(LibCommonTags.Biomes.IS_HOT).addTag(LibCommonTags.Biomes.IS_HOT_OVERWORLD).addTag(LibCommonTags.Biomes.IS_HOT_NETHER).addOptionalTag(LibCommonTags.Biomes.IS_HOT_END);
+                tagger.apply(LibCommonTags.Biomes.IS_COLD).addTag(LibCommonTags.Biomes.IS_COLD_OVERWORLD).addOptionalTag(LibCommonTags.Biomes.IS_COLD_NETHER).addTag(LibCommonTags.Biomes.IS_COLD_END);
+                tagger.apply(LibCommonTags.Biomes.IS_SPARSE).addTag(LibCommonTags.Biomes.IS_SPARSE_OVERWORLD).addOptionalTag(LibCommonTags.Biomes.IS_SPARSE_NETHER).addOptionalTag(LibCommonTags.Biomes.IS_SPARSE_END);
+                tagger.apply(LibCommonTags.Biomes.IS_DENSE).addTag(LibCommonTags.Biomes.IS_DENSE_OVERWORLD).addOptionalTag(LibCommonTags.Biomes.IS_DENSE_NETHER).addOptionalTag(LibCommonTags.Biomes.IS_DENSE_END);
+                tagger.apply(LibCommonTags.Biomes.IS_WET).addTag(LibCommonTags.Biomes.IS_WET_OVERWORLD).addOptionalTag(LibCommonTags.Biomes.IS_WET_NETHER).addOptionalTag(LibCommonTags.Biomes.IS_WET_END);
                 tagger.apply(LibCommonTags.Biomes.IS_DRY).addTag(LibCommonTags.Biomes.IS_DRY_OVERWORLD).addTag(LibCommonTags.Biomes.IS_DRY_NETHER).addTag(LibCommonTags.Biomes.IS_DRY_END);
 
-                tagger.apply(LibCommonTags.Biomes.IS_WATER).addOptionalTag(BiomeTags.IS_OCEAN.location()).addOptionalTag(BiomeTags.IS_RIVER.location());
+                tagger.apply(LibCommonTags.Biomes.IS_WATER).addOptionalTag(BiomeTags.IS_OCEAN).addOptionalTag(BiomeTags.IS_RIVER);
                 tagger.apply(LibCommonTags.Biomes.IS_MOUNTAIN).addTag(LibCommonTags.Biomes.IS_PEAK).addTag(LibCommonTags.Biomes.IS_SLOPE);
                 tagger.apply(LibCommonTags.Biomes.IS_UNDERGROUND).addTag(LibCommonTags.Biomes.IS_CAVE);
             }

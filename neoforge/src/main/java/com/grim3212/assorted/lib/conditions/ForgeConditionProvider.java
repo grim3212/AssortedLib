@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import com.grim3212.assorted.lib.core.conditions.LibConditionProvider;
 import net.minecraft.resources.Identifier;
 import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.neoforged.neoforge.common.conditions.ICondition;
 import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
 
 import java.lang.reflect.Field;

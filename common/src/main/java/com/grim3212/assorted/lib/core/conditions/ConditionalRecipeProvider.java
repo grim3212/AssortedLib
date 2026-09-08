@@ -1,13 +1,11 @@
 package com.grim3212.assorted.lib.core.conditions;
 
-import com.google.common.collect.Sets;
 import com.google.gson.JsonObject;
 import com.grim3212.assorted.lib.platform.Services;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.CachedOutput;
-import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
@@ -20,21 +18,16 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 
 public abstract class ConditionalRecipeProvider extends RecipeProvider {
 
     protected final Map<Identifier, List<LibConditionProvider>> conditions;
-    protected final PackOutput.PathProvider recipePathProvider;
-    protected final PackOutput.PathProvider advancementPathProvider;
     private final String modId;
 
-    public ConditionalRecipeProvider(PackOutput output, String modId) {
-        super(output);
+    public ConditionalRecipeProvider(HolderLookup.Provider registries, RecipeOutput output, String modId) {
+        super(registries, output);
         this.modId = modId;
         this.conditions = new HashMap<>();
-        this.recipePathProvider = output.createPathProvider(PackOutput.Target.DATA_PACK, "recipes");
-        this.advancementPathProvider = output.createPathProvider(PackOutput.Target.DATA_PACK, "advancements");
     }
 
     public LibConditionProvider and(LibConditionProvider... providers) {
@@ -114,6 +107,13 @@ public abstract class ConditionalRecipeProvider extends RecipeProvider {
         }
     }
 
+    /**
+     * TODO(26.2): recipes are no longer serialised to a {@link JsonObject} here - the
+     * {@link RecipeProvider.Runner} writes them through {@code Recipe.CODEC}, so conditions can
+     * only be attached by wrapping the {@link RecipeOutput} handed to this provider. That needs
+     * a codec based replacement for {@code IConditionHelper#write(JsonObject, ...)}, which lives
+     * in platform/services. Kept as-is so the other conditional data providers still build.
+     */
     public void writeConditions(Identifier id, JsonObject json) {
         if (this.conditions.containsKey(id))
             Services.CONDITIONS.write(json, this.conditions.get(id).toArray(new LibConditionProvider[0]));
@@ -126,29 +126,21 @@ public abstract class ConditionalRecipeProvider extends RecipeProvider {
     public abstract void registerConditions();
 
     @Override
-    public void buildRecipes(Consumer<FinishedRecipe> recipeConsumer) {
+    protected void buildRecipes() {
         this.registerConditions();
     }
 
-    @Override
-    public CompletableFuture<?> run(CachedOutput output) {
-        Set<Identifier> recipes = Sets.newHashSet();
-        List<CompletableFuture<?>> finishedRecipes = new ArrayList<>();
-        this.buildRecipes((curRecipe) -> {
-            if (!recipes.add(curRecipe.getId())) {
-                throw new IllegalStateException("Duplicate recipe " + curRecipe.getId());
-            } else {
-                JsonObject recipeJson = curRecipe.serializeRecipe();
-                this.writeConditions(curRecipe.getId(), recipeJson);
-                finishedRecipes.add(DataProvider.saveStable(output, recipeJson, this.recipePathProvider.json(curRecipe.getId())));
-                JsonObject advancementJson = curRecipe.serializeAdvancement();
-                if (advancementJson != null) {
-                    this.writeConditions(curRecipe.getId(), advancementJson);
-                    finishedRecipes.add(DataProvider.saveStable(output, advancementJson, this.advancementPathProvider.json(curRecipe.getAdvancementId())));
-                }
+    /**
+     * A {@link RecipeProvider.Runner} that knows the mod id of the provider it creates. Recipe
+     * providers are no longer data providers themselves in 26.2 - the runner owns the file
+     * writing and hands a {@link RecipeOutput} to a freshly created provider instead.
+     */
+    public abstract static class Runner extends RecipeProvider.Runner {
+        protected final String modId;
 
-            }
-        });
-        return CompletableFuture.allOf(finishedRecipes.toArray(($$0x) -> new CompletableFuture[$$0x]));
+        public Runner(PackOutput output, CompletableFuture<HolderLookup.Provider> registries, String modId) {
+            super(output, registries);
+            this.modId = modId;
+        }
     }
 }

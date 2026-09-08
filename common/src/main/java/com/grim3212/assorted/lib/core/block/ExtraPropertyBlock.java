@@ -42,7 +42,8 @@ public class ExtraPropertyBlock extends Block implements IBlockExtraProperties, 
 
     @Override
     public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter blockGetter, BlockPos pos, Player player) {
-        return super.getCloneItemStack(blockGetter, pos, state);
+        // Vanilla only exposes the LevelReader based overload now, so fall back when we only have a BlockGetter
+        return blockGetter instanceof LevelReader levelReader ? super.getCloneItemStack(levelReader, pos, state, true) : new ItemStack(this.asItem());
     }
 
     @Override

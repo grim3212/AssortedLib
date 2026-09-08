@@ -1,6 +1,6 @@
 package com.grim3212.assorted.lib.client.key;
 
-import net.minecraftforge.client.settings.IKeyConflictContext;
+import net.neoforged.neoforge.client.settings.IKeyConflictContext;
 
 public class ForgeKeyConflictContextPlatformDelegate implements IKeyConflictHelper {
 
