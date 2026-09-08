@@ -1,6 +1,7 @@
 package com.grim3212.assorted.lib.client.render.entity;
 
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -14,6 +15,6 @@ public class EntityRenderers {
     }
 
     public interface BlockEntityRendererConsumer {
-        <E extends BlockEntity> void accept(BlockEntityType<? extends E> entityType, BlockEntityRendererProvider<E> entityRendererFactory);
+        <E extends BlockEntity, S extends BlockEntityRenderState> void accept(BlockEntityType<? extends E> entityType, BlockEntityRendererProvider<E, S> entityRendererFactory);
     }
 }

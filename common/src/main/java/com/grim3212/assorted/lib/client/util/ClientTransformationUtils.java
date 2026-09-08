@@ -2,7 +2,7 @@ package com.grim3212.assorted.lib.client.util;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Transformation;
-import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 public final class ClientTransformationUtils {
 
@@ -15,15 +15,15 @@ public final class ClientTransformationUtils {
             stack.pushPose();
         }
 
-        Vector3f trans = transformation.getTranslation();
+        Vector3fc trans = transformation.translation();
         stack.translate(trans.x(), trans.y(), trans.z());
 
-        stack.mulPose(transformation.getLeftRotation());
+        stack.mulPose(transformation.leftRotation());
 
-        Vector3f scale = transformation.getScale();
+        Vector3fc scale = transformation.scale();
         stack.scale(scale.x(), scale.y(), scale.z());
 
-        stack.mulPose(transformation.getRightRotation());
+        stack.mulPose(transformation.rightRotation());
     }
 
 }
