@@ -2,11 +2,9 @@ package com.grim3212.assorted.lib.client.model.loaders.context;
 
 import com.google.common.collect.Maps;
 import com.grim3212.assorted.lib.platform.ClientServices;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.client.resources.model.cuboid.ItemTransforms;
 import net.minecraft.client.resources.model.sprite.Material;
-import net.minecraft.client.resources.model.ModelBaker;
-import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.Identifier;
 
 import java.util.Map;
@@ -18,15 +16,13 @@ public class SimpleModelBakingContext implements IModelBakingContext {
     private final boolean useBlockLight;
     private final boolean useAmbientOcclusion;
     private final ItemTransforms itemTransforms;
-    private final ItemOverrides itemOverrides;
 
-    public SimpleModelBakingContext(final Map<String, Material> materials, final boolean isGui3d, final boolean useBlockLight, final boolean useAmbientOcclusion, final ItemTransforms itemTransforms, final ItemOverrides itemOverrides) {
+    public SimpleModelBakingContext(final Map<String, Material> materials, final boolean isGui3d, final boolean useBlockLight, final boolean useAmbientOcclusion, final ItemTransforms itemTransforms) {
         this.materials = materials;
         this.isGui3d = isGui3d;
         this.useBlockLight = useBlockLight;
         this.useAmbientOcclusion = useAmbientOcclusion;
         this.itemTransforms = itemTransforms;
-        this.itemOverrides = itemOverrides;
     }
 
     @Override
@@ -59,11 +55,6 @@ public class SimpleModelBakingContext implements IModelBakingContext {
         return itemTransforms;
     }
 
-    @Override
-    public ItemOverrides getItemOverrides(ModelBaker baker) {
-        return itemOverrides;
-    }
-
 
     public static final class SimpleModelBakingContextBuilder {
         private final Map<String, Material> materials = Maps.newHashMap();
@@ -71,7 +62,6 @@ public class SimpleModelBakingContext implements IModelBakingContext {
         private boolean useBlockLight = false;
         private boolean useAmbientOcclusion = false;
         private ItemTransforms itemTransforms = ItemTransforms.NO_TRANSFORMS;
-        private ItemOverrides itemOverrides = ItemOverrides.EMPTY;
 
         private SimpleModelBakingContextBuilder() {
         }
@@ -110,17 +100,12 @@ public class SimpleModelBakingContext implements IModelBakingContext {
             return this;
         }
 
-        public SimpleModelBakingContextBuilder withItemOverrides(ItemOverrides itemOverrides) {
-            this.itemOverrides = itemOverrides;
-            return this;
-        }
-
         public SimpleModelBakingContextBuilder but() {
-            return builder().withMaterials(materials).withIsGui3d(isGui3d).withUseBlockLight(useBlockLight).withUseAmbientOcclusion(useAmbientOcclusion).withItemTransforms(itemTransforms).withItemOverrides(itemOverrides);
+            return builder().withMaterials(materials).withIsGui3d(isGui3d).withUseBlockLight(useBlockLight).withUseAmbientOcclusion(useAmbientOcclusion).withItemTransforms(itemTransforms);
         }
 
         public SimpleModelBakingContext build() {
-            return new SimpleModelBakingContext(materials, isGui3d, useBlockLight, useAmbientOcclusion, itemTransforms, itemOverrides);
+            return new SimpleModelBakingContext(materials, isGui3d, useBlockLight, useAmbientOcclusion, itemTransforms);
         }
     }
 }

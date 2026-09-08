@@ -1,53 +1,36 @@
 package com.grim3212.assorted.lib.client.model;
 
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormatElement;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
 
-import java.util.Arrays;
 import java.util.List;
 
+/**
+ * A transformation that can be applied to {@linkplain BakedQuad baked quads}.
+ * <p>
+ * {@link BakedQuad} is an immutable record in 26.2 - four {@code Vector3fc} positions, four packed uv
+ * longs, a {@code Direction} and a {@link BakedQuad.MaterialInfo} - so a transformer produces a new
+ * quad instead of editing one in place.
+ */
+@FunctionalInterface
 public interface IQuadTransformer {
-    int STRIDE = DefaultVertexFormat.BLOCK.getIntegerSize();
-    int POSITION = findOffset(DefaultVertexFormat.ELEMENT_POSITION);
-    int COLOR = findOffset(DefaultVertexFormat.ELEMENT_COLOR);
-    int UV0 = findOffset(DefaultVertexFormat.ELEMENT_UV0);
-    int UV1 = findOffset(DefaultVertexFormat.ELEMENT_UV1);
-    int UV2 = findOffset(DefaultVertexFormat.ELEMENT_UV2);
-    int NORMAL = findOffset(DefaultVertexFormat.ELEMENT_NORMAL);
 
-    void processInPlace(BakedQuad quad);
-
-    default void processInPlace(List<BakedQuad> quads) {
-        for (BakedQuad quad : quads)
-            processInPlace(quad);
-    }
-
-    default BakedQuad process(BakedQuad quad) {
-        var copy = copy(quad);
-        processInPlace(copy);
-        return copy;
-    }
+    BakedQuad process(BakedQuad quad);
 
     default List<BakedQuad> process(List<BakedQuad> inputs) {
-        return inputs.stream().map(IQuadTransformer::copy).peek(this::processInPlace).toList();
+        return inputs.stream().map(this::process).toList();
     }
 
     default IQuadTransformer andThen(IQuadTransformer other) {
-        return quad -> {
-            processInPlace(quad);
-            other.processInPlace(quad);
-        };
+        return quad -> other.process(process(quad));
     }
 
-    private static BakedQuad copy(BakedQuad quad) {
-        var vertices = quad.getVertices();
-        return new BakedQuad(Arrays.copyOf(vertices, vertices.length), quad.getTintIndex(), quad.getDirection(), quad.getSprite(), quad.isShade());
-    }
-
-    private static int findOffset(VertexFormatElement element) {
-        // Divide by 4 because we want the int offset
-        var index = DefaultVertexFormat.BLOCK.getElements().indexOf(element);
-        return index < 0 ? -1 : DefaultVertexFormat.BLOCK.offsets.getInt(index) / 4;
-    }
+    // TODO(26.2): the in place half of this interface is gone, along with the vertex format constants
+    //  it was built on. processInPlace(BakedQuad) worked because a 1.20.1 BakedQuad owned a mutable
+    //  int[] of DefaultVertexFormat.BLOCK vertex data, and STRIDE / POSITION / COLOR / UV0 / UV1 /
+    //  UV2 / NORMAL were int offsets into it (DefaultVertexFormat.BLOCK#getIntegerSize and
+    //  VertexFormat#offsets). 26.2 has no packed vertex array on a quad at all: positions and uvs are
+    //  typed fields on a record, normals are recomputed from direction() at submit time, and colour
+    //  and light are submit time arguments (tintLayers / lightCoords on
+    //  SubmitNodeCollector#submitBlockModel), not geometry. There is nothing to mutate, so the
+    //  offsets and processInPlace were dropped rather than faked.
 }

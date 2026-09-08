@@ -1,272 +1,87 @@
 package com.grim3212.assorted.lib.client.model.baked.simple;
 
-import com.grim3212.assorted.lib.client.model.vertices.IVertexConsumer;
-import com.grim3212.assorted.lib.client.util.LightUtil;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormatElement;
-import net.minecraft.client.renderer.block.model.*;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
+import com.grim3212.assorted.lib.client.model.baked.base.BaseBakedBlockModel;
+import com.mojang.blaze3d.platform.Transparency;
+import com.mojang.math.Quadrant;
 import net.minecraft.client.renderer.block.dispatch.BlockModelRotation;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.ModelBaker;
+import net.minecraft.client.resources.model.cuboid.CuboidFace;
+import net.minecraft.client.resources.model.cuboid.FaceBakery;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.Identifier;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-public class SimpleGeneratedModel implements BakedModel {
+/**
+ * A full block cube generated from a single sprite, with every face using the whole texture.
+ * <p>
+ * 1.20.1 built this by hand: bake a quad per side, unpack the resulting {@code int[]} vertex data and
+ * repack it with {@link com.grim3212.assorted.lib.client.util.LightUtil#diffuseLight(Direction)}
+ * folded into the vertex colours. {@link BakedQuad} is an immutable record of four positions, four
+ * packed uvs, a direction and a {@link BakedQuad.MaterialInfo} in 26.2 - there is no vertex colour to
+ * write to - so the diffuse term is left to the renderer by baking the quads with {@code shade = true},
+ * which is what it is for.
+ */
+public class SimpleGeneratedModel extends BaseBakedBlockModel {
+
+    private static final Vector3fc FROM = new Vector3f(0.0F, 0.0F, 0.0F);
+    private static final Vector3fc TO = new Vector3f(16.0F, 16.0F, 16.0F);
+    private static final CuboidFace.UVs FULL_FACE = new CuboidFace.UVs(0.0F, 0.0F, 16.0F, 16.0F);
+
+    /**
+     * {@link FaceBakery} interns the vectors and material infos it produces through the
+     * {@link ModelBaker} it is baking under, so quads baked outside of a model bake need one of these.
+     */
+    private static final ModelBaker.Interner NO_INTERNING = new ModelBaker.Interner() {
+        @Override
+        public Vector3fc vector(Vector3fc vector) {
+            return vector;
+        }
+
+        @Override
+        public BakedQuad.MaterialInfo materialInfo(BakedQuad.MaterialInfo material) {
+            return material;
+        }
+    };
 
     @SuppressWarnings("unchecked")
-    private final List<BakedQuad>[] face = new List[6];
+    private final List<BakedQuad>[] face = new List[Direction.values().length];
 
-    private final TextureAtlasSprite texture;
+    private final Material.Baked material;
 
-    public SimpleGeneratedModel(
-            final TextureAtlasSprite texture) {
-        // create lists...
-        face[0] = new ArrayList<>();
-        face[1] = new ArrayList<>();
-        face[2] = new ArrayList<>();
-        face[3] = new ArrayList<>();
-        face[4] = new ArrayList<>();
-        face[5] = new ArrayList<>();
+    public SimpleGeneratedModel(final TextureAtlasSprite texture) {
+        this.material = new Material.Baked(texture, false);
 
-        this.texture = texture;
-
-        final float[] afloat = new float[]{0, 0, 16, 16};
-        final BlockFaceUV uv = new BlockFaceUV(afloat, 0);
-        final FaceBakery faceBakery = new FaceBakery();
-
-        final Vector3f to = new Vector3f(0.0f, 0.0f, 0.0f);
-        final Vector3f from = new Vector3f(16.0f, 16.0f, 16.0f);
-
-        final BlockModelRotation mr = BlockModelRotation.X0_Y0;
+        final Transparency transparency = texture.contents().computeTransparency(0.0F, 0.0F, 1.0F, 1.0F);
+        final BakedQuad.MaterialInfo materialInfo = BakedQuad.MaterialInfo.of(this.material, transparency, 1, true, 0);
 
         for (final Direction side : Direction.values()) {
-            final BlockElementFace bpf = new BlockElementFace(side, 1, "", uv);
-
-            Vector3f toB, fromB;
-
-            switch (side) {
-                case UP -> {
-                    toB = new Vector3f(to.x(), from.y(), to.z());
-                    fromB = new Vector3f(from.x(), from.y(), from.z());
-                }
-                case EAST -> {
-                    toB = new Vector3f(from.x(), to.y(), to.z());
-                    fromB = new Vector3f(from.x(), from.y(), from.z());
-                }
-                case NORTH -> {
-                    toB = new Vector3f(to.x(), to.y(), to.z());
-                    fromB = new Vector3f(from.x(), from.y(), to.z());
-                }
-                case SOUTH -> {
-                    toB = new Vector3f(to.x(), to.y(), from.z());
-                    fromB = new Vector3f(from.x(), from.y(), from.z());
-                }
-                case DOWN -> {
-                    toB = new Vector3f(to.x(), to.y(), to.z());
-                    fromB = new Vector3f(from.x(), to.y(), from.z());
-                }
-                case WEST -> {
-                    toB = new Vector3f(to.x(), to.y(), to.z());
-                    fromB = new Vector3f(to.x(), from.y(), from.z());
-                }
-                default -> throw new NullPointerException();
-            }
-
-            final BakedQuad g = faceBakery.bakeQuad(toB, fromB, bpf, texture, side, mr, null, false, Identifier.fromNamespaceAndPath("scena", "simple"));
-            face[side.ordinal()].add(finishFace(g, side));
+            final BakedQuad quad = FaceBakery.bakeQuad(NO_INTERNING, FROM, TO, FULL_FACE, Quadrant.R0, materialInfo, side, BlockModelRotation.IDENTITY, null);
+            face[side.ordinal()] = List.of(quad);
         }
-    }
-
-    private BakedQuad finishFace(
-            final BakedQuad g,
-            final Direction myFace) {
-        final int[] vertData = g.getVertices();
-        final int wrapAt = vertData.length / 4;
-
-        final BakedQuadBuilder b = new BakedQuadBuilder(g.getSprite());
-        b.setQuadOrientation(myFace);
-        b.setQuadTint(1);
-
-        for (int vertNum = 0; vertNum < 4; vertNum++) {
-            for (int elementIndex = 0; elementIndex < DefaultVertexFormat.BLOCK.getElements().size(); elementIndex++) {
-                final VertexFormatElement element = DefaultVertexFormat.BLOCK.getElements().get(elementIndex);
-                switch (element.getUsage()) {
-                    case POSITION:
-                        b.put(vertNum, elementIndex, Float.intBitsToFloat(vertData[wrapAt * vertNum]), Float.intBitsToFloat(vertData[1 + wrapAt * vertNum]), Float.intBitsToFloat(vertData[2 + wrapAt * vertNum]));
-                        break;
-
-                    case COLOR:
-                        final float light = LightUtil.diffuseLight(myFace);
-                        b.put(vertNum, elementIndex, light, light, light, 1f);
-                        break;
-
-                    case NORMAL:
-                        b.put(vertNum, elementIndex, myFace.getStepX(), myFace.getStepY(), myFace.getStepZ());
-                        break;
-
-                    case UV:
-
-                        if (element.getIndex() == 1) {
-                            b.put(vertNum, elementIndex, 0, 0);
-                        } else {
-                            final float u = Float.intBitsToFloat(vertData[4 + wrapAt * vertNum]);
-                            final float v = Float.intBitsToFloat(vertData[5 + wrapAt * vertNum]);
-                            b.put(vertNum, elementIndex, u, v);
-                        }
-
-                        break;
-
-                    default:
-                        b.put(vertNum, elementIndex);
-                        break;
-                }
-            }
-        }
-
-        b.onComplete();
-
-        return b.build();
     }
 
     public List<BakedQuad>[] getFace() {
         return face;
     }
 
-    @NotNull
     @Override
-    public List<BakedQuad> getQuads(
-            final BlockState state,
-            final Direction side,
-            @NotNull final RandomSource rand) {
-        if (side == null) {
-            return Collections.emptyList();
+    public @NotNull List<BakedQuad> getQuads(@Nullable final Direction direction) {
+        if (direction == null) {
+            return List.of();
         }
 
-        return face[side.ordinal()];
+        return face[direction.ordinal()];
     }
 
     @Override
-    public boolean useAmbientOcclusion() {
-        return true;
-    }
-
-    @Override
-    public boolean isGui3d() {
-        return true;
-    }
-
-    @Override
-    public boolean usesBlockLight() {
-        return false;
-    }
-
-    @NotNull
-    @Override
-    public ItemTransforms getTransforms() {
-        return ItemTransforms.NO_TRANSFORMS;
-    }
-
-    @NotNull
-    @Override
-    public TextureAtlasSprite getParticleIcon() {
-        return texture;
-    }
-
-    @Override
-    public boolean isCustomRenderer() {
-        return false;
-    }
-
-    @NotNull
-    @Override
-    public ItemOverrides getOverrides() {
-        return ItemOverrides.EMPTY;
-    }
-
-    private static final class BakedQuadBuilder implements IVertexConsumer {
-        private static final int SIZE = DefaultVertexFormat.BLOCK.getElements().size();
-
-        private final float[][][] unpackedData = new float[4][SIZE][4];
-        private int tint = -1;
-        private Direction orientation;
-        private TextureAtlasSprite texture;
-        private boolean applyDiffuseLighting = true;
-
-        private int vertices = 0;
-        private int elements = 0;
-        private boolean full = false;
-
-        public BakedQuadBuilder(TextureAtlasSprite texture) {
-            this.texture = texture;
-        }
-
-        @Override
-        public VertexFormat getVertexFormat() {
-            return DefaultVertexFormat.BLOCK;
-        }
-
-        @Override
-        public void setQuadTint(int tint) {
-            this.tint = tint;
-        }
-
-        @Override
-        public void setQuadOrientation(Direction orientation) {
-            this.orientation = orientation;
-        }
-
-        @Override
-        public void setTexture(TextureAtlasSprite texture) {
-            this.texture = texture;
-        }
-
-        @Override
-        public void setApplyDiffuseLighting(boolean diffuse) {
-            this.applyDiffuseLighting = diffuse;
-        }
-
-        @Override
-        public void put(int vertexIndex, int element, float... data) {
-            for (int i = 0; i < 4; i++) {
-                if (i < data.length) {
-                    unpackedData[vertices][element][i] = data[i];
-                } else {
-                    unpackedData[vertices][element][i] = 0;
-                }
-            }
-            elements++;
-            if (elements == SIZE) {
-                vertices++;
-                elements = 0;
-            }
-            if (vertices == 4) {
-                full = true;
-            }
-        }
-
-        public BakedQuad build() {
-            if (!full) {
-                throw new IllegalStateException("not enough data");
-            }
-            if (texture == null) {
-                throw new IllegalStateException("texture not set");
-            }
-            int[] packed = new int[DefaultVertexFormat.BLOCK.getIntegerSize() * 4];
-            for (int v = 0; v < 4; v++) {
-                for (int e = 0; e < SIZE; e++) {
-                    LightUtil.pack(unpackedData[v][e], packed, DefaultVertexFormat.BLOCK, v, e);
-                }
-            }
-            return new BakedQuad(packed, tint, orientation, texture, applyDiffuseLighting);
-        }
+    public Material.Baked particleMaterial() {
+        return material;
     }
 }

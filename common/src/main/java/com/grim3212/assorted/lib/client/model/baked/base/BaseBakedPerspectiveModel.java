@@ -1,36 +1,35 @@
 package com.grim3212.assorted.lib.client.model.baked.base;
 
 import com.grim3212.assorted.lib.client.model.baked.ITransformAwareBakedModel;
-import com.grim3212.assorted.lib.client.util.ClientTransformationUtils;
-import com.grim3212.assorted.lib.util.TransformationUtils;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Transformation;
 import net.minecraft.client.resources.model.cuboid.ItemTransform;
 import net.minecraft.client.resources.model.cuboid.ItemTransforms;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.item.ItemDisplayContext;
 import org.jetbrains.annotations.NotNull;
-import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-public abstract class BaseBakedPerspectiveModel implements BakedModel, ITransformAwareBakedModel {
-    private static final Transformation ground;
-    private static final Transformation gui;
-    private static final Transformation fixed;
-    private static final Transformation firstPerson_righthand;
-    private static final Transformation firstPerson_lefthand;
-    private static final Transformation thirdPerson_righthand;
-    private static final Transformation thirdPerson_lefthand;
+/**
+ * Supplies the classic hard coded "held item" perspective set for models that do not ship a
+ * {@code display} block of their own.
+ * <p>
+ * In 1.20.1 this was done by handing the item renderer a custom {@link ItemTransforms} subclass whose
+ * {@code getTransform} returned an {@link ItemTransform} that pushed a {@code Transformation} onto the
+ * pose stack. Both classes are records in 26.2 and cannot be subclassed, and the renderer no longer
+ * calls back into the model, so the same numbers are now expressed as plain {@link ItemTransform}
+ * records - which is what {@code ItemStackRenderState.LayerRenderState#setItemTransform} wants anyway.
+ * <p>
+ * Translations are in block units (the vanilla deserializer multiplies the json values by 1/16),
+ * rotations are euler angles in degrees.
+ */
+public abstract class BaseBakedPerspectiveModel implements ITransformAwareBakedModel {
+    private static final ItemTransform GROUND = transform(0.0F, 3.0F / 16.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.25F);
+    private static final ItemTransform GUI = transform(0.0F, 0.0F, 0.0F, 30.0F, 225.0F, 0.0F, 0.625F);
+    private static final ItemTransform FIXED = transform(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.5F);
+    private static final ItemTransform THIRD_PERSON = transform(0.0F, 2.5F / 16.0F, 0.0F, 75.0F, 45.0F, 0.0F, 0.375F);
+    private static final ItemTransform FIRST_PERSON = transform(0.0F, 0.0F, 0.0F, 0.0F, 45.0F, 0.0F, 0.40F);
 
-    static {
-        gui = getMatrix(0, 0, 0, 30, 225, 0, 0.625f);
-        ground = getMatrix(0, 3 / 16.0f, 0, 0, 0, 0, 0.25f);
-        fixed = getMatrix(0, 0, 0, 0, 0, 0, 0.5f);
-        thirdPerson_lefthand = thirdPerson_righthand = getMatrix(0, 2.5f / 16.0f, 0, 75, 45, 0, 0.375f);
-        firstPerson_righthand = firstPerson_lefthand = getMatrix(0, 0, 0, 0, 45, 0, 0.40f);
-    }
+    private static final ItemTransforms TRANSFORMS = new ItemTransforms(THIRD_PERSON, THIRD_PERSON, FIRST_PERSON, FIRST_PERSON, FIXED, GUI, GROUND, FIXED, FIXED);
 
-    private static Transformation getMatrix(
+    private static ItemTransform transform(
             final float transX,
             final float transY,
             final float transZ,
@@ -38,77 +37,15 @@ public abstract class BaseBakedPerspectiveModel implements BakedModel, ITransfor
             final float rotY,
             final float rotZ,
             final float scaleXYZ) {
-        final Vector3f translation = new Vector3f(transX, transY, transZ);
-        final Vector3f scale = new Vector3f(scaleXYZ, scaleXYZ, scaleXYZ);
-        final Quaternionf rotation = TransformationUtils.quatFromXYZ(rotX, rotY, rotZ, true);
-
-        return new Transformation(translation, rotation, scale, null);
+        return new ItemTransform(new Vector3f(rotX, rotY, rotZ), new Vector3f(transX, transY, transZ), new Vector3f(scaleXYZ, scaleXYZ, scaleXYZ));
     }
 
-    @Override
     public @NotNull ItemTransforms getTransforms() {
-        return new PerspectiveHandlingItemTransforms(this);
+        return TRANSFORMS;
     }
 
     @Override
-    public BakedModel handlePerspective(final ItemDisplayContext cameraTransformType, final PoseStack mat) {
-        doCameraTransformForType(cameraTransformType, mat, true);
-
-        return this;
+    public ItemTransform getTransform(final ItemDisplayContext cameraTransformType) {
+        return getTransforms().getTransform(cameraTransformType);
     }
-
-    private void doCameraTransformForType(final ItemDisplayContext cameraTransformType, final PoseStack mat, final boolean requiresStackPush) {
-        switch (cameraTransformType) {
-            case FIRST_PERSON_LEFT_HAND:
-                ClientTransformationUtils.push(mat, firstPerson_lefthand, requiresStackPush);
-                break;
-            case FIRST_PERSON_RIGHT_HAND:
-                ClientTransformationUtils.push(mat, firstPerson_righthand, requiresStackPush);
-                break;
-            case THIRD_PERSON_LEFT_HAND:
-                ClientTransformationUtils.push(mat, thirdPerson_lefthand, requiresStackPush);
-                break;
-            case THIRD_PERSON_RIGHT_HAND:
-                ClientTransformationUtils.push(mat, thirdPerson_righthand, requiresStackPush);
-                break;
-            case GROUND:
-                ClientTransformationUtils.push(mat, ground, requiresStackPush);
-                break;
-            case GUI:
-                ClientTransformationUtils.push(mat, gui, requiresStackPush);
-                break;
-            case FIXED:
-            default:
-                ClientTransformationUtils.push(mat, fixed, requiresStackPush);
-                break;
-        }
-    }
-
-    private static final class PerspectiveHandlingItemTransforms extends ItemTransforms {
-
-        private final BaseBakedPerspectiveModel transformAwareBakedModel;
-
-        public PerspectiveHandlingItemTransforms(
-                final BaseBakedPerspectiveModel transformAwareBakedModel
-        ) {
-            super(ItemTransform.NO_TRANSFORM, ItemTransform.NO_TRANSFORM, ItemTransform.NO_TRANSFORM, ItemTransform.NO_TRANSFORM, ItemTransform.NO_TRANSFORM, ItemTransform.NO_TRANSFORM, ItemTransform.NO_TRANSFORM, ItemTransform.NO_TRANSFORM);
-            this.transformAwareBakedModel = transformAwareBakedModel;
-        }
-
-        @Override
-        public @NotNull ItemTransform getTransform(final @NotNull ItemDisplayContext transformType) {
-            return new ItemTransform(
-                    new Vector3f(),
-                    new Vector3f(),
-                    new Vector3f()
-            ) {
-
-                @Override
-                public void apply(final boolean isLeftHand, final @NotNull PoseStack poseStack) {
-                    transformAwareBakedModel.doCameraTransformForType(transformType, poseStack, false);
-                }
-            };
-        }
-    }
-
 }

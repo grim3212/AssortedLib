@@ -1,30 +1,33 @@
 package com.grim3212.assorted.lib.client.model.renderable;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Unit;
 
 /**
- * A standard interface for things that can be rendered to a {@link MultiBufferSource}.
+ * A standard interface for things that can be rendered through a {@link SubmitNodeCollector}.
+ * <p>
+ * 26.2 is retained mode: instead of pulling a {@code VertexConsumer} out of a {@code MultiBufferSource}
+ * and writing to it, geometry is handed to a collector which batches and draws it later.
  *
  * @param <T> The type of context object used by the rendering logic
  */
 @FunctionalInterface
 public interface IModelRenderable<T> {
     /**
-     * Draws the renderable by adding the geometry to the provided {@link MultiBufferSource}
+     * Draws the renderable by submitting its geometry to the provided {@link SubmitNodeCollector}
      *
      * @param poseStack               The pose stack
-     * @param bufferSource            The buffer source where the vertex data should be output
+     * @param collector               The collector the geometry is submitted to
      * @param textureRenderTypeLookup A function that provides a RenderType for the given texture
-     * @param lightmap                The lightmap coordinates representing the current lighting conditions. See {@link net.minecraft.client.renderer.LightTexture}
+     * @param lightmap                The lightmap coordinates representing the current lighting conditions
      * @param overlay                 The overlay coordinates representing the current overlay status. See {@link net.minecraft.client.renderer.texture.OverlayTexture}
      * @param partialTick             The current time expressed in the fraction of a tick elapsed since the last client tick
      * @param context                 The context used for rendering
      */
-    void render(PoseStack poseStack, MultiBufferSource bufferSource, ITextureRenderTypeLookup textureRenderTypeLookup, int lightmap, int overlay, float partialTick, T context);
+    void render(PoseStack poseStack, SubmitNodeCollector collector, ITextureRenderTypeLookup textureRenderTypeLookup, int lightmap, int overlay, float partialTick, T context);
 
     /**
      * Wraps the current renderable along with a context.
@@ -34,8 +37,8 @@ public interface IModelRenderable<T> {
      * @return A renderable that accepts {@link Unit#INSTANCE} as context, but uses the provided {@code context} instead
      */
     default IModelRenderable<Unit> withContext(T context) {
-        return (poseStack, bufferSource, textureRenderTypeLookup, lightmap, overlay, partialTick, unused) ->
-                this.render(poseStack, bufferSource, textureRenderTypeLookup, lightmap, overlay, partialTick, context);
+        return (poseStack, collector, textureRenderTypeLookup, lightmap, overlay, partialTick, unused) ->
+                this.render(poseStack, collector, textureRenderTypeLookup, lightmap, overlay, partialTick, context);
     }
 
     /**

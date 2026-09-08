@@ -2,21 +2,22 @@ package com.grim3212.assorted.lib.client.model;
 
 import com.google.common.base.Preconditions;
 import com.mojang.math.Transformation;
-import net.minecraft.util.Util;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.core.Direction;
+import net.minecraft.util.Util;
 import org.joml.Matrix3f;
+import org.joml.Matrix4fc;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.joml.Vector4f;
 
 import java.util.Arrays;
 
 public final class QuadTransformers {
 
-    private static final IQuadTransformer EMPTY = quad -> {
-    };
+    private static final IQuadTransformer EMPTY = quad -> quad;
     private static final IQuadTransformer[] EMISSIVE_TRANSFORMERS = Util.make(new IQuadTransformer[16], array -> {
-        Arrays.setAll(array, i -> applyingLightmap(LightTexture.pack(i, i)));
+        Arrays.setAll(array, QuadTransformers::makeEmissive);
     });
 
     /**
@@ -30,44 +31,25 @@ public final class QuadTransformers {
      * {@return a new {@link BakedQuad} transformer that applies the specified {@link Transformation }}
      */
     public static IQuadTransformer applying(Transformation transform) {
-        if (transform.equals(Transformation.identity()))
+        if (transform.equals(Transformation.IDENTITY))
             return empty();
-        return quad -> {
-            var vertices = quad.getVertices();
-            for (int i = 0; i < 4; i++) {
-                int offset = i * IQuadTransformer.STRIDE + IQuadTransformer.POSITION;
-                float x = Float.intBitsToFloat(vertices[offset]);
-                float y = Float.intBitsToFloat(vertices[offset + 1]);
-                float z = Float.intBitsToFloat(vertices[offset + 2]);
 
-                Vector4f pos = new Vector4f(x, y, z, 1);
-                pos.mul(transform.getMatrix());
-                pos.div(pos.w);
+        final Matrix4fc matrix = transform.getMatrix();
+        return quad -> new BakedQuad(
+                transform(matrix, quad.position0()),
+                transform(matrix, quad.position1()),
+                transform(matrix, quad.position2()),
+                transform(matrix, quad.position3()),
+                quad.packedUV0(), quad.packedUV1(), quad.packedUV2(), quad.packedUV3(),
+                Direction.rotate(matrix, quad.direction()),
+                quad.materialInfo());
+    }
 
-                vertices[offset] = Float.floatToRawIntBits(pos.x());
-                vertices[offset + 1] = Float.floatToRawIntBits(pos.y());
-                vertices[offset + 2] = Float.floatToRawIntBits(pos.z());
-            }
-
-            for (int i = 0; i < 4; i++) {
-                int offset = i * IQuadTransformer.STRIDE + IQuadTransformer.NORMAL;
-                int normalIn = vertices[offset];
-                if ((normalIn & 0x00FFFFFF) != 0) // The ignored byte is padding and may be filled with user data
-                {
-                    float x = ((byte) (normalIn & 0xFF)) / 127.0f;
-                    float y = ((byte) ((normalIn >> 8) & 0xFF)) / 127.0f;
-                    float z = ((byte) ((normalIn >> 16) & 0xFF)) / 127.0f;
-
-                    Vector3f pos = new Vector3f(x, y, z);
-                    pos.mul(getNormalTransform(transform));
-
-                    vertices[offset] = (((byte) (pos.x() * 127.0f)) & 0xFF) |
-                            ((((byte) (pos.y() * 127.0f)) & 0xFF) << 8) |
-                            ((((byte) (pos.z() * 127.0f)) & 0xFF) << 16) |
-                            (normalIn & 0xFF000000); // Restore padding, just in case
-                }
-            }
-        };
+    private static Vector3fc transform(Matrix4fc matrix, Vector3fc position) {
+        Vector4f pos = new Vector4f(position.x(), position.y(), position.z(), 1.0F);
+        pos.mul(matrix);
+        pos.div(pos.w);
+        return new Vector3f(pos.x(), pos.y(), pos.z());
     }
 
     public static Matrix3f getNormalTransform(Transformation transform) {
@@ -78,25 +60,7 @@ public final class QuadTransformers {
     }
 
     /**
-     * @return A new {@link BakedQuad} transformer that applies the specified packed light value.
-     */
-    public static IQuadTransformer applyingLightmap(int packedLight) {
-        return quad -> {
-            var vertices = quad.getVertices();
-            for (int i = 0; i < 4; i++)
-                vertices[i * IQuadTransformer.STRIDE + IQuadTransformer.UV2] = packedLight;
-        };
-    }
-
-    /**
-     * @return A new {@link BakedQuad} transformer that applies the specified block and sky light values.
-     */
-    public static IQuadTransformer applyingLightmap(int blockLight, int skyLight) {
-        return applyingLightmap(LightTexture.pack(blockLight, skyLight));
-    }
-
-    /**
-     * @return A {@link BakedQuad} transformer that sets the lightmap to the given emissivity (0-15)
+     * @return A {@link BakedQuad} transformer that sets the light emission to the given emissivity (0-15)
      */
     public static IQuadTransformer settingEmissivity(int emissivity) {
         Preconditions.checkArgument(emissivity >= 0 && emissivity < 16, "Emissivity must be between 0 and 15.");
@@ -104,46 +68,24 @@ public final class QuadTransformers {
     }
 
     /**
-     * @return A {@link BakedQuad} transformer that sets the lightmap to its max value
+     * @return A {@link BakedQuad} transformer that sets the light emission to its max value
      */
     public static IQuadTransformer settingMaxEmissivity() {
         return EMISSIVE_TRANSFORMERS[15];
     }
 
-    /**
-     * @param color The color in ARGB format.
-     * @return A {@link BakedQuad} transformer that sets the color to the specified value.
-     */
-    public static IQuadTransformer applyingColor(int color) {
-        final int fixedColor = toABGR(color);
+    private static IQuadTransformer makeEmissive(int emissivity) {
         return quad -> {
-            var vertices = quad.getVertices();
-            for (int i = 0; i < 4; i++)
-                vertices[i * IQuadTransformer.STRIDE + IQuadTransformer.COLOR] = fixedColor;
+            BakedQuad.MaterialInfo material = quad.materialInfo();
+            if (material.lightEmission() == emissivity)
+                return quad;
+
+            return new BakedQuad(
+                    quad.position0(), quad.position1(), quad.position2(), quad.position3(),
+                    quad.packedUV0(), quad.packedUV1(), quad.packedUV2(), quad.packedUV3(),
+                    quad.direction(),
+                    new BakedQuad.MaterialInfo(material.sprite(), material.layer(), material.itemRenderType(), material.tintIndex(), material.shade(), emissivity));
         };
-    }
-
-    /**
-     * This method supplies a default alpha value of 255 (no transparency)
-     *
-     * @param red   The red value (0-255)
-     * @param green The green value (0-255)
-     * @param blue  The blue value (0-255)
-     * @return A {@link BakedQuad} transformer that sets the color to the specified value.
-     */
-    public static IQuadTransformer applyingColor(int red, int green, int blue) {
-        return applyingColor(255, red, green, blue);
-    }
-
-    /**
-     * @param alpha The alpha value (0-255)
-     * @param red   The red value (0-255)
-     * @param green The green value (0-255)
-     * @param blue  The blue value (0-255)
-     * @return A {@link BakedQuad} transformer that sets the color to the specified value.
-     */
-    public static IQuadTransformer applyingColor(int alpha, int red, int green, int blue) {
-        return applyingColor(alpha << 24 | red << 16 | green << 8 | blue);
     }
 
     /**
@@ -159,6 +101,16 @@ public final class QuadTransformers {
                 | ((argb << 16) & 0x00FF0000); // blue moves to red
     }
 
-    private QuadTransformers() {
-    }
+    // TODO(26.2): applyingLightmap(int) / applyingLightmap(int, int) and applyingColor(int) /
+    //  applyingColor(int, int, int) / applyingColor(int, int, int, int) are gone.
+    //  What they used to do: overwrite the UV2 (lightmap) or COLOR element of all four vertices in a
+    //  quad's int[] vertex data, so a model could bake fixed lighting or a fixed tint into geometry.
+    //  Why they cannot be expressed: a 26.2 BakedQuad carries no per vertex colour and no per vertex
+    //  lightmap - only positions, uvs, a direction and a MaterialInfo. Colour and light are supplied
+    //  by the caller when the geometry is submitted (the tintLayers / lightCoords / overlayCoords
+    //  arguments of SubmitNodeCollector#submitBlockModel and #submitItem, and QuadInstance for the
+    //  submitCustomGeometry escape hatch), and net.minecraft.client.renderer.LightTexture - the source
+    //  of the packed light value these methods took - was removed as well. The only lighting a quad
+    //  itself still carries is MaterialInfo#lightEmission, which is what settingEmissivity above sets;
+    //  a fixed tint has to be applied at the submit call, not baked in here.
 }

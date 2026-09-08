@@ -1,68 +1,31 @@
 package com.grim3212.assorted.lib.client.model.baked.simple;
 
-import net.minecraft.client.Minecraft;
+import com.grim3212.assorted.lib.client.model.EmptyModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
-import net.minecraft.client.resources.model.cuboid.ItemTransforms;
-import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.core.Direction;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
 import java.util.List;
 
-public class NullBakedModel implements BakedModel {
+/**
+ * A model that draws nothing.
+ */
+public class NullBakedModel implements BlockStateModel {
     public static final NullBakedModel instance = new NullBakedModel();
 
-    @NotNull
     @Override
-    public List<BakedQuad> getQuads(@Nullable final BlockState state, @Nullable final Direction side, @NotNull final RandomSource rand) {
-        return Collections.emptyList();
+    public void collectParts(final RandomSource random, final List<BlockStateModelPart> output) {
     }
 
     @Override
-    public boolean useAmbientOcclusion() {
-        return false;
+    public Material.Baked particleMaterial() {
+        return EmptyModel.missingMaterial();
     }
 
     @Override
-    public boolean isGui3d() {
-        return false;
+    public @BakedQuad.MaterialFlags int materialFlags() {
+        return 0;
     }
-
-    @Override
-    public boolean usesBlockLight() {
-        return false;
-    }
-
-    @Override
-    public boolean isCustomRenderer() {
-        return false;
-    }
-
-    @NotNull
-    @Override
-    public TextureAtlasSprite getParticleIcon() {
-        return Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
-                .apply(MissingTextureAtlasSprite.getLocation());
-    }
-
-    @NotNull
-    @Override
-    public ItemTransforms getTransforms() {
-        return ItemTransforms.NO_TRANSFORMS;
-    }
-
-    @NotNull
-    @Override
-    public ItemOverrides getOverrides() {
-        return ItemOverrides.EMPTY;
-    }
-
 }
