@@ -90,8 +90,12 @@ publishing {
     }
 
     repositories {
-        maven {
-            url "file://" + System.getenv("local_maven")
+        // Only declare the shared maven when local_maven is actually set; otherwise this
+        // resolved to the literal "file://null" and broke publishing.
+        if (System.getenv("local_maven") != null) {
+            maven {
+                url "file://" + System.getenv("local_maven")
+            }
         }
     }
 }

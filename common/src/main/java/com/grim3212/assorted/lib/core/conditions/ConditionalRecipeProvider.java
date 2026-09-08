@@ -1,6 +1,5 @@
 package com.grim3212.assorted.lib.core.conditions;
 
-import com.google.gson.JsonObject;
 import com.grim3212.assorted.lib.platform.Services;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
@@ -25,9 +24,16 @@ public abstract class ConditionalRecipeProvider extends RecipeProvider {
     private final String modId;
 
     public ConditionalRecipeProvider(HolderLookup.Provider registries, RecipeOutput output, String modId) {
-        super(registries, output);
+        this(registries, output, modId, new HashMap<>());
+    }
+
+    // The map has to exist before the super call so the wrapped output can close over it, which is
+    // why this goes through a private constructor. The wrapper reads it lazily on each accept, so
+    // registerConditions() populating it later still works.
+    private ConditionalRecipeProvider(HolderLookup.Provider registries, RecipeOutput output, String modId, Map<Identifier, List<LibConditionProvider>> conditions) {
+        super(registries, Services.CONDITIONS.conditionalOutput(output, conditions));
         this.modId = modId;
-        this.conditions = new HashMap<>();
+        this.conditions = conditions;
     }
 
     public LibConditionProvider and(LibConditionProvider... providers) {
@@ -105,18 +111,6 @@ public abstract class ConditionalRecipeProvider extends RecipeProvider {
         for (Identifier recipe : recipes) {
             this.conditions.computeIfAbsent(recipe, (r) -> new ArrayList<>()).add(condition);
         }
-    }
-
-    /**
-     * TODO(26.2): recipes are no longer serialised to a {@link JsonObject} here - the
-     * {@link RecipeProvider.Runner} writes them through {@code Recipe.CODEC}, so conditions can
-     * only be attached by wrapping the {@link RecipeOutput} handed to this provider. That needs
-     * a codec based replacement for {@code IConditionHelper#write(JsonObject, ...)}, which lives
-     * in platform/services. Kept as-is so the other conditional data providers still build.
-     */
-    public void writeConditions(Identifier id, JsonObject json) {
-        if (this.conditions.containsKey(id))
-            Services.CONDITIONS.write(json, this.conditions.get(id).toArray(new LibConditionProvider[0]));
     }
 
     /**
