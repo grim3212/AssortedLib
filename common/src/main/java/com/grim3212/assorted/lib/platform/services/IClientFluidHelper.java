@@ -2,7 +2,7 @@ package com.grim3212.assorted.lib.platform.services;
 
 import com.grim3212.assorted.lib.core.fluid.FluidInformation;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.material.Fluid;
 
 public interface IClientFluidHelper {
@@ -17,7 +17,7 @@ public interface IClientFluidHelper {
      * @param fluidInformation The fluid to get the texture for.
      * @return The texture.
      */
-    ResourceLocation getFlowingFluidTexture(final FluidInformation fluidInformation);
+    Identifier getFlowingFluidTexture(final FluidInformation fluidInformation);
 
     /**
      * Gains access to the texture that is used to render a flowing fluid.
@@ -25,7 +25,7 @@ public interface IClientFluidHelper {
      * @param fluid The fluid to get the texture for.
      * @return The texture.
      */
-    ResourceLocation getFlowingFluidTexture(final Fluid fluid);
+    Identifier getFlowingFluidTexture(final Fluid fluid);
 
     /**
      * Gains access to the texture that is used to render a still fluid.
@@ -33,7 +33,7 @@ public interface IClientFluidHelper {
      * @param fluidInformation The fluid to get the texture for.
      * @return The texture.
      */
-    ResourceLocation getStillFluidTexture(final FluidInformation fluidInformation);
+    Identifier getStillFluidTexture(final FluidInformation fluidInformation);
 
     /**
      * Gains access to the texture that is used to render a still fluid.
@@ -41,5 +41,5 @@ public interface IClientFluidHelper {
      * @param fluid The fluid to get the texture for.
      * @return The texture.
      */
-    ResourceLocation getStillFluidTexture(final Fluid fluid);
+    Identifier getStillFluidTexture(final Fluid fluid);
 }

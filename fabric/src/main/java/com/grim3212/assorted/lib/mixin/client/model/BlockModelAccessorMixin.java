@@ -3,9 +3,9 @@ package com.grim3212.assorted.lib.mixin.client.model;
 import com.grim3212.assorted.lib.client.model.IBlockModelAccessor;
 import com.mojang.datafixers.util.Either;
 import net.minecraft.client.renderer.block.model.*;
-import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.client.resources.model.ModelBaker;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -26,7 +26,7 @@ public abstract class BlockModelAccessorMixin implements IBlockModelAccessor {
     protected BlockModel parent;
     @Shadow
     @Nullable
-    protected ResourceLocation parentLocation;
+    protected Identifier parentLocation;
 
     @Shadow
     protected abstract ItemOverrides getItemOverrides(ModelBaker baker, BlockModel model);
@@ -87,7 +87,7 @@ public abstract class BlockModelAccessorMixin implements IBlockModelAccessor {
     }
 
     @Override
-    public ResourceLocation parentLocation() {
+    public Identifier parentLocation() {
         return parentLocation;
     }
 

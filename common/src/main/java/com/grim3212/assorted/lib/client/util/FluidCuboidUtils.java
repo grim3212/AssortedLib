@@ -7,7 +7,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.InventoryMenu;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
@@ -72,15 +72,15 @@ public class FluidCuboidUtils {
             float y2,
             float z2,
             int color) {
-        ResourceLocation still = ClientServices.FLUIDS.getStillFluidTexture(fluid);
-        ResourceLocation flowing = ClientServices.FLUIDS.getFlowingFluidTexture(fluid);
+        Identifier still = ClientServices.FLUIDS.getStillFluidTexture(fluid);
+        Identifier flowing = ClientServices.FLUIDS.getFlowingFluidTexture(fluid);
 
         renderFluidCuboid(still, flowing, color, matrices, renderer, combinedOverlay, combinedLight, x1, y1, z1, x2, y2, z2);
     }
 
     public static void renderFluidCuboid(
-            ResourceLocation still,
-            ResourceLocation flowing,
+            Identifier still,
+            Identifier flowing,
             int color,
             PoseStack matrices,
             VertexConsumer renderer,

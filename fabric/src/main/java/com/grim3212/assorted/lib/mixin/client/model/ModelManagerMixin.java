@@ -4,7 +4,7 @@ import com.grim3212.assorted.lib.client.model.IModelBakeryAccessor;
 import net.minecraft.client.resources.model.AtlasSet;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelManager;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -26,7 +26,7 @@ public abstract class ModelManagerMixin implements IModelBakeryAccessor {
                     value = "HEAD"
             )
     )
-    public void onApply(ProfilerFiller profilerFiller, Map<ResourceLocation, AtlasSet.StitchResult> map, ModelBakery modelBakery, CallbackInfoReturnable<ModelManager.ReloadState> cir) {
+    public void onApply(ProfilerFiller profilerFiller, Map<Identifier, AtlasSet.StitchResult> map, ModelBakery modelBakery, CallbackInfoReturnable<ModelManager.ReloadState> cir) {
         this.currentBakery = modelBakery;
     }
 

@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Map;
 import java.util.function.Supplier;
@@ -16,7 +16,7 @@ public class FabricConfigurationNetworkingUtils {
         throw new IllegalStateException("Can not instantiate an instance of: FabricConfigurationNetworkingUtils. This is a utility class");
     }
 
-    public static void registerNetworkingChannel(final ResourceLocation channelName, final Gson gson, Supplier<Map<String, FabricConfigurationSpec>> syncedSourcesProvider) {
+    public static void registerNetworkingChannel(final Identifier channelName, final Gson gson, Supplier<Map<String, FabricConfigurationSpec>> syncedSourcesProvider) {
         ClientPlayNetworking.registerGlobalReceiver(channelName, (minecraft, clientPacketListener, friendlyByteBuf, packetSender) -> {
             final JsonElement jsonElement = gson.fromJson(friendlyByteBuf.readUtf(Integer.MAX_VALUE / 4), JsonElement.class);
             if (!jsonElement.isJsonObject())

@@ -10,7 +10,7 @@ import com.grim3212.assorted.lib.util.LibCommonTags;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
@@ -102,18 +102,18 @@ public class LibFluidIngredient {
 
     public static abstract class Serializer<T extends LibFluidIngredient> {
 
-        public ResourceLocation getIdentifier() {
-            return new ResourceLocation(LibConstants.MOD_ID, "stored_fluid_ingredient");
+        public Identifier getIdentifier() {
+            return Identifier.fromNamespaceAndPath(LibConstants.MOD_ID, "stored_fluid_ingredient");
         }
 
         public T read(JsonObject json) {
             TagKey<Item> itemTag = null;
             if (json.has("item")) {
-                ResourceLocation itemLocation = new ResourceLocation(GsonHelper.getAsString(json, "item"));
+                Identifier itemLocation = Identifier.parse(GsonHelper.getAsString(json, "item"));
                 itemTag = TagKey.create(Registries.ITEM, itemLocation);
             }
 
-            ResourceLocation fluidLocation = new ResourceLocation(GsonHelper.getAsString(json, "fluid"));
+            Identifier fluidLocation = Identifier.parse(GsonHelper.getAsString(json, "fluid"));
             TagKey<Fluid> fluidTag = TagKey.create(Registries.FLUID, fluidLocation);
 
             long amount = Services.FLUIDS.getBucketAmount();

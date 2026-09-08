@@ -2,9 +2,9 @@ package com.grim3212.assorted.lib.client.model;
 
 import com.google.common.base.Preconditions;
 import com.mojang.math.Transformation;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import org.joml.Matrix3f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;

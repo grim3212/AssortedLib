@@ -2,9 +2,9 @@ package com.grim3212.assorted.lib.util;
 
 import com.google.common.collect.Maps;
 import com.grim3212.assorted.lib.platform.Services;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
@@ -19,7 +19,7 @@ import java.util.Map;
 
 public class DyeHelper {
     public static TagKey<Item> getDyeTag(DyeColor color) {
-        return TagKey.create(Registries.ITEM, new ResourceLocation(Services.PLATFORM.getCommonTagPrefix(), "dyes/" + color.getName()));
+        return TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(Services.PLATFORM.getCommonTagPrefix(), "dyes/" + color.getName()));
     }
 
     public static DyeColor getColor(ItemStack stack) {

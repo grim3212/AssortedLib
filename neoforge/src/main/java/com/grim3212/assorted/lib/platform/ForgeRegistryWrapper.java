@@ -3,7 +3,7 @@ package com.grim3212.assorted.lib.platform;
 import com.grim3212.assorted.lib.registry.ILoaderRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.RegistryManager;
 
@@ -33,13 +33,13 @@ public class ForgeRegistryWrapper<T> implements ILoaderRegistry<T> {
     }
 
     @Override
-    public Optional<T> getValue(ResourceLocation resourceLocation) {
+    public Optional<T> getValue(Identifier resourceLocation) {
         T value = this.forgeRegistry.getValue(resourceLocation);
         return Optional.ofNullable(value);
     }
 
     @Override
-    public boolean containsKey(ResourceLocation resourceLocation) {
+    public boolean containsKey(Identifier resourceLocation) {
         return this.forgeRegistry.containsKey(resourceLocation);
     }
 
@@ -49,7 +49,7 @@ public class ForgeRegistryWrapper<T> implements ILoaderRegistry<T> {
     }
 
     @Override
-    public ResourceLocation getRegistryName(T entry) {
+    public Identifier getRegistryName(T entry) {
         return this.forgeRegistry.getResourceKey(entry).map(ResourceKey::location).orElse(this.forgeRegistry.getDefaultKey());
     }
 }

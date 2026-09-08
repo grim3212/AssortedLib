@@ -7,7 +7,7 @@ import com.grim3212.assorted.lib.conditions.*;
 import com.grim3212.assorted.lib.core.conditions.LibCondition;
 import com.grim3212.assorted.lib.core.conditions.LibConditionProvider;
 import com.grim3212.assorted.lib.platform.services.IConditionHelper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -52,7 +52,7 @@ public class ForgeConditionHelper implements IConditionHelper {
     }
 
     @Override
-    public void register(ResourceLocation name, LibCondition condition) {
+    public void register(Identifier name, LibCondition condition) {
         if (!CONDITIONS.add(new RecipeConditionWrapper.Serializer(name, condition)))
             LibConstants.LOG.warn("Duplicate condition with id: " + name);
     }
@@ -83,12 +83,12 @@ public class ForgeConditionHelper implements IConditionHelper {
     }
 
     @Override
-    public LibConditionProvider blockExists(ResourceLocation block) {
+    public LibConditionProvider blockExists(Identifier block) {
         return wrap(new BlockExistsCondition(block));
     }
 
     @Override
-    public LibConditionProvider itemExists(ResourceLocation item) {
+    public LibConditionProvider itemExists(Identifier item) {
         return wrap(new ItemExistsCondition(item));
     }
 
@@ -137,7 +137,7 @@ public class ForgeConditionHelper implements IConditionHelper {
         }
 
         @Override
-        public ResourceLocation getID() {
+        public Identifier getID() {
             return this.provider.getName();
         }
 

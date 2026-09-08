@@ -2,7 +2,7 @@ package com.grim3212.assorted.lib.util;
 
 import com.grim3212.assorted.lib.platform.Services;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.biome.Biome;
@@ -103,7 +103,7 @@ public class LibCommonTags {
         public static final TagKey<Block> CARPET = commonTag("carpet");
 
         private static TagKey<Block> commonTag(String name) {
-            return TagKey.create(Registries.BLOCK, new ResourceLocation(Services.PLATFORM.getCommonTagPrefix(), name));
+            return TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(Services.PLATFORM.getCommonTagPrefix(), name));
         }
     }
 
@@ -278,7 +278,7 @@ public class LibCommonTags {
         public static final TagKey<Item> BUCKETS_MILK = commonTag("buckets/milk");
 
         private static TagKey<Item> commonTag(String name) {
-            return TagKey.create(Registries.ITEM, new ResourceLocation(Services.PLATFORM.getCommonTagPrefix(), name));
+            return TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(Services.PLATFORM.getCommonTagPrefix(), name));
         }
     }
 
@@ -338,7 +338,7 @@ public class LibCommonTags {
         public static final TagKey<Biome> IS_MOUNTAIN = commonTag("is_mountain");
 
         private static TagKey<Biome> commonTag(String name) {
-            return TagKey.create(Registries.BIOME, new ResourceLocation(Services.PLATFORM.getCommonTagPrefix(), name));
+            return TagKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath(Services.PLATFORM.getCommonTagPrefix(), name));
         }
     }
 }

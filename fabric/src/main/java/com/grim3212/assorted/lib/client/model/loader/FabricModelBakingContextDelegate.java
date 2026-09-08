@@ -5,11 +5,11 @@ import com.grim3212.assorted.lib.client.model.IModelBakeryAccessor;
 import com.grim3212.assorted.lib.client.model.loaders.context.IModelBakingContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.cuboid.ItemTransforms;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.UnbakedModel;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Optional;
 
@@ -24,7 +24,7 @@ public class FabricModelBakingContextDelegate implements IModelBakingContext {
     }
 
     @Override
-    public UnbakedModel getUnbakedModel(final ResourceLocation unbakedModel) {
+    public UnbakedModel getUnbakedModel(final Identifier unbakedModel) {
         final IModelBakeryAccessor modelBakeryAccessor = (IModelBakeryAccessor) Minecraft.getInstance().getModelManager();
         return modelBakeryAccessor.getModelBakery().getModel(unbakedModel);
     }

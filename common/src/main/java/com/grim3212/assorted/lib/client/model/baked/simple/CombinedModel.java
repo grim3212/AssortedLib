@@ -2,7 +2,7 @@ package com.grim3212.assorted.lib.client.model.baked.simple;
 
 import com.grim3212.assorted.lib.client.model.baked.base.BaseBakedBlockModel;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;

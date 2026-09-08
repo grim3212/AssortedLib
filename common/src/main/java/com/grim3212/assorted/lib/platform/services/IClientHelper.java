@@ -15,13 +15,13 @@ import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SpriteSet;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -42,9 +42,9 @@ public interface IClientHelper {
 
     <T extends AbstractContainerMenu, S extends Screen & MenuAccess<T>> void registerScreen(Supplier<MenuType<? extends T>> menuType, LibScreenFactory<T, S> factory);
 
-    void registerAdditionalModel(List<ResourceLocation> modelLocations);
+    void registerAdditionalModel(List<Identifier> modelLocations);
 
-    void addReloadListener(ResourceLocation identifier, PreparableReloadListener reloadListener);
+    void addReloadListener(Identifier identifier, PreparableReloadListener reloadListener);
 
     void registerBEWLR(final Consumer<IBEWLR> register);
 
@@ -62,9 +62,9 @@ public interface IClientHelper {
 
     ItemColors getItemColors();
 
-    void registerModelLoader(ResourceLocation name, IModelSpecificationLoader<?> modelLoader);
+    void registerModelLoader(Identifier name, IModelSpecificationLoader<?> modelLoader);
 
-    void registerItemProperty(Supplier<Item> item, ResourceLocation location, ClampedItemPropertyFunction itemPropertyFunction);
+    void registerItemProperty(Supplier<Item> item, Identifier location, ClampedItemPropertyFunction itemPropertyFunction);
 
     void registerRenderType(Supplier<Block> block, RenderType renderType);
 

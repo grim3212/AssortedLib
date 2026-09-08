@@ -5,10 +5,10 @@ import com.grim3212.assorted.lib.client.model.loader.ForgeBakedModelDelegate;
 import com.grim3212.assorted.lib.platform.services.IClientModelHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.UnbakedModel;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -48,7 +48,7 @@ public class ForgeClientModelHelper implements IClientModelHelper {
     }
 
     @Override
-    public UnbakedModel getUnbakedModel(ResourceLocation unbakedModel) {
+    public UnbakedModel getUnbakedModel(Identifier unbakedModel) {
         return Minecraft.getInstance().getModelManager().getModelBakery().getModel(unbakedModel);
     }
 

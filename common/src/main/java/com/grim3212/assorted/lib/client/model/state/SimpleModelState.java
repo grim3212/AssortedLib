@@ -6,7 +6,7 @@
 package com.grim3212.assorted.lib.client.model.state;
 
 import com.mojang.math.Transformation;
-import net.minecraft.client.resources.model.ModelState;
+import net.minecraft.client.renderer.block.dispatch.ModelState;
 
 /**
  * Simple implementation of {@link ModelState}.

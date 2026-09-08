@@ -5,8 +5,8 @@ import com.grim3212.assorted.lib.client.texture.UnitTextureAtlasSprite;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
-import net.minecraft.Util;
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.util.Util;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 

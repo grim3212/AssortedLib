@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version "${loom_version}"
+    id 'net.fabricmc.fabric-loom' version "${loom_version}"
     id 'maven-publish'
     id 'idea'
 }
@@ -8,11 +8,12 @@ base.archivesName = "${mod_id}-fabric-${minecraft_version}"
 
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"
-    // Parchment has not published mappings for 26.x, so this is plain official Mojang mappings.
-    mappings loom.officialMojangMappings()
+    // No `mappings` declaration: as of 26.x Fabric has dropped intermediary (the meta API
+    // reports intermediary 0.0.0) and Loom uses official Mojang names directly, so there is
+    // no remapping step to configure. Parchment has published nothing for 26.x either.
 
-    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
+    implementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
     implementation project(":common")
 }

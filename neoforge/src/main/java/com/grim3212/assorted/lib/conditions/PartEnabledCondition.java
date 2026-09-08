@@ -3,13 +3,13 @@ package com.grim3212.assorted.lib.conditions;
 import com.google.gson.JsonObject;
 import com.grim3212.assorted.lib.LibConstants;
 import com.grim3212.assorted.lib.platform.ForgeConditionHelper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
 
 public class PartEnabledCondition implements ICondition {
-    public static final ResourceLocation NAME = new ResourceLocation(LibConstants.MOD_ID, "part_enabled");
+    public static final Identifier NAME = Identifier.fromNamespaceAndPath(LibConstants.MOD_ID, "part_enabled");
     private final String part;
 
     public PartEnabledCondition(String part) {
@@ -17,7 +17,7 @@ public class PartEnabledCondition implements ICondition {
     }
 
     @Override
-    public ResourceLocation getID() {
+    public Identifier getID() {
         return NAME;
     }
 
@@ -50,7 +50,7 @@ public class PartEnabledCondition implements ICondition {
         }
 
         @Override
-        public ResourceLocation getID() {
+        public Identifier getID() {
             return PartEnabledCondition.NAME;
         }
     }

@@ -7,7 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.util.RandomSource;
@@ -105,7 +105,7 @@ public class ForgePlatformHelper implements IPlatformHelper {
     }
 
     @Override
-    public void addReloadListener(ResourceLocation identifier, PreparableReloadListener reloadListener) {
+    public void addReloadListener(Identifier identifier, PreparableReloadListener reloadListener) {
         MinecraftForge.EVENT_BUS.addListener((AddReloadListenerEvent event) -> event.addListener(reloadListener));
     }
 

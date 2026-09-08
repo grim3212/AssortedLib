@@ -16,7 +16,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -104,10 +104,10 @@ public class FabricPlatformHelper implements IPlatformHelper {
     }
 
     @Override
-    public void addReloadListener(ResourceLocation identifier, PreparableReloadListener reloadListener) {
+    public void addReloadListener(Identifier identifier, PreparableReloadListener reloadListener) {
         ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new IdentifiableResourceReloadListener() {
             @Override
-            public ResourceLocation getFabricId() {
+            public Identifier getFabricId() {
                 return identifier;
             }
 

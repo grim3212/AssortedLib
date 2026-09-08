@@ -1,16 +1,16 @@
 package com.grim3212.assorted.lib.client.model;
 
 import com.grim3212.assorted.lib.client.model.loaders.context.IModelBakingContext;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.renderer.block.model.*;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.Material;
-import net.minecraft.client.resources.model.ModelState;
+import net.minecraft.client.resources.model.sprite.Material;
+import net.minecraft.client.renderer.block.dispatch.ModelState;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
@@ -112,17 +112,17 @@ public class UnbakedGeometryHelper {
     /**
      * Turns a single {@link BlockElementFace} into a {@link BakedQuad}.
      */
-    public static BakedQuad bakeElementFace(BlockElement element, BlockElementFace face, TextureAtlasSprite sprite, Direction direction, ModelState state, ResourceLocation modelLocation) {
+    public static BakedQuad bakeElementFace(BlockElement element, BlockElementFace face, TextureAtlasSprite sprite, Direction direction, ModelState state, Identifier modelLocation) {
         return FACE_BAKERY.bakeQuad(element.from, element.to, face, sprite, direction, state, element.rotation, element.shade, modelLocation);
     }
 
     /**
      * Bakes a list of {@linkplain BlockElement block elements} and feeds the baked quads to a {@linkplain IModelBuilder model builder}.
      */
-    public static void bakeElements(IModelBuilder<?> builder, List<BlockElement> elements, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState, ResourceLocation modelLocation) {
+    public static void bakeElements(IModelBuilder<?> builder, List<BlockElement> elements, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState, Identifier modelLocation) {
         for (BlockElement element : elements) {
             element.faces.forEach((side, face) -> {
-                var sprite = spriteGetter.apply(new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation(face.texture)));
+                var sprite = spriteGetter.apply(new Material(TextureAtlas.LOCATION_BLOCKS, Identifier.parse(face.texture)));
                 var quad = bakeElementFace(element, face, sprite, side, modelState, modelLocation);
                 if (face.cullForDirection == null)
                     builder.addUnculledFace(quad);
@@ -135,7 +135,7 @@ public class UnbakedGeometryHelper {
     /**
      * Bakes a list of {@linkplain BlockElement block elements} and returns the list of baked quads.
      */
-    public static List<BakedQuad> bakeElements(List<BlockElement> elements, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState, ResourceLocation modelLocation) {
+    public static List<BakedQuad> bakeElements(List<BlockElement> elements, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState, Identifier modelLocation) {
         if (elements.isEmpty())
             return List.of();
         var list = new ArrayList<BakedQuad>();
@@ -161,7 +161,7 @@ public class UnbakedGeometryHelper {
             Pattern.compile("(?:.*[\\\\/]assets[\\\\/](?<namespace>[a-z_-]+)[\\\\/]textures[\\\\/])?(?<path>[a-z_\\\\/-]+)\\.png");
 
     /**
-     * Resolves a material that may have been defined with a filesystem path instead of a proper {@link ResourceLocation}.
+     * Resolves a material that may have been defined with a filesystem path instead of a proper {@link Identifier}.
      * <p>
      * The target atlas will always be {@link TextureAtlas#LOCATION_BLOCKS}.
      */
@@ -171,7 +171,7 @@ public class UnbakedGeometryHelper {
         if (tex.startsWith("#"))
             return owner.getMaterial(tex).orElse(null);
 
-        // Attempt to convert a common (windows/linux/mac) filesystem path to a ResourceLocation.
+        // Attempt to convert a common (windows/linux/mac) filesystem path to a Identifier.
         // This makes no promises, if it doesn't work, too bad, fix your mtl file.
         Matcher match = FILESYSTEM_PATH_TO_RESLOC.matcher(tex);
         if (match.matches()) {
@@ -180,6 +180,6 @@ public class UnbakedGeometryHelper {
             tex = namespace != null ? namespace + ":" + path : path;
         }
 
-        return new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation(tex));
+        return new Material(TextureAtlas.LOCATION_BLOCKS, Identifier.parse(tex));
     }
 }

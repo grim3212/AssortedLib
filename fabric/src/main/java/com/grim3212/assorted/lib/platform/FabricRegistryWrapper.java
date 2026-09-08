@@ -4,7 +4,7 @@ import com.grim3212.assorted.lib.registry.ILoaderRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -35,13 +35,13 @@ public class FabricRegistryWrapper<T> implements ILoaderRegistry<T> {
     }
 
     @Override
-    public Optional<T> getValue(ResourceLocation resourceLocation) {
+    public Optional<T> getValue(Identifier resourceLocation) {
         T t = this.registry.get(resourceLocation);
         return Optional.ofNullable(t);
     }
 
     @Override
-    public boolean containsKey(ResourceLocation resourceLocation) {
+    public boolean containsKey(Identifier resourceLocation) {
         return getValue(resourceLocation).isPresent();
     }
 
@@ -51,7 +51,7 @@ public class FabricRegistryWrapper<T> implements ILoaderRegistry<T> {
     }
 
     @Override
-    public ResourceLocation getRegistryName(T entry) {
+    public Identifier getRegistryName(T entry) {
         return this.registry.getKey(entry);
     }
 }

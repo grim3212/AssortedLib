@@ -1,7 +1,7 @@
 package com.grim3212.assorted.lib.client.model.baked.base;
 
 import com.grim3212.assorted.lib.client.model.baked.IDelegatingBakedModel;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.resources.model.cuboid.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import org.jetbrains.annotations.NotNull;

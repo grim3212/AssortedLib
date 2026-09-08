@@ -9,7 +9,7 @@ import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 
 public abstract class ConditionalRecipeProvider extends RecipeProvider {
 
-    protected final Map<ResourceLocation, List<LibConditionProvider>> conditions;
+    protected final Map<Identifier, List<LibConditionProvider>> conditions;
     protected final PackOutput.PathProvider recipePathProvider;
     protected final PackOutput.PathProvider advancementPathProvider;
     private final String modId;
@@ -93,28 +93,28 @@ public abstract class ConditionalRecipeProvider extends RecipeProvider {
         return id(b).getPath();
     }
 
-    protected ResourceLocation id(Item i) {
+    protected Identifier id(Item i) {
         return Services.PLATFORM.getRegistry(Registries.ITEM).getRegistryName(i);
     }
 
-    protected ResourceLocation id(Block b) {
+    protected Identifier id(Block b) {
         return Services.PLATFORM.getRegistry(Registries.BLOCK).getRegistryName(b);
     }
 
-    protected ResourceLocation prefix(String name) {
-        return new ResourceLocation(this.modId, name);
+    protected Identifier prefix(String name) {
+        return Identifier.fromNamespaceAndPath(this.modId, name);
     }
 
-    public void addConditions(LibConditionProvider condition, ResourceLocation... recipes) {
+    public void addConditions(LibConditionProvider condition, Identifier... recipes) {
         if (recipes.length == 0)
             return;
 
-        for (ResourceLocation recipe : recipes) {
+        for (Identifier recipe : recipes) {
             this.conditions.computeIfAbsent(recipe, (r) -> new ArrayList<>()).add(condition);
         }
     }
 
-    public void writeConditions(ResourceLocation id, JsonObject json) {
+    public void writeConditions(Identifier id, JsonObject json) {
         if (this.conditions.containsKey(id))
             Services.CONDITIONS.write(json, this.conditions.get(id).toArray(new LibConditionProvider[0]));
     }
@@ -132,7 +132,7 @@ public abstract class ConditionalRecipeProvider extends RecipeProvider {
 
     @Override
     public CompletableFuture<?> run(CachedOutput output) {
-        Set<ResourceLocation> recipes = Sets.newHashSet();
+        Set<Identifier> recipes = Sets.newHashSet();
         List<CompletableFuture<?>> finishedRecipes = new ArrayList<>();
         this.buildRecipes((curRecipe) -> {
             if (!recipes.add(curRecipe.getId())) {

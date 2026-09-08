@@ -3,8 +3,8 @@ package com.grim3212.assorted.lib.client.model.renderable;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
@@ -62,10 +62,10 @@ public class CompositeModelRenderable implements IModelRenderable<CompositeModel
     }
 
     private static class Mesh {
-        private final ResourceLocation texture;
+        private final Identifier texture;
         private final List<BakedQuad> quads = new ArrayList<>();
 
-        public Mesh(ResourceLocation texture) {
+        public Mesh(Identifier texture) {
             this.texture = texture;
         }
 
@@ -109,7 +109,7 @@ public class CompositeModelRenderable implements IModelRenderable<CompositeModel
             return new PartBuilder<>(this, child);
         }
 
-        public PartBuilder<T> addMesh(ResourceLocation texture, List<BakedQuad> quads) {
+        public PartBuilder<T> addMesh(Identifier texture, List<BakedQuad> quads) {
             var mesh = new Mesh(texture);
             mesh.quads.addAll(quads);
             component.meshes.add(mesh);

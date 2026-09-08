@@ -2,7 +2,7 @@ package com.grim3212.assorted.lib.client.model;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 
 import java.util.Arrays;
 import java.util.List;

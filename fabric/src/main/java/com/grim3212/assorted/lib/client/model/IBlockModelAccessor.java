@@ -2,9 +2,9 @@ package com.grim3212.assorted.lib.client.model;
 
 import com.mojang.datafixers.util.Either;
 import net.minecraft.client.renderer.block.model.*;
-import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.client.resources.model.ModelBaker;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.List;
 import java.util.Map;
@@ -27,7 +27,7 @@ public interface IBlockModelAccessor {
 
     BlockModel parent();
 
-    ResourceLocation parentLocation();
+    Identifier parentLocation();
 
     ItemOverrides overrides(ModelBaker modelBaker, BlockModel model);
 }

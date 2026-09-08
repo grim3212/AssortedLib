@@ -28,14 +28,14 @@ import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SpriteSet;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -65,19 +65,19 @@ public class FabricClientHelper implements IClientHelper {
     }
 
     @Override
-    public void registerAdditionalModel(List<ResourceLocation> modelLocations) {
+    public void registerAdditionalModel(List<Identifier> modelLocations) {
         ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, out) -> {
-            for (ResourceLocation model : modelLocations) {
+            for (Identifier model : modelLocations) {
                 out.accept(model);
             }
         });
     }
 
     @Override
-    public void addReloadListener(ResourceLocation identifier, PreparableReloadListener reloadListener) {
+    public void addReloadListener(Identifier identifier, PreparableReloadListener reloadListener) {
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new IdentifiableResourceReloadListener() {
             @Override
-            public ResourceLocation getFabricId() {
+            public Identifier getFabricId() {
                 return identifier;
             }
 
@@ -129,12 +129,12 @@ public class FabricClientHelper implements IClientHelper {
     }
 
     @Override
-    public void registerModelLoader(ResourceLocation name, IModelSpecificationLoader<?> modelLoader) {
+    public void registerModelLoader(Identifier name, IModelSpecificationLoader<?> modelLoader) {
         ModelLoadingRegistry.INSTANCE.registerResourceProvider(resourceManager -> new FabricPlatformModelLoaderPlatformDelegate<>(name, modelLoader));
     }
 
     @Override
-    public void registerItemProperty(Supplier<Item> item, ResourceLocation location, ClampedItemPropertyFunction itemPropertyFunction) {
+    public void registerItemProperty(Supplier<Item> item, Identifier location, ClampedItemPropertyFunction itemPropertyFunction) {
         ItemProperties.register(item.get(), location, itemPropertyFunction);
     }
 

@@ -4,7 +4,7 @@ import com.grim3212.assorted.lib.annotations.LoaderImplement;
 import com.grim3212.assorted.lib.mixin.data.AccessorBlockLootSubProvider;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.loot.packs.VanillaBlockLoot;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -28,14 +28,14 @@ public abstract class LibBlockLootProvider extends VanillaBlockLoot {
     public abstract void generate();
 
     @Override
-    public void generate(BiConsumer<ResourceLocation, LootTable.Builder> biConsumer) {
+    public void generate(BiConsumer<Identifier, LootTable.Builder> biConsumer) {
         this.generate();
-        Set<ResourceLocation> set = new HashSet<>();
+        Set<Identifier> set = new HashSet<>();
         AccessorBlockLootSubProvider provider = ((AccessorBlockLootSubProvider) this);
 
         for (Block block : getKnownBlocks()) {
             if (block.isEnabled(provider.assortedlib_getEnabledFeatures())) {
-                ResourceLocation resourcelocation = block.getLootTable();
+                Identifier resourcelocation = block.getLootTable();
                 if (resourcelocation != BuiltInLootTables.EMPTY && set.add(resourcelocation)) {
                     LootTable.Builder loottable$builder = provider.assortedlib_getMap().remove(resourcelocation);
                     if (loottable$builder == null) {

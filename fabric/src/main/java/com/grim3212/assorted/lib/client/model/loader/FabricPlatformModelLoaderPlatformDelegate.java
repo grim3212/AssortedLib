@@ -14,7 +14,7 @@ import net.fabricmc.fabric.api.client.model.ModelResourceProvider;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.*;
 import net.minecraft.client.resources.model.UnbakedModel;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.util.GsonHelper;
 import org.jetbrains.annotations.Nullable;
@@ -29,10 +29,10 @@ public final class FabricPlatformModelLoaderPlatformDelegate<L extends IModelSpe
     private final Gson gson;
     private final String name;
 
-    public FabricPlatformModelLoaderPlatformDelegate(final ResourceLocation name, final L delegate) {
+    public FabricPlatformModelLoaderPlatformDelegate(final Identifier name, final L delegate) {
         this.name = name.toString();
         this.gson = (new GsonBuilder())
-                .registerTypeAdapter(ResourceLocation.class, new ResourceLocation.Serializer())
+                .registerTypeAdapter(Identifier.class, new Identifier.Serializer())
                 .registerTypeHierarchyAdapter(UnbakedModel.class, new FabricExtendedBlockModelDeserializer(this.name, delegate))
                 .registerTypeHierarchyAdapter(BlockModel.class, new FabricExtendedBlockModelDeserializer(this.name, delegate))
                 .registerTypeAdapter(BlockElement.class, new BlockElement.Deserializer() {
@@ -53,9 +53,9 @@ public final class FabricPlatformModelLoaderPlatformDelegate<L extends IModelSpe
 
     @SuppressWarnings("unchecked")
     @Override
-    public @Nullable UnbakedModel loadModelResource(final ResourceLocation resourceLocation, final ModelProviderContext modelProviderContext) throws ModelProviderException {
+    public @Nullable UnbakedModel loadModelResource(final Identifier resourceLocation, final ModelProviderContext modelProviderContext) throws ModelProviderException {
         try {
-            final ResourceLocation target = new ResourceLocation(resourceLocation.getNamespace(), "models/" + resourceLocation.getPath() + ".json");
+            final Identifier target = Identifier.fromNamespaceAndPath(resourceLocation.getNamespace(), "models/" + resourceLocation.getPath() + ".json");
 
             final Optional<Resource> resource = Minecraft.getInstance().getResourceManager().getResource(target);
             if (resource.isEmpty())
@@ -76,7 +76,7 @@ public final class FabricPlatformModelLoaderPlatformDelegate<L extends IModelSpe
             if (!modelSpecification.has("loader")) {
                 if (modelSpecification.has("parent")) {
                     // If we have a parent model check if the parent model is of our loader
-                    return getParentModel(new ResourceLocation(GsonHelper.getAsString(modelSpecification, "parent", "")));
+                    return getParentModel(Identifier.parse(GsonHelper.getAsString(modelSpecification, "parent", "")));
                 }
                 return null;
             }
@@ -90,8 +90,8 @@ public final class FabricPlatformModelLoaderPlatformDelegate<L extends IModelSpe
         }
     }
 
-    private @Nullable UnbakedModel getParentModel(ResourceLocation parentLocation) throws IOException {
-        final ResourceLocation target = new ResourceLocation(parentLocation.getNamespace(), "models/" + parentLocation.getPath() + ".json");
+    private @Nullable UnbakedModel getParentModel(Identifier parentLocation) throws IOException {
+        final Identifier target = Identifier.fromNamespaceAndPath(parentLocation.getNamespace(), "models/" + parentLocation.getPath() + ".json");
 
         final Optional<Resource> resource = Minecraft.getInstance().getResourceManager().getResource(target);
         if (resource.isEmpty())

@@ -3,7 +3,7 @@ package com.grim3212.assorted.lib.platform;
 import com.grim3212.assorted.lib.LibConstants;
 import com.grim3212.assorted.lib.platform.services.INetworkHelper;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -92,7 +92,7 @@ public class ForgeNetworkHelper implements INetworkHelper {
 
         public static SimpleChannel get(String modId) {
             return channels.computeIfAbsent(modId, key -> {
-                ResourceLocation channelName = new ResourceLocation(key, "channel");
+                Identifier channelName = Identifier.fromNamespaceAndPath(key, "channel");
                 return NetworkRegistry.newSimpleChannel(channelName, () -> PROTOCOL, PROTOCOL::equals, PROTOCOL::equals);
             });
         }

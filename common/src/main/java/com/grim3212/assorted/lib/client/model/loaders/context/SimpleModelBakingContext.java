@@ -3,11 +3,11 @@ package com.grim3212.assorted.lib.client.model.loaders.context;
 import com.google.common.collect.Maps;
 import com.grim3212.assorted.lib.platform.ClientServices;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.cuboid.ItemTransforms;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.UnbakedModel;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Map;
 import java.util.Optional;
@@ -30,7 +30,7 @@ public class SimpleModelBakingContext implements IModelBakingContext {
     }
 
     @Override
-    public UnbakedModel getUnbakedModel(final ResourceLocation unbakedModel) {
+    public UnbakedModel getUnbakedModel(final Identifier unbakedModel) {
         return ClientServices.MODELS.getUnbakedModel(unbakedModel);
     }
 

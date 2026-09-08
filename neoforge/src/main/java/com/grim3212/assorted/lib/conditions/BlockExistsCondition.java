@@ -2,7 +2,7 @@ package com.grim3212.assorted.lib.conditions;
 
 import com.google.gson.JsonObject;
 import com.grim3212.assorted.lib.LibConstants;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
@@ -10,15 +10,15 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 public class BlockExistsCondition implements ICondition {
 
-    private static final ResourceLocation NAME = new ResourceLocation(LibConstants.MOD_ID, "block_exists");
-    private final ResourceLocation block;
+    private static final Identifier NAME = Identifier.fromNamespaceAndPath(LibConstants.MOD_ID, "block_exists");
+    private final Identifier block;
 
-    public BlockExistsCondition(ResourceLocation block) {
+    public BlockExistsCondition(Identifier block) {
         this.block = block;
     }
 
     @Override
-    public ResourceLocation getID() {
+    public Identifier getID() {
         return NAME;
     }
 
@@ -43,11 +43,11 @@ public class BlockExistsCondition implements ICondition {
 
         @Override
         public BlockExistsCondition read(JsonObject json) {
-            return new BlockExistsCondition(new ResourceLocation(GsonHelper.getAsString(json, "block")));
+            return new BlockExistsCondition(Identifier.parse(GsonHelper.getAsString(json, "block")));
         }
 
         @Override
-        public ResourceLocation getID() {
+        public Identifier getID() {
             return BlockExistsCondition.NAME;
         }
     }

@@ -7,7 +7,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -51,7 +51,7 @@ public class FabricRegistryProvider implements IRegistryFactory {
         @Override
         @SuppressWarnings("unchecked")
         public <I extends T> IRegistryObject<I> register(String name, Supplier<? extends I> supplier) {
-            final var rl = new ResourceLocation(modId, name);
+            final var rl = Identifier.fromNamespaceAndPath(modId, name);
             final var obj = Registry.register(registry, rl, supplier.get());
             final var ro = new IRegistryObject<I>() {
                 final ResourceKey<I> key =
@@ -63,7 +63,7 @@ public class FabricRegistryProvider implements IRegistryFactory {
                 }
 
                 @Override
-                public ResourceLocation getId() {
+                public Identifier getId() {
                     return rl;
                 }
 
@@ -93,7 +93,7 @@ public class FabricRegistryProvider implements IRegistryFactory {
         }
 
         @Override
-        public Optional<T> getValue(ResourceLocation resourceLocation) {
+        public Optional<T> getValue(Identifier resourceLocation) {
             return entriesView.stream().filter(x -> x.getResourceKey().equals(resourceLocation)).map(x -> x.get()).findFirst();
         }
 
@@ -103,12 +103,12 @@ public class FabricRegistryProvider implements IRegistryFactory {
         }
 
         @Override
-        public boolean containsKey(ResourceLocation resourceLocation) {
+        public boolean containsKey(Identifier resourceLocation) {
             return this.getValue(resourceLocation).isPresent();
         }
 
         @Override
-        public ResourceLocation getRegistryName(T entry) {
+        public Identifier getRegistryName(T entry) {
             return this.registry.getKey(entry);
         }
     }

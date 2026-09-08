@@ -3,7 +3,7 @@ package com.grim3212.assorted.lib.platform.services;
 import com.google.gson.JsonObject;
 import com.grim3212.assorted.lib.core.conditions.LibCondition;
 import com.grim3212.assorted.lib.core.conditions.LibConditionProvider;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -15,7 +15,7 @@ public interface IConditionHelper {
 
     void write(JsonObject conditionalObject, LibConditionProvider... conditions);
 
-    void register(ResourceLocation name, LibCondition condition);
+    void register(Identifier name, LibCondition condition);
 
     boolean test(JsonObject json);
 
@@ -27,9 +27,9 @@ public interface IConditionHelper {
 
     LibConditionProvider or(LibConditionProvider... values);
 
-    LibConditionProvider blockExists(ResourceLocation block);
+    LibConditionProvider blockExists(Identifier block);
 
-    LibConditionProvider itemExists(ResourceLocation item);
+    LibConditionProvider itemExists(Identifier item);
 
     LibConditionProvider blockTagExists(TagKey<Block> tag);
 

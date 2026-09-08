@@ -4,7 +4,7 @@ import com.grim3212.assorted.lib.LibConstants;
 import com.grim3212.assorted.lib.platform.ForgeWorldGenHelper;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraftforge.common.world.BiomeModifier;
 import net.minecraftforge.common.world.ModifiableBiomeInfo;
@@ -20,7 +20,7 @@ public class LibForgeWorldGen {
     public static void init(IEventBus modEventBus) {
         modEventBus.<RegisterEvent>addListener(event -> {
             event.register(ForgeRegistries.Keys.BIOME_MODIFIER_SERIALIZERS, registry -> {
-                registry.register(new ResourceLocation(LibConstants.MOD_ID, "lib_biome_modifier"), libBiomeModifierCodec = Codec.unit(ForgeBiomeModifier.INSTANCE));
+                registry.register(Identifier.fromNamespaceAndPath(LibConstants.MOD_ID, "lib_biome_modifier"), libBiomeModifierCodec = Codec.unit(ForgeBiomeModifier.INSTANCE));
             });
         });
     }

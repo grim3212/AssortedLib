@@ -3,11 +3,11 @@ package com.grim3212.assorted.lib.client.model.loader;
 import com.grim3212.assorted.lib.client.model.loaders.context.IModelBakingContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.cuboid.ItemTransforms;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.UnbakedModel;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraftforge.client.model.geometry.BlockGeometryBakingContext;
 import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
 
@@ -16,17 +16,17 @@ import java.util.function.Function;
 
 public class ForgeModelBakingContextDelegate implements IModelBakingContext {
 
-    private final Function<ResourceLocation, UnbakedModel> unbakedModelGetter;
+    private final Function<Identifier, UnbakedModel> unbakedModelGetter;
     private final IGeometryBakingContext delegate;
 
 
-    public ForgeModelBakingContextDelegate(final Function<ResourceLocation, UnbakedModel> unbakedModelGetter, final IGeometryBakingContext delegate) {
+    public ForgeModelBakingContextDelegate(final Function<Identifier, UnbakedModel> unbakedModelGetter, final IGeometryBakingContext delegate) {
         this.unbakedModelGetter = unbakedModelGetter;
         this.delegate = delegate;
     }
 
     @Override
-    public UnbakedModel getUnbakedModel(final ResourceLocation unbakedModel) {
+    public UnbakedModel getUnbakedModel(final Identifier unbakedModel) {
         return unbakedModelGetter.apply(unbakedModel);
     }
 

@@ -11,7 +11,7 @@ import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
@@ -23,9 +23,9 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public class FabricConditionHelper implements IConditionHelper {
-    public static final ResourceLocation ITEM_EXISTS = new ResourceLocation(LibConstants.MOD_ID, "item_exists");
-    public static final ResourceLocation BLOCK_EXISTS = new ResourceLocation(LibConstants.MOD_ID, "block_exists");
-    public static final ResourceLocation PART_ENABLED = new ResourceLocation(LibConstants.MOD_ID, "part_enabled");
+    public static final Identifier ITEM_EXISTS = Identifier.fromNamespaceAndPath(LibConstants.MOD_ID, "item_exists");
+    public static final Identifier BLOCK_EXISTS = Identifier.fromNamespaceAndPath(LibConstants.MOD_ID, "block_exists");
+    public static final Identifier PART_ENABLED = Identifier.fromNamespaceAndPath(LibConstants.MOD_ID, "part_enabled");
     private static final Map<String, Supplier<Boolean>> REGISTERED_PARTS = new HashMap<>();
 
     @Override
@@ -48,7 +48,7 @@ public class FabricConditionHelper implements IConditionHelper {
     }
 
     @Override
-    public void register(ResourceLocation name, LibCondition condition) {
+    public void register(Identifier name, LibCondition condition) {
         ResourceConditions.register(name, condition::test);
     }
 
@@ -78,12 +78,12 @@ public class FabricConditionHelper implements IConditionHelper {
     }
 
     @Override
-    public LibConditionProvider blockExists(ResourceLocation block) {
+    public LibConditionProvider blockExists(Identifier block) {
         return wrap(registryKeyExistsProvider(BLOCK_EXISTS, "block", block));
     }
 
     @Override
-    public LibConditionProvider itemExists(ResourceLocation item) {
+    public LibConditionProvider itemExists(Identifier item) {
         return wrap(registryKeyExistsProvider(ITEM_EXISTS, "item", item));
     }
 
@@ -123,10 +123,10 @@ public class FabricConditionHelper implements IConditionHelper {
         return new ConditionJsonWrapper(condition);
     }
 
-    private static ConditionJsonProvider registryKeyExistsProvider(ResourceLocation id, String jsonKey, ResourceLocation key) {
+    private static ConditionJsonProvider registryKeyExistsProvider(Identifier id, String jsonKey, Identifier key) {
         return new ConditionJsonProvider() {
             @Override
-            public ResourceLocation getConditionId() {
+            public Identifier getConditionId() {
                 return id;
             }
 
@@ -140,7 +140,7 @@ public class FabricConditionHelper implements IConditionHelper {
     private static ConditionJsonProvider partEnabledCondition(String part) {
         return new ConditionJsonProvider() {
             @Override
-            public ResourceLocation getConditionId() {
+            public Identifier getConditionId() {
                 return PART_ENABLED;
             }
 
@@ -152,7 +152,7 @@ public class FabricConditionHelper implements IConditionHelper {
     }
 
     private static <T> boolean registryKeyExists(JsonObject object, String jsonKey, ResourceKey<? extends Registry<T>> key) {
-        return Services.PLATFORM.getRegistry(key).containsKey(new ResourceLocation(GsonHelper.getAsString(object, jsonKey)));
+        return Services.PLATFORM.getRegistry(key).containsKey(Identifier.parse(GsonHelper.getAsString(object, jsonKey)));
     }
 
     private static class ConditionJsonWrapper implements ConditionJsonProvider {
@@ -164,7 +164,7 @@ public class FabricConditionHelper implements IConditionHelper {
         }
 
         @Override
-        public ResourceLocation getConditionId() {
+        public Identifier getConditionId() {
             return this.provider.getName();
         }
 
@@ -188,7 +188,7 @@ public class FabricConditionHelper implements IConditionHelper {
         }
 
         @Override
-        public ResourceLocation getName() {
+        public Identifier getName() {
             return this.condition.getConditionId();
         }
     }

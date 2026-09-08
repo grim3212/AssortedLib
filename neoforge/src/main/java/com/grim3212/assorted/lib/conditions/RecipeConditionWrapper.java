@@ -2,23 +2,23 @@ package com.grim3212.assorted.lib.conditions;
 
 import com.google.gson.JsonObject;
 import com.grim3212.assorted.lib.core.conditions.LibCondition;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
 
 public class RecipeConditionWrapper implements ICondition {
-    private final ResourceLocation name;
+    private final Identifier name;
     private final String stringName;
     private final boolean result;
 
-    public RecipeConditionWrapper(ResourceLocation name, String stringName, boolean result) {
+    public RecipeConditionWrapper(Identifier name, String stringName, boolean result) {
         this.name = name;
         this.stringName = stringName;
         this.result = result;
     }
 
     @Override
-    public ResourceLocation getID() {
+    public Identifier getID() {
         return name;
     }
 
@@ -34,10 +34,10 @@ public class RecipeConditionWrapper implements ICondition {
 
     public static class Serializer implements IConditionSerializer<RecipeConditionWrapper> {
 
-        private final ResourceLocation name;
+        private final Identifier name;
         private final LibCondition condition;
 
-        public Serializer(ResourceLocation name, LibCondition condition) {
+        public Serializer(Identifier name, LibCondition condition) {
             this.name = name;
             this.condition = condition;
         }
@@ -52,7 +52,7 @@ public class RecipeConditionWrapper implements ICondition {
         }
 
         @Override
-        public ResourceLocation getID() {
+        public Identifier getID() {
             return name;
         }
 

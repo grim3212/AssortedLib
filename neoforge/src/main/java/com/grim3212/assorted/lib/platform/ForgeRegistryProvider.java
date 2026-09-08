@@ -6,7 +6,7 @@ import com.grim3212.assorted.lib.registry.RegistryProvider;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.javafmlmod.FMLModContainer;
 import net.minecraftforge.registries.DeferredRegister;
@@ -58,7 +58,7 @@ public class ForgeRegistryProvider implements IRegistryFactory {
                 }
 
                 @Override
-                public ResourceLocation getId() {
+                public Identifier getId() {
                     return obj.getId();
                 }
 
@@ -87,7 +87,7 @@ public class ForgeRegistryProvider implements IRegistryFactory {
         }
 
         @Override
-        public Optional<T> getValue(ResourceLocation resourceLocation) {
+        public Optional<T> getValue(Identifier resourceLocation) {
             Optional<T> value = entriesView.stream().filter(x -> x.getResourceKey().equals(resourceLocation)).map(x -> x.get()).findFirst();
             return value;
         }
@@ -98,12 +98,12 @@ public class ForgeRegistryProvider implements IRegistryFactory {
         }
 
         @Override
-        public boolean containsKey(ResourceLocation resourceLocation) {
+        public boolean containsKey(Identifier resourceLocation) {
             return this.getValue(resourceLocation).isPresent();
         }
 
         @Override
-        public ResourceLocation getRegistryName(T entry) {
+        public Identifier getRegistryName(T entry) {
             return RegistryManager.ACTIVE.getRegistry(this.registry.getRegistryKey()).getKey(entry);
         }
     }

@@ -61,6 +61,8 @@ subprojects {
     tasks.withType(JavaCompile).configureEach {
         it.options.encoding = 'UTF-8'
         it.options.release = 25
+        // The 26.2 port produces far more than javac's default 100-error cap.
+        it.options.compilerArgs << '-Xmaxerrs' << '10000'
     }
 
     // Javadoc on Minecraft-derived sources trips doclint constantly; keep the jar, drop the pedantry.

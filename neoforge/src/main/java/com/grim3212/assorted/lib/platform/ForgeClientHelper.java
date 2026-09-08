@@ -23,14 +23,14 @@ import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -67,12 +67,12 @@ public class ForgeClientHelper implements IClientHelper {
     }
 
     @Override
-    public void registerAdditionalModel(List<ResourceLocation> modelLocations) {
+    public void registerAdditionalModel(List<Identifier> modelLocations) {
         getRegistration().extraModels.addAll(modelLocations);
     }
 
     @Override
-    public void addReloadListener(ResourceLocation identifier, PreparableReloadListener reloadListener) {
+    public void addReloadListener(Identifier identifier, PreparableReloadListener reloadListener) {
         getRegistration().clientReloadListeners.add(reloadListener);
     }
 
@@ -117,12 +117,12 @@ public class ForgeClientHelper implements IClientHelper {
     }
 
     @Override
-    public void registerModelLoader(ResourceLocation name, IModelSpecificationLoader<?> modelLoader) {
+    public void registerModelLoader(Identifier name, IModelSpecificationLoader<?> modelLoader) {
         getRegistration().modelLoaders.put(name, modelLoader);
     }
 
     @Override
-    public void registerItemProperty(Supplier<Item> item, ResourceLocation location, ClampedItemPropertyFunction itemPropertyFunction) {
+    public void registerItemProperty(Supplier<Item> item, Identifier location, ClampedItemPropertyFunction itemPropertyFunction) {
         getRegistration().itemProperties.put(item, Pair.of(location, itemPropertyFunction));
     }
 
@@ -186,13 +186,13 @@ public class ForgeClientHelper implements IClientHelper {
         private final Map<ModelLayerLocation, Supplier<LayerDefinition>> entityLayers = new HashMap<>();
         private final Map<BlockColor, Supplier<List<Block>>> blockColors = new HashMap<>();
         private final Map<ItemColor, Supplier<List<Item>>> itemColors = new HashMap<>();
-        private final Map<Supplier<Item>, Pair<ResourceLocation, ClampedItemPropertyFunction>> itemProperties = new HashMap<>();
+        private final Map<Supplier<Item>, Pair<Identifier, ClampedItemPropertyFunction>> itemProperties = new HashMap<>();
         private final Map<Supplier<Block>, RenderType> renderTypes = new HashMap<>();
         private final List<KeyMapping> keyMappings = new ArrayList<>();
-        private final List<ResourceLocation> extraModels = new ArrayList<>();
+        private final List<Identifier> extraModels = new ArrayList<>();
         private final List<Consumer<IBEWLR>> blockEntityWithoutLevelInitializers = Collections.synchronizedList(new ArrayList<>());
         private final List<PreparableReloadListener> clientReloadListeners = new ArrayList<>();
-        private final Map<ResourceLocation, IModelSpecificationLoader<?>> modelLoaders = new HashMap<>();
+        private final Map<Identifier, IModelSpecificationLoader<?>> modelLoaders = new HashMap<>();
         private final Map<Supplier<ParticleType<?>>, Function<SpriteSet, ParticleProvider<?>>> particleProviders = new HashMap<>();
         private final Map<Supplier<MenuType<?>>, LibScreenFactory<?, ?>> menuTypes = new HashMap<>();
 
@@ -232,7 +232,7 @@ public class ForgeClientHelper implements IClientHelper {
         @SuppressWarnings("removal")
         public void clientSetup(final FMLClientSetupEvent event) {
             event.enqueueWork(() -> {
-                for (Map.Entry<Supplier<Item>, Pair<ResourceLocation, ClampedItemPropertyFunction>> entry : itemProperties.entrySet()) {
+                for (Map.Entry<Supplier<Item>, Pair<Identifier, ClampedItemPropertyFunction>> entry : itemProperties.entrySet()) {
                     ItemProperties.register(entry.getKey().get(), entry.getValue().getFirst(), entry.getValue().getSecond());
                 }
             });
@@ -261,7 +261,7 @@ public class ForgeClientHelper implements IClientHelper {
 
         @SubscribeEvent
         public void registerAdditionalModels(final ModelEvent.RegisterAdditional event) {
-            for (ResourceLocation location : extraModels) {
+            for (Identifier location : extraModels) {
                 event.register(location);
             }
         }
@@ -275,7 +275,7 @@ public class ForgeClientHelper implements IClientHelper {
 
         @SubscribeEvent
         public void registerModelLoaders(final ModelEvent.RegisterGeometryLoaders event) {
-            for (Map.Entry<ResourceLocation, IModelSpecificationLoader<?>> entry : modelLoaders.entrySet()) {
+            for (Map.Entry<Identifier, IModelSpecificationLoader<?>> entry : modelLoaders.entrySet()) {
                 event.register(entry.getKey().getPath(), new ForgePlatformModelLoaderPlatformDelegate<>(entry.getValue()));
             }
         }

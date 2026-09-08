@@ -3,10 +3,10 @@ package com.grim3212.assorted.lib.platform.services;
 import com.grim3212.assorted.lib.client.model.data.IBlockModelData;
 import com.grim3212.assorted.lib.client.model.data.IModelDataBuilder;
 import com.grim3212.assorted.lib.client.model.data.IModelDataKey;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.UnbakedModel;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -54,7 +54,7 @@ public interface IClientModelHelper {
      * @param unbakedModel The resource location of the model.
      * @return The model.
      */
-    UnbakedModel getUnbakedModel(final ResourceLocation unbakedModel);
+    UnbakedModel getUnbakedModel(final Identifier unbakedModel);
 
     /**
      * Registers a model specification loader for the given resource location.

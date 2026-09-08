@@ -7,11 +7,11 @@ import com.grim3212.assorted.lib.client.model.loader.FabricBakedModelDelegate;
 import com.grim3212.assorted.lib.platform.services.IClientModelHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.UnbakedModel;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -47,7 +47,7 @@ public class FabricClientModelHelper implements IClientModelHelper {
     }
 
     @Override
-    public UnbakedModel getUnbakedModel(ResourceLocation unbakedModel) {
+    public UnbakedModel getUnbakedModel(Identifier unbakedModel) {
         final IModelBakeryAccessor accessor = (IModelBakeryAccessor) Minecraft.getInstance().getModelManager();
         return accessor.getModelBakery().getModel(unbakedModel);
     }

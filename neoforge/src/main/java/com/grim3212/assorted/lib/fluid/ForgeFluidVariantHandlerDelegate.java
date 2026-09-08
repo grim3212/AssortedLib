@@ -4,7 +4,7 @@ import com.grim3212.assorted.lib.core.fluid.FluidInformation;
 import com.grim3212.assorted.lib.core.fluid.IFluidVariantHandler;
 import com.grim3212.assorted.lib.platform.ForgeFluidManager;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.common.SoundActions;
@@ -60,12 +60,12 @@ public class ForgeFluidVariantHandlerDelegate implements IFluidVariantHandler {
     }
 
     @Override
-    public Optional<ResourceLocation> getStillTexture(final FluidInformation variant) {
+    public Optional<Identifier> getStillTexture(final FluidInformation variant) {
         return Optional.ofNullable(IClientFluidTypeExtensions.of(delegate).getStillTexture(ForgeFluidManager.buildFluidStack(variant)));
     }
 
     @Override
-    public Optional<ResourceLocation> getFlowingTexture(final FluidInformation variant) {
+    public Optional<Identifier> getFlowingTexture(final FluidInformation variant) {
         return Optional.ofNullable(IClientFluidTypeExtensions.of(delegate).getFlowingTexture(ForgeFluidManager.buildFluidStack(variant)));
     }
 }

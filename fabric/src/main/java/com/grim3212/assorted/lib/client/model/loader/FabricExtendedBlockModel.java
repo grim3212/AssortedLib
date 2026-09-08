@@ -5,10 +5,10 @@ import com.grim3212.assorted.lib.client.model.loaders.IModelSpecification;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.client.resources.model.ModelBaker;
-import net.minecraft.client.resources.model.ModelState;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.block.dispatch.ModelState;
+import net.minecraft.resources.Identifier;
 
 import java.util.Collections;
 import java.util.function.Function;
@@ -22,7 +22,7 @@ public class FabricExtendedBlockModel extends BlockModel {
     }
 
     @Override
-    public BakedModel bake(ModelBaker modelBaker, Function<Material, TextureAtlasSprite> function, ModelState modelState, ResourceLocation resourceLocation) {
+    public BakedModel bake(ModelBaker modelBaker, Function<Material, TextureAtlasSprite> function, ModelState modelState, Identifier resourceLocation) {
         final FabricModelBakingContextDelegate context = new FabricModelBakingContextDelegate(this);
 
         final BakedModel bakedModel = specification.bake(context, modelBaker, function, modelState, resourceLocation);
@@ -30,7 +30,7 @@ public class FabricExtendedBlockModel extends BlockModel {
     }
 
     @Override
-    public BakedModel bake(ModelBaker modelBaker, BlockModel blockModel, Function<Material, TextureAtlasSprite> function, ModelState modelState, ResourceLocation resourceLocation, boolean bl) {
+    public BakedModel bake(ModelBaker modelBaker, BlockModel blockModel, Function<Material, TextureAtlasSprite> function, ModelState modelState, Identifier resourceLocation, boolean bl) {
         final FabricModelBakingContextDelegate context = new FabricModelBakingContextDelegate(this);
 
         final BakedModel bakedModel = specification.bake(context, modelBaker, function, modelState, resourceLocation);

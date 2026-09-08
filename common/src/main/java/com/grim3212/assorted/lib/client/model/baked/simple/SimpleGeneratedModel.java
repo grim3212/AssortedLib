@@ -8,9 +8,9 @@ import com.mojang.blaze3d.vertex.VertexFormatElement;
 import net.minecraft.client.renderer.block.model.*;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.BlockModelRotation;
+import net.minecraft.client.renderer.block.dispatch.BlockModelRotation;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
@@ -81,7 +81,7 @@ public class SimpleGeneratedModel implements BakedModel {
                 default -> throw new NullPointerException();
             }
 
-            final BakedQuad g = faceBakery.bakeQuad(toB, fromB, bpf, texture, side, mr, null, false, new ResourceLocation("scena", "simple"));
+            final BakedQuad g = faceBakery.bakeQuad(toB, fromB, bpf, texture, side, mr, null, false, Identifier.fromNamespaceAndPath("scena", "simple"));
             face[side.ordinal()].add(finishFace(g, side));
         }
     }

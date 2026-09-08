@@ -1,7 +1,7 @@
 package com.grim3212.assorted.lib.core.fluid;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 
 import java.util.Optional;
@@ -61,7 +61,7 @@ public interface IFluidVariantHandler {
      * @param variant The fluid variant
      * @return The resource location of the still texture of the fluid
      */
-    Optional<ResourceLocation> getStillTexture(FluidInformation variant);
+    Optional<Identifier> getStillTexture(FluidInformation variant);
 
     /**
      * Returns the resource location of the flowing texture of the fluid.
@@ -69,5 +69,5 @@ public interface IFluidVariantHandler {
      * @param variant The fluid variant
      * @return The resource location of the flowing texture of the fluid
      */
-    Optional<ResourceLocation> getFlowingTexture(FluidInformation variant);
+    Optional<Identifier> getFlowingTexture(FluidInformation variant);
 }

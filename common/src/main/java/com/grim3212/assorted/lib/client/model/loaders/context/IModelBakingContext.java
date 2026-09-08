@@ -1,11 +1,11 @@
 package com.grim3212.assorted.lib.client.model.loaders.context;
 
 import net.minecraft.client.renderer.block.model.ItemOverrides;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.cuboid.ItemTransforms;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.UnbakedModel;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Optional;
 
@@ -24,7 +24,7 @@ public interface IModelBakingContext {
      * @param unbakedModel The name of the unbaked model to load.
      * @return The unbaked model, or null if it could not be found.
      */
-    UnbakedModel getUnbakedModel(final ResourceLocation unbakedModel);
+    UnbakedModel getUnbakedModel(final Identifier unbakedModel);
 
     /**
      * Retries a material from a supported super model or context.

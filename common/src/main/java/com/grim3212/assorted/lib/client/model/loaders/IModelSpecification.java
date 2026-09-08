@@ -3,7 +3,7 @@ package com.grim3212.assorted.lib.client.model.loaders;
 import com.grim3212.assorted.lib.client.model.loaders.context.IModelBakingContext;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.*;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.function.Function;
 
@@ -22,5 +22,5 @@ public interface IModelSpecification<T extends IModelSpecification<T>> {
      * @param modelLocation The location of the model that is being baked.
      * @return The baked model.
      */
-    BakedModel bake(IModelBakingContext context, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState, ResourceLocation modelLocation);
+    BakedModel bake(IModelBakingContext context, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState, Identifier modelLocation);
 }

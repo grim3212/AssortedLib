@@ -2,10 +2,10 @@ package com.grim3212.assorted.lib.core.conditions;
 
 import com.google.gson.JsonObject;
 import net.minecraft.data.DataProvider;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public interface LibConditionalDataProvider extends DataProvider {
-    void addConditions(ResourceLocation id, LibConditionProvider... providers);
+    void addConditions(Identifier id, LibConditionProvider... providers);
 
-    void writeConditions(ResourceLocation id, JsonObject json);
+    void writeConditions(Identifier id, JsonObject json);
 }

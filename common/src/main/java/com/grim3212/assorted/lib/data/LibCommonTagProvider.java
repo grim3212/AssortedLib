@@ -6,7 +6,7 @@ import com.grim3212.assorted.lib.util.LibCommonTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
@@ -112,7 +112,7 @@ public class LibCommonTagProvider {
         private void addColored(Consumer<Block> consumer, TagKey<Block> group, String pattern, Function<TagKey<Block>, IntrinsicTagAppender<Block>> tagger) {
             String prefix = group.location().getPath().toUpperCase(Locale.ENGLISH) + '_';
             for (DyeColor color : DyeColor.values()) {
-                ResourceLocation key = new ResourceLocation("minecraft", pattern.replace("{color}", color.getName()));
+                Identifier key = Identifier.fromNamespaceAndPath("minecraft", pattern.replace("{color}", color.getName()));
                 TagKey<Block> tag = getCommonTag(prefix + color.getName());
                 Block block = Services.PLATFORM.getRegistry(Registries.BLOCK).getValue(key).get();
                 if (block == null || block == Blocks.AIR)

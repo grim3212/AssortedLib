@@ -2,8 +2,8 @@ package com.grim3212.assorted.lib.client.model.renderable;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Unit;
 
 /**
@@ -43,6 +43,6 @@ public interface IModelRenderable<T> {
      */
     @FunctionalInterface
     interface ITextureRenderTypeLookup {
-        RenderType get(ResourceLocation name);
+        RenderType get(Identifier name);
     }
 }

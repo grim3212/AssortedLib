@@ -16,7 +16,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.io.File;
@@ -31,7 +31,7 @@ import java.util.Map;
 public class FabricConfigHelper implements IConfigHelper {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    private static final ResourceLocation CONFIG_SYNC_CHANNEL_ID = new ResourceLocation(LibConstants.MOD_ID, "config_sync");
+    private static final Identifier CONFIG_SYNC_CHANNEL_ID = Identifier.fromNamespaceAndPath(LibConstants.MOD_ID, "config_sync");
 
     private static final Map<String, FabricConfigurationSpec> syncedSources = Maps.newHashMap();
     private static final List<FabricConfigurationSpec> noneSyncedSources = Lists.newArrayList();
