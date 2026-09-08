@@ -2,7 +2,8 @@ package com.grim3212.assorted.lib.client.model.renderable;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.MultiBufferSource;
+import com.mojang.blaze3d.vertex.QuadInstance;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
@@ -25,9 +26,9 @@ public class CompositeModelRenderable implements IModelRenderable<CompositeModel
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource bufferSource, IModelRenderable.ITextureRenderTypeLookup textureRenderTypeLookup, int lightmap, int overlay, float partialTick, Transforms context) {
+    public void render(PoseStack poseStack, SubmitNodeCollector collector, IModelRenderable.ITextureRenderTypeLookup textureRenderTypeLookup, int lightmap, int overlay, float partialTick, Transforms context) {
         for (var component : components)
-            component.render(poseStack, bufferSource, textureRenderTypeLookup, lightmap, overlay, context);
+            component.render(poseStack, collector, textureRenderTypeLookup, lightmap, overlay, context);
     }
 
     public static Builder builder() {
@@ -43,18 +44,18 @@ public class CompositeModelRenderable implements IModelRenderable<CompositeModel
             this.name = name;
         }
 
-        public void render(PoseStack poseStack, MultiBufferSource bufferSource, ITextureRenderTypeLookup textureRenderTypeLookup, int lightmap, int overlay, Transforms context) {
+        public void render(PoseStack poseStack, SubmitNodeCollector collector, ITextureRenderTypeLookup textureRenderTypeLookup, int lightmap, int overlay, Transforms context) {
             Matrix4f matrix = context.getTransform(name);
             if (matrix != null) {
                 poseStack.pushPose();
-                poseStack.mulPoseMatrix(matrix);
+                poseStack.mulPose(matrix);
             }
 
             for (var part : children)
-                part.render(poseStack, bufferSource, textureRenderTypeLookup, lightmap, overlay, context);
+                part.render(poseStack, collector, textureRenderTypeLookup, lightmap, overlay, context);
 
             for (var mesh : meshes)
-                mesh.render(poseStack, bufferSource, textureRenderTypeLookup, lightmap, overlay);
+                mesh.render(poseStack, collector, textureRenderTypeLookup, lightmap, overlay);
 
             if (matrix != null)
                 poseStack.popPose();
@@ -69,11 +70,22 @@ public class CompositeModelRenderable implements IModelRenderable<CompositeModel
             this.texture = texture;
         }
 
-        public void render(PoseStack poseStack, MultiBufferSource bufferSource, ITextureRenderTypeLookup textureRenderTypeLookup, int lightmap, int overlay) {
-            var consumer = bufferSource.getBuffer(textureRenderTypeLookup.get(texture));
-            for (var quad : quads) {
-                consumer.putBulkData(poseStack.last(), quad, new float[]{1.0F, 1.0F, 1.0F, 1.0F}, 1, 1, 1, new int[]{lightmap, lightmap, lightmap, lightmap}, overlay, true);
-            }
+        public void render(PoseStack poseStack, SubmitNodeCollector collector, ITextureRenderTypeLookup textureRenderTypeLookup, int lightmap, int overlay) {
+            // A mesh is a loose bag of quads sharing one texture, which does not fit any of the typed
+            // submit calls (submitBlockModel wants BlockStateModelParts, submitItem wants a display
+            // context), so it goes through the custom geometry escape hatch - the one place a raw
+            // VertexConsumer still exists. Colour and light are no longer baked into the quads, they
+            // are carried by the QuadInstance handed to putBakedQuad.
+            var instance = new QuadInstance();
+            instance.setColor(-1);
+            instance.setLightCoords(lightmap);
+            instance.setOverlayCoords(overlay);
+
+            collector.submitCustomGeometry(poseStack, textureRenderTypeLookup.get(texture), (pose, buffer) -> {
+                for (var quad : quads) {
+                    buffer.putBakedQuad(pose, quad, instance);
+                }
+            });
         }
     }
 

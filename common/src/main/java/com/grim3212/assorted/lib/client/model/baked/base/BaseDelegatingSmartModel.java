@@ -1,51 +1,37 @@
 package com.grim3212.assorted.lib.client.model.baked.base;
 
 import com.grim3212.assorted.lib.client.model.baked.IDelegatingBakedModel;
-import net.minecraft.client.resources.model.cuboid.ItemTransforms;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
-import org.jetbrains.annotations.NotNull;
+import com.grim3212.assorted.lib.client.model.data.IBlockModelData;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.client.resources.model.sprite.Material;
+import net.minecraft.util.RandomSource;
 
 public abstract class BaseDelegatingSmartModel extends BaseSmartModel implements IDelegatingBakedModel {
 
-    private final BakedModel delegate;
+    private final BlockStateModel delegate;
 
-    protected BaseDelegatingSmartModel(final BakedModel delegate) {
+    protected BaseDelegatingSmartModel(final BlockStateModel delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public BakedModel getDelegate() {
+    public BlockStateModel getDelegate() {
         return delegate;
     }
 
     @Override
-    public boolean useAmbientOcclusion() {
-        return getDelegate().useAmbientOcclusion();
+    public BlockStateModel handleBlockState(final RandomSource random, final IBlockModelData modelData) {
+        return getDelegate();
     }
 
     @Override
-    public boolean isGui3d() {
-        return getDelegate().isGui3d();
+    public Material.Baked particleMaterial() {
+        return getDelegate().particleMaterial();
     }
 
     @Override
-    public boolean isCustomRenderer() {
-        return getDelegate().isCustomRenderer();
-    }
-
-    @Override
-    public @NotNull TextureAtlasSprite getParticleIcon() {
-        return getDelegate().getParticleIcon();
-    }
-
-    @Override
-    public @NotNull ItemTransforms getTransforms() {
-        return getDelegate().getTransforms();
-    }
-
-    @Override
-    public boolean usesBlockLight() {
-        return getDelegate().usesBlockLight();
+    public @BakedQuad.MaterialFlags int materialFlags() {
+        return getDelegate().materialFlags();
     }
 }

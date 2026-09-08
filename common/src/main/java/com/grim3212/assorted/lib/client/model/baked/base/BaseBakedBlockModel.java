@@ -1,28 +1,52 @@
 package com.grim3212.assorted.lib.client.model.baked.base;
 
-import net.minecraft.client.renderer.block.model.ItemOverrides;
-import net.minecraft.client.resources.model.BakedModel;
-import org.jetbrains.annotations.NotNull;
+import com.grim3212.assorted.lib.client.model.EmptyModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.client.resources.model.sprite.Material;
+import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 
-public abstract class BaseBakedBlockModel extends BaseBakedPerspectiveModel implements BakedModel {
+import java.util.List;
+
+/**
+ * Base for a hand built block model that draws a single set of quads.
+ * <p>
+ * 26.2 splits the old {@code BakedModel} in two: a {@link BlockStateModel} answers "which parts do I
+ * draw for this random seed" and a {@link BlockStateModelPart} answers "which quads are on this face".
+ * A model of this shape is exactly one part, so it implements both and hands itself out of
+ * {@link #collectParts(RandomSource, List)}; subclasses only have to implement
+ * {@link BlockStateModelPart#getQuads(Direction)}.
+ */
+public abstract class BaseBakedBlockModel implements BlockStateModel, BlockStateModelPart {
 
     @Override
-    final public boolean useAmbientOcclusion() {
+    public void collectParts(final RandomSource random, final List<BlockStateModelPart> output) {
+        output.add(this);
+    }
+
+    @Override
+    public boolean useAmbientOcclusion() {
         return true;
     }
 
     @Override
-    final public boolean isGui3d() {
-        return true;
+    public Material.Baked particleMaterial() {
+        return EmptyModel.missingMaterial();
     }
 
     @Override
-    final public boolean isCustomRenderer() {
-        return false;
-    }
-
-    @Override
-    public @NotNull ItemOverrides getOverrides() {
-        return ItemOverrides.EMPTY;
+    public @BakedQuad.MaterialFlags int materialFlags() {
+        int flags = 0;
+        for (final BakedQuad quad : getQuads(null)) {
+            flags |= quad.materialInfo().flags();
+        }
+        for (final Direction direction : Direction.values()) {
+            for (final BakedQuad quad : getQuads(direction)) {
+                flags |= quad.materialInfo().flags();
+            }
+        }
+        return flags;
     }
 }

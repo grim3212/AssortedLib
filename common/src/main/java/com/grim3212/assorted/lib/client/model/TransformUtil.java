@@ -52,9 +52,9 @@ public class TransformUtil {
      * @return a new transformation with a changed origin
      */
     public static Transformation applyOrigin(Transformation transform, Vector3f origin) {
-        if (transform.equals(Transformation.identity())) return Transformation.identity();
+        if (transform.equals(Transformation.IDENTITY)) return Transformation.IDENTITY;
 
-        Matrix4f ret = transform.getMatrix();
+        Matrix4f ret = transform.getMatrixCopy();
         Matrix4f tmp = new Matrix4f().translation(origin.x(), origin.y(), origin.z());
         tmp.mul(ret, ret);
         tmp.translation(-origin.x(), -origin.y(), -origin.z());

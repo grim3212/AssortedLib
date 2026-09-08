@@ -2,125 +2,107 @@ package com.grim3212.assorted.lib.client.model.vertices;
 
 import com.google.common.base.Preconditions;
 import com.grim3212.assorted.lib.client.texture.UnitTextureAtlasSprite;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexFormatElement;
-import net.minecraft.util.Util;
-import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.client.model.geom.builders.UVPair;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.Direction;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
-import java.util.IdentityHashMap;
-import java.util.Map;
 import java.util.function.Consumer;
 
-import static com.grim3212.assorted.lib.client.model.IQuadTransformer.*;
-
+/**
+ * A {@link VertexConsumer} that assembles the vertices it is fed into {@linkplain BakedQuad baked quads}.
+ * <p>
+ * A 26.2 quad is a record of four positions, four packed uvs, a direction and a
+ * {@link BakedQuad.MaterialInfo}, so only {@link #addVertex(float, float, float)} and
+ * {@link #setUv(float, float)} carry data this can use; colour, overlay, light and normal are supplied
+ * when the geometry is submitted and are accepted and ignored here.
+ * <p>
+ * {@code VertexConsumer} lost {@code endVertex()} in 26.x - a vertex ends when the next one begins - so
+ * the quad for the last four vertices is only emitted once a fifth vertex arrives or {@link #flush()}
+ * is called.
+ */
 public class QuadBakingVertexConsumer implements VertexConsumer {
-
-    private final Map<VertexFormatElement, Integer> ELEMENT_OFFSETS = Util.make(new IdentityHashMap<>(), map -> {
-        int i = 0;
-        for (var element : DefaultVertexFormat.BLOCK.getElements())
-            map.put(element, DefaultVertexFormat.BLOCK.offsets.getInt(i++) / 4); // Int offset
-    });
-    private static final int QUAD_DATA_SIZE = STRIDE * 4;
 
     private final Consumer<BakedQuad> quadConsumer;
 
-    int vertexIndex = 0;
-    private int[] quadData = new int[QUAD_DATA_SIZE];
+    protected int vertexIndex = 0;
+    private final Vector3fc[] positions = new Vector3fc[4];
+    private final long[] packedUVs = new long[4];
 
-    private int tintIndex;
+    private int tintIndex = -1;
     private Direction direction = Direction.DOWN;
     private TextureAtlasSprite sprite = UnitTextureAtlasSprite.INSTANCE;
-    private boolean hasAmbientOcclusion;
+    private boolean shade;
+    private int lightEmission;
 
     public QuadBakingVertexConsumer(Consumer<BakedQuad> quadConsumer) {
         this.quadConsumer = quadConsumer;
     }
 
     @Override
-    public VertexConsumer vertex(double x, double y, double z) {
-        int offset = vertexIndex * STRIDE + POSITION;
-        quadData[offset] = Float.floatToRawIntBits((float) x);
-        quadData[offset + 1] = Float.floatToRawIntBits((float) y);
-        quadData[offset + 2] = Float.floatToRawIntBits((float) z);
+    public VertexConsumer addVertex(float x, float y, float z) {
+        if (vertexIndex == 4)
+            flush();
+
+        positions[vertexIndex] = new Vector3f(x, y, z);
+        packedUVs[vertexIndex] = UVPair.pack(0.0F, 0.0F);
+        vertexIndex++;
         return this;
     }
 
     @Override
-    public VertexConsumer normal(float x, float y, float z) {
-        int offset = vertexIndex * STRIDE + NORMAL;
-        quadData[offset] = ((int) (x * 127.0f) & 0xFF) |
-                (((int) (y * 127.0f) & 0xFF) << 8) |
-                (((int) (z * 127.0f) & 0xFF) << 16);
+    public VertexConsumer setUv(float u, float v) {
+        if (vertexIndex > 0)
+            packedUVs[vertexIndex - 1] = UVPair.pack(u, v);
         return this;
     }
 
     @Override
-    public VertexConsumer color(int r, int g, int b, int a) {
-        int offset = vertexIndex * STRIDE + COLOR;
-        quadData[offset] = ((a & 0xFF) << 24) |
-                ((b & 0xFF) << 16) |
-                ((g & 0xFF) << 8) |
-                (r & 0xFF);
+    public VertexConsumer setColor(int r, int g, int b, int a) {
         return this;
     }
 
     @Override
-    public VertexConsumer uv(float u, float v) {
-        int offset = vertexIndex * STRIDE + UV0;
-        quadData[offset] = Float.floatToRawIntBits(u);
-        quadData[offset + 1] = Float.floatToRawIntBits(v);
+    public VertexConsumer setColor(int color) {
         return this;
     }
 
     @Override
-    public VertexConsumer overlayCoords(int u, int v) {
-        if (UV1 >= 0) // Vanilla doesn't support this, but it may be added by a 3rd party
-        {
-            int offset = vertexIndex * STRIDE + UV1;
-            quadData[offset] = (u & 0xFFFF) | ((v & 0xFFFF) << 16);
-        }
+    public VertexConsumer setUv1(int u, int v) {
         return this;
     }
 
     @Override
-    public VertexConsumer uv2(int u, int v) {
-        int offset = vertexIndex * STRIDE + UV2;
-        quadData[offset] = (u & 0xFFFF) | ((v & 0xFFFF) << 16);
-        return this;
-    }
-
-    public VertexConsumer misc(VertexFormatElement element, int... rawData) {
-        Integer baseOffset = ELEMENT_OFFSETS.get(element);
-        if (baseOffset != null) {
-            int offset = vertexIndex * STRIDE + baseOffset;
-            System.arraycopy(rawData, 0, quadData, offset, rawData.length);
-        }
+    public VertexConsumer setUv2(int u, int v) {
         return this;
     }
 
     @Override
-    public void endVertex() {
-        if (++vertexIndex != 4)
+    public VertexConsumer setNormal(float x, float y, float z) {
+        return this;
+    }
+
+    @Override
+    public VertexConsumer setLineWidth(float width) {
+        return this;
+    }
+
+    /**
+     * Emits the quad built from the vertices seen so far, if there are four of them.
+     */
+    public void flush() {
+        if (vertexIndex != 4)
             return;
-        // We have a full quad, pass it to the consumer and reset
-        quadConsumer.accept(new BakedQuad(quadData, tintIndex, direction, sprite, hasAmbientOcclusion));
+
+        Material.Baked material = new Material.Baked(sprite, false);
+        BakedQuad.MaterialInfo materialInfo = BakedQuad.MaterialInfo.of(material, sprite.contents().computeTransparency(0.0F, 0.0F, 1.0F, 1.0F), tintIndex, shade, lightEmission);
+        quadConsumer.accept(new BakedQuad(positions[0], positions[1], positions[2], positions[3], packedUVs[0], packedUVs[1], packedUVs[2], packedUVs[3], direction, materialInfo));
         vertexIndex = 0;
-        quadData = new int[QUAD_DATA_SIZE];
     }
-
-    @Override
-    public void defaultColor(int var1, int var2, int var3, int var4) {
-
-    }
-
-    @Override
-    public void unsetDefaultColor() {
-
-    }
-
 
     public void setTintIndex(int tintIndex) {
         this.tintIndex = tintIndex;
@@ -134,8 +116,16 @@ public class QuadBakingVertexConsumer implements VertexConsumer {
         this.sprite = sprite;
     }
 
-    public void setHasAmbientOcclusion(boolean hasAmbientOcclusion) {
-        this.hasAmbientOcclusion = hasAmbientOcclusion;
+    /**
+     * Whether the renderer applies its diffuse lighting term to this quad. This is what the old
+     * {@code hasAmbientOcclusion} flag ended up as on the quad.
+     */
+    public void setShade(boolean shade) {
+        this.shade = shade;
+    }
+
+    public void setLightEmission(int lightEmission) {
+        this.lightEmission = lightEmission;
     }
 
     public static class Buffered extends QuadBakingVertexConsumer {
@@ -151,6 +141,7 @@ public class QuadBakingVertexConsumer implements VertexConsumer {
         }
 
         public BakedQuad getQuad() {
+            flush();
             var quad = Preconditions.checkNotNull(output[0], "No quad has been emitted. Vertices in buffer: " + vertexIndex);
             output[0] = null;
             return quad;
