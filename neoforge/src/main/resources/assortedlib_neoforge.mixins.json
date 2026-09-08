@@ -4,13 +4,9 @@
   "compatibilityLevel": "JAVA_21",
   "package": "com.grim3212.assorted.lib.mixin",
   "mixins": [
-    "crafting.CraftingHelperMixin",
-    "item.enchantment.IItemEnchantmentConditionMixin",
-    "item.enchantment.LibEnchantmentMixin"
   ],
   "client": [
-    "client.model.ModelDataManagerMixin",
-    "client.rendering.BlockEntityWithoutLevelRendererMixin"
+    "client.model.ModelDataManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

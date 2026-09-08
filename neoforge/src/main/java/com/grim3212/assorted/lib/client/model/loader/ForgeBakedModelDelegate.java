@@ -1,194 +1,111 @@
 package com.grim3212.assorted.lib.client.model.loader;
 
-import com.google.common.collect.Lists;
-import com.grim3212.assorted.lib.client.model.baked.ICompoundItemBakedModel;
 import com.grim3212.assorted.lib.client.model.baked.IDataAwareBakedModel;
 import com.grim3212.assorted.lib.client.model.baked.IDelegatingBakedModel;
 import com.grim3212.assorted.lib.client.model.data.ForgeBlockModelDataPlatformDelegate;
 import com.grim3212.assorted.lib.client.model.data.IBlockModelData;
-import com.grim3212.assorted.lib.platform.ClientServices;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.resources.model.geometry.BakedQuad;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
-import net.minecraft.client.resources.model.cuboid.ItemTransforms;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.client.resources.model.sprite.Material;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.ChunkRenderTypeSet;
+import net.neoforged.neoforge.client.model.DynamicBlockStateModel;
 import net.neoforged.neoforge.model.data.ModelData;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
 import java.util.List;
 
-public final class ForgeBakedModelDelegate implements BakedModel, IDelegatingBakedModel, IDataAwareBakedModel, ICompoundItemBakedModel {
-    private final BakedModel delegate;
+/**
+ * Bridges the loader agnostic {@link IDataAwareBakedModel} onto NeoForge's own position aware model
+ * hook.
+ * <p>
+ * {@code BakedModel} is gone; a block model is a {@link BlockStateModel} which is baked per block
+ * state and hands its geometry over as {@linkplain BlockStateModelPart parts}. NeoForge re-adds the
+ * level/position context on {@link DynamicBlockStateModel}, which is where the model data is read
+ * from ({@code level.getModelData(pos)}), so this delegate translates that into the
+ * {@link IBlockModelData} the common side works with.
+ * <p>
+ * TODO(26.2): the item side of this delegate is gone. It used to also implement
+ *  {@code ICompoundItemBakedModel} and forward {@code getRenderPasses} / {@code getQuads(ItemStack,
+ *  ...)} / {@code getRenderTypes(ItemStack, boolean)} / {@code applyTransform}. Item rendering is
+ *  push-only now - an {@code ItemModel} mutates an {@code ItemStackRenderState} and hands nothing
+ *  back - and {@code BlockStateModel} and {@code ItemModel} are unrelated types, so a single wrapper
+ *  can no longer cover both. Per render type filtering ({@code ChunkRenderTypeSet}, which has no
+ *  NeoForge equivalent) is gone too: every {@link BakedQuad} carries its own material info and the
+ *  section compiler buckets quads by it.
+ */
+public final class ForgeBakedModelDelegate implements DynamicBlockStateModel, IDelegatingBakedModel, IDataAwareBakedModel {
 
-    public ForgeBakedModelDelegate(final BakedModel delegate) {
+    private final BlockStateModel delegate;
+
+    public ForgeBakedModelDelegate(final BlockStateModel delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public @NotNull List<BakedQuad> getQuads(
-            @Nullable final BlockState p_119123_, @Nullable final Direction p_119124_, final @NotNull RandomSource p_119125_) {
-        return delegate.getQuads(p_119123_, p_119124_, p_119125_);
+    public BlockStateModel getDelegate() {
+        return this.delegate;
     }
 
     @Override
-    public @NotNull List<BakedQuad> getQuads(@Nullable final BlockState state, @Nullable final Direction side, @NotNull final RandomSource rand, @NotNull final ModelData data, @Nullable final RenderType renderType) {
-        if (delegate instanceof IDataAwareBakedModel dataAwareBakedModel) {
-            return dataAwareBakedModel.getQuads(state, side, rand, new ForgeBlockModelDataPlatformDelegate(data), renderType);
+    public void collectParts(final BlockAndTintGetter level, final BlockPos pos, final BlockState state, final RandomSource random, final List<BlockStateModelPart> parts) {
+        if (this.delegate instanceof IDataAwareBakedModel dataAwareBakedModel) {
+            dataAwareBakedModel.collectParts(random, new ForgeBlockModelDataPlatformDelegate(level.getModelData(pos)), parts);
+            return;
         }
 
-        return delegate.getQuads(state, side, rand);
+        this.delegate.collectParts(level, pos, state, random, parts);
     }
 
     @Override
-    public boolean useAmbientOcclusion() {
-        return delegate.useAmbientOcclusion();
-    }
-
-    @Override
-    public boolean isGui3d() {
-        return delegate.isGui3d();
-    }
-
-    @Override
-    public boolean usesBlockLight() {
-        return delegate.usesBlockLight();
-    }
-
-    @Override
-    public boolean isCustomRenderer() {
-        return delegate.isCustomRenderer();
-    }
-
-    @Override
-    public @NotNull TextureAtlasSprite getParticleIcon() {
-        return delegate.getParticleIcon();
-    }
-
-    @Override
-    public @NotNull ItemOverrides getOverrides() {
-        return delegate.getOverrides();
-    }
-
-    @Override
-    public BakedModel getDelegate() {
-        return delegate;
-    }
-
-    @Override
-    public @NotNull ItemTransforms getTransforms() {
-        return delegate.getTransforms();
-    }
-
-    @Override
-    public boolean useAmbientOcclusion(final @NotNull BlockState state) {
-        return delegate.useAmbientOcclusion(state);
-    }
-
-    @Override
-    public boolean useAmbientOcclusion(final @NotNull BlockState state, final @NotNull RenderType renderType) {
-        return delegate.useAmbientOcclusion(state, renderType);
-    }
-
-    @Override
-    public @NotNull BakedModel applyTransform(final ItemDisplayContext transformType, final @NotNull PoseStack poseStack, final boolean applyLeftHandTransform) {
-        return ClientServices.MODELS.adaptToPlatform(delegate.applyTransform(transformType, poseStack, applyLeftHandTransform));
-    }
-
-    @Override
-    public @NotNull ModelData getModelData(@NotNull final BlockAndTintGetter level, @NotNull final BlockPos pos, @NotNull final BlockState state, @NotNull final ModelData modelData) {
-        return delegate.getModelData(level, pos, state, modelData);
-    }
-
-    @Override
-    public @NotNull TextureAtlasSprite getParticleIcon(@NotNull final ModelData data) {
-        return delegate.getParticleIcon(data);
-    }
-
-    @Override
-    public @NotNull ChunkRenderTypeSet getRenderTypes(@NotNull final BlockState state, @NotNull final RandomSource rand, @NotNull final ModelData data) {
-        final ForgeBlockModelDataPlatformDelegate dataDelegate = new ForgeBlockModelDataPlatformDelegate(data);
-        return ChunkRenderTypeSet.of(getSupportedRenderTypes(state, rand, dataDelegate));
-    }
-
-    @Override
-    public @NotNull List<RenderType> getRenderTypes(final @NotNull ItemStack itemStack, final boolean fabulous) {
-        return Lists.newArrayList(getSupportedRenderTypes(itemStack, fabulous));
-    }
-
-    @Override
-    public @NotNull List<BakedModel> getRenderPasses(final @NotNull ItemStack itemStack, final boolean fabulous) {
-        if (delegate instanceof ICompoundItemBakedModel compoundItemBakedModel)
-            return compoundItemBakedModel.getRenderPasses(itemStack, fabulous).stream().map(ClientServices.MODELS::adaptToPlatform).toList();
-
-        return List.of(this);
-    }
-
-    @Override
-    public @NotNull List<BakedQuad> getQuads(@Nullable final BlockState state, @Nullable final Direction side, @NotNull final RandomSource rand, @NotNull final IBlockModelData extraData, @Nullable final RenderType renderType) {
-        if (!(extraData instanceof ForgeBlockModelDataPlatformDelegate blockModelDataPlatformDelegate)) {
-            if (delegate instanceof IDataAwareBakedModel dataAwareBakedModel) {
-                return dataAwareBakedModel.getQuads(state, side, rand, extraData, renderType);
-            }
-
-            return delegate.getQuads(state, side, rand, ModelData.EMPTY, renderType);
+    public void collectParts(final @NotNull RandomSource random, final @NotNull IBlockModelData extraData, final @NotNull List<BlockStateModelPart> parts) {
+        if (this.delegate instanceof IDataAwareBakedModel dataAwareBakedModel) {
+            dataAwareBakedModel.collectParts(random, extraData, parts);
+            return;
         }
 
-        if (delegate instanceof IDataAwareBakedModel dataAwareBakedModel) {
-            return dataAwareBakedModel.getQuads(state, side, rand, blockModelDataPlatformDelegate, renderType);
-        }
-
-        return delegate.getQuads(state, side, rand, blockModelDataPlatformDelegate.getDelegate(), renderType);
+        this.delegate.collectParts(random, parts);
     }
 
     @Override
-    public @NotNull List<BakedQuad> getQuads(ItemStack stack, boolean fabulous, @NotNull RandomSource rand, @Nullable RenderType renderType) {
-        if (delegate instanceof IDataAwareBakedModel dataAwareBakedModel) {
-            return dataAwareBakedModel.getQuads(stack, fabulous, rand, renderType);
-        }
-
-        return delegate.getQuads(null, null, rand, ModelData.EMPTY, renderType);
+    public void collectParts(final @NotNull RandomSource random, final @NotNull List<BlockStateModelPart> parts) {
+        this.delegate.collectParts(random, parts);
     }
 
     @Override
-    public @NotNull Collection<RenderType> getSupportedRenderTypes(final BlockState state, final RandomSource rand, final IBlockModelData data) {
-        if (!(data instanceof ForgeBlockModelDataPlatformDelegate blockModelDataPlatformDelegate)) {
-            if (delegate instanceof IDataAwareBakedModel dataAwareBakedModel) {
-                return dataAwareBakedModel.getSupportedRenderTypes(state, rand, IBlockModelData.empty());
-            }
-
-            return Lists.newArrayList(delegate.getRenderTypes(state, rand, ModelData.EMPTY));
-
-        }
-
-        if (delegate instanceof IDataAwareBakedModel dataAwareBakedModel) {
-            return dataAwareBakedModel.getSupportedRenderTypes(state, rand, data);
-        }
-
-        return Lists.newArrayList(delegate.getRenderTypes(state, rand, blockModelDataPlatformDelegate.getDelegate()));
+    public Object createGeometryKey(final BlockAndTintGetter level, final BlockPos pos, final BlockState state, final RandomSource random) {
+        // The delegate may be data aware, in which case its geometry depends on the block entity data
+        // this delegate feeds it and cannot be keyed on the block state alone.
+        return this.delegate instanceof IDataAwareBakedModel ? null : this.delegate.createGeometryKey(level, pos, state, random);
     }
 
     @Override
-    public @NotNull Collection<RenderType> getSupportedRenderTypes(final ItemStack stack, final boolean fabulous) {
-        if (delegate instanceof IDataAwareBakedModel dataAwareBakedModel)
-            return dataAwareBakedModel.getSupportedRenderTypes(stack, fabulous);
-
-        return Lists.newArrayList(delegate.getRenderTypes(stack, fabulous));
+    public Material.Baked particleMaterial() {
+        return this.delegate.particleMaterial();
     }
 
     @Override
-    public List<BakedModel> getLayers(final ItemStack stack, final boolean fabulous) {
-        return getRenderPasses(stack, fabulous);
+    public Material.Baked particleMaterial(final BlockAndTintGetter level, final BlockPos pos, final BlockState state) {
+        return this.delegate.particleMaterial(level, pos, state);
+    }
+
+    @Override
+    public @BakedQuad.MaterialFlags int materialFlags() {
+        return this.delegate.materialFlags();
+    }
+
+    @Override
+    public @BakedQuad.MaterialFlags int materialFlags(final BlockAndTintGetter level, final BlockPos pos, final BlockState state) {
+        return this.delegate.materialFlags(level, pos, state);
+    }
+
+    /**
+     * Convenience for call sites that still hold a raw {@link ModelData}.
+     */
+    public void collectParts(final RandomSource random, final ModelData data, final List<BlockStateModelPart> parts) {
+        collectParts(random, new ForgeBlockModelDataPlatformDelegate(data), parts);
     }
 }

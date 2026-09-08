@@ -1,76 +1,64 @@
 package com.grim3212.assorted.lib.conditions;
 
-import com.google.gson.JsonObject;
 import com.grim3212.assorted.lib.core.conditions.LibCondition;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.common.conditions.ICondition;
-import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
 
+/**
+ * Wraps a loader agnostic {@link LibCondition} registered at runtime through
+ * {@code IConditionHelper#register(Identifier, LibCondition)}.
+ * <p>
+ * The 1.20.1 version needed a separate {@code IConditionSerializer} which re-evaluated the condition
+ * while reading a recipe's json. A {@link LibCondition} has no parameters any more, so a wrapper is
+ * a singleton per name and its codec is a unit codec of itself; the test happens where every other
+ * condition's does, in {@link #test(IContext)}.
+ */
 public class RecipeConditionWrapper implements ICondition {
-    private final Identifier name;
-    private final String stringName;
-    private final boolean result;
 
-    public RecipeConditionWrapper(Identifier name, String stringName, boolean result) {
+    private final Identifier name;
+    private final LibCondition condition;
+    private final MapCodec<RecipeConditionWrapper> codec;
+
+    public RecipeConditionWrapper(Identifier name, LibCondition condition) {
         this.name = name;
-        this.stringName = stringName;
-        this.result = result;
+        this.condition = condition;
+        this.codec = MapCodec.unit(() -> this);
     }
 
-    @Override
-    public Identifier getID() {
-        return name;
+    public Identifier getName() {
+        return this.name;
+    }
+
+    public LibCondition getCondition() {
+        return this.condition;
     }
 
     @Override
     public boolean test(IContext context) {
-        return this.result;
+        return this.condition.test();
+    }
+
+    @Override
+    public MapCodec<? extends ICondition> codec() {
+        return this.codec;
     }
 
     @Override
     public String toString() {
-        return stringName;
+        return this.name.toString();
     }
 
-    public static class Serializer implements IConditionSerializer<RecipeConditionWrapper> {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RecipeConditionWrapper that = (RecipeConditionWrapper) o;
+        return this.name.equals(that.name);
+    }
 
-        private final Identifier name;
-        private final LibCondition condition;
-
-        public Serializer(Identifier name, LibCondition condition) {
-            this.name = name;
-            this.condition = condition;
-        }
-
-        @Override
-        public void write(JsonObject json, RecipeConditionWrapper value) {
-        }
-
-        @Override
-        public RecipeConditionWrapper read(JsonObject json) {
-            return new RecipeConditionWrapper(this.name, this.condition.toString(), this.condition.test(json));
-        }
-
-        @Override
-        public Identifier getID() {
-            return name;
-        }
-
-        public LibCondition getCondition() {
-            return condition;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Serializer that = (Serializer) o;
-            return this.name.equals(that.name);
-        }
-
-        @Override
-        public int hashCode() {
-            return this.name.hashCode();
-        }
+    @Override
+    public int hashCode() {
+        return this.name.hashCode();
     }
 }

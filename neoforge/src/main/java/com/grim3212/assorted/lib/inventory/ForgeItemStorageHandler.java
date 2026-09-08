@@ -5,6 +5,17 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * TODO(26.2): {@link IItemHandlerModifiable} (and {@link net.neoforged.neoforge.items.IItemHandler}
+ * as a whole) is deprecated for removal in favour of NeoForge's transfer API - the item handler
+ * capabilities are {@code BlockCapability<ResourceHandler<ItemResource>, Direction>} now
+ * ({@code Capabilities.Item.BLOCK} / {@code .ENTITY} / {@code .ITEM}), and there is only an adapter
+ * in the {@code ResourceHandler -> IItemHandler} direction ({@code IItemHandler.of}), not back.
+ * Exposing an {@link IItemStorageHandler} as a capability therefore has to go through a real
+ * {@code ResourceHandler<ItemResource>} implementation with transaction support, which is a redesign
+ * of {@code IItemStorageHandler} rather than a rename; the deprecated interface is kept here so the
+ * existing behaviour is preserved until that happens.
+ */
 public class ForgeItemStorageHandler implements IItemHandlerModifiable {
 
     private final IItemStorageHandler storage;

@@ -1,74 +1,66 @@
 package com.grim3212.assorted.lib.client.model.loader;
 
 import com.grim3212.assorted.lib.client.model.loaders.context.IModelBakingContext;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
-import net.minecraft.client.resources.model.cuboid.ItemTransforms;
-import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.UnbakedModel;
+import net.minecraft.client.resources.model.cuboid.ItemTransforms;
+import net.minecraft.client.resources.model.sprite.Material;
+import net.minecraft.client.resources.model.sprite.TextureSlots;
 import net.minecraft.resources.Identifier;
-import net.minecraftforge.client.model.geometry.BlockGeometryBakingContext;
-import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
+import net.neoforged.neoforge.client.model.StandardModelParameters;
 
 import java.util.Optional;
-import java.util.function.Function;
 
+/**
+ * {@code IGeometryBakingContext} has no NeoForge equivalent. The information it carried is split in
+ * 26.2: the resolved texture references are a {@link TextureSlots} handed to
+ * {@link net.minecraft.client.resources.model.geometry.UnbakedGeometry#bake} and the remaining top
+ * level model properties are the {@link StandardModelParameters} the loader parsed out of the model
+ * json, so this context is built from both.
+ */
 public class ForgeModelBakingContextDelegate implements IModelBakingContext {
 
-    private final Function<Identifier, UnbakedModel> unbakedModelGetter;
-    private final IGeometryBakingContext delegate;
+    private final ModelBaker baker;
+    private final TextureSlots textureSlots;
+    private final StandardModelParameters parameters;
 
-
-    public ForgeModelBakingContextDelegate(final Function<Identifier, UnbakedModel> unbakedModelGetter, final IGeometryBakingContext delegate) {
-        this.unbakedModelGetter = unbakedModelGetter;
-        this.delegate = delegate;
+    public ForgeModelBakingContextDelegate(final ModelBaker baker, final TextureSlots textureSlots, final StandardModelParameters parameters) {
+        this.baker = baker;
+        this.textureSlots = textureSlots;
+        this.parameters = parameters;
     }
 
     @Override
     public UnbakedModel getUnbakedModel(final Identifier unbakedModel) {
-        return unbakedModelGetter.apply(unbakedModel);
+        return this.baker.getModel(unbakedModel).wrapped();
     }
 
     @Override
     public Optional<Material> getMaterial(final String name) {
-        if (delegate.hasMaterial(name)) {
-            return Optional.of(delegate.getMaterial(name));
-        }
-
-        return Optional.empty();
+        return Optional.ofNullable(this.textureSlots.getMaterial(name));
     }
 
     @Override
     public boolean isGui3d() {
-        return delegate.isGui3d();
+        final UnbakedModel.GuiLight guiLight = this.parameters.guiLight();
+        return guiLight == null || guiLight.lightLikeBlock();
     }
 
     @Override
     public boolean useBlockLight() {
-        return delegate.useBlockLight();
+        final UnbakedModel.GuiLight guiLight = this.parameters.guiLight();
+        return guiLight == null || guiLight.lightLikeBlock();
     }
 
     @Override
     public boolean useAmbientOcclusion() {
-        return delegate.useAmbientOcclusion();
+        final Boolean ambientOcclusion = this.parameters.ambientOcclusion();
+        return ambientOcclusion == null || ambientOcclusion;
     }
 
     @Override
     public ItemTransforms getTransforms() {
-        return delegate.getTransforms();
-    }
-
-    @Override
-    public ItemOverrides getItemOverrides(ModelBaker modelBaker) {
-        if (delegate instanceof BlockGeometryBakingContext geometryBakingContext) {
-            return geometryBakingContext.owner.getOverrides(
-                    modelBaker,
-                    geometryBakingContext.owner,
-                    material -> Minecraft.getInstance().getTextureAtlas(material.atlasLocation()).apply(material.texture())
-            );
-        }
-
-        return ItemOverrides.EMPTY;
+        final ItemTransforms transforms = this.parameters.itemTransforms();
+        return transforms == null ? ItemTransforms.NO_TRANSFORMS : transforms;
     }
 }

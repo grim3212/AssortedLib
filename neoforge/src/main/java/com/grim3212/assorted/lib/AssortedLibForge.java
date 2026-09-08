@@ -1,5 +1,6 @@
 package com.grim3212.assorted.lib;
 
+import com.grim3212.assorted.lib.conditions.LibConditions;
 import com.grim3212.assorted.lib.data.ForgeBiomeTagProvider;
 import com.grim3212.assorted.lib.data.ForgeBlockTagProvider;
 import com.grim3212.assorted.lib.data.ForgeItemTagProvider;
@@ -9,36 +10,39 @@ import com.grim3212.assorted.lib.platform.ForgePlatformHelper;
 import com.grim3212.assorted.lib.platform.Services;
 import com.grim3212.assorted.lib.worldgen.LibForgeWorldGen;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.data.ExistingFileHelper;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.event.AnvilUpdateEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.LootTableLoadEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.IEventBus;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.registries.RegisterEvent;
 
 import java.util.concurrent.CompletableFuture;
 
 @Mod(LibConstants.MOD_ID)
 public class AssortedLibForge {
-    public AssortedLibForge() {
+
+    /**
+     * {@code FMLJavaModLoadingContext} is gone; the mod event bus and the mod container are injected
+     * into the {@code @Mod} constructor instead.
+     */
+    public AssortedLibForge(IEventBus modBus, ModContainer modContainer) {
         LibConstants.LOG.info(LibConstants.MOD_NAME + " starting up...");
 
-        final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         modBus.addListener(this::gatherData);
-        modBus.addListener(this::registerRecipeSerializers);
+        modBus.addListener(this::registerIngredientTypes);
+        modBus.addListener(this::registerConditionCodecs);
         modBus.addListener(this::modifyCreativeTabs);
 
         Services.EVENTS.registerEventType(UseBlockEvent.class, () -> {
-            MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, (final PlayerInteractEvent.RightClickBlock event) -> {
+            NeoForge.EVENT_BUS.addListener(EventPriority.NORMAL, (final PlayerInteractEvent.RightClickBlock event) -> {
                 final UseBlockEvent newEvent = new UseBlockEvent(event.getEntity(), event.getLevel(), event.getHand(), event.getHitVec());
                 Services.EVENTS.handleEvents(newEvent);
                 if (newEvent.isCanceled()) {
@@ -49,21 +53,21 @@ public class AssortedLibForge {
         });
 
         Services.EVENTS.registerEventType(AnvilUpdatedEvent.class, () -> {
-            MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, (final AnvilUpdateEvent event) -> {
-                final AnvilUpdatedEvent newEvent = new AnvilUpdatedEvent(event.getLeft(), event.getRight(), event.getName(), event.getCost(), event.getPlayer());
+            NeoForge.EVENT_BUS.addListener(EventPriority.NORMAL, (final AnvilUpdateEvent event) -> {
+                final AnvilUpdatedEvent newEvent = new AnvilUpdatedEvent(event.getLeft(), event.getRight(), event.getName(), event.getXpCost(), event.getPlayer());
                 Services.EVENTS.handleEvents(newEvent);
                 if (newEvent.isCanceled()) {
                     event.setCanceled(true);
                 } else if (!newEvent.getOutput().isEmpty()) {
                     event.setOutput(newEvent.getOutput());
-                    event.setCost(newEvent.getCost());
+                    event.setXpCost(newEvent.getCost());
                     event.setMaterialCost(newEvent.getMaterialCost());
                 }
             });
         });
 
         Services.EVENTS.registerEventType(EntityInteractEvent.class, () -> {
-            MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, (final PlayerInteractEvent.EntityInteract event) -> {
+            NeoForge.EVENT_BUS.addListener(EventPriority.NORMAL, (final PlayerInteractEvent.EntityInteract event) -> {
                 final EntityInteractEvent newEvent = new EntityInteractEvent(event.getEntity(), event.getHand(), event.getTarget());
                 Services.EVENTS.handleEvents(newEvent);
                 event.setCanceled(newEvent.isCanceled());
@@ -72,7 +76,7 @@ public class AssortedLibForge {
         });
 
         Services.EVENTS.registerEventType(LootTableModifyEvent.class, () -> {
-            MinecraftForge.EVENT_BUS.addListener((final LootTableLoadEvent event) -> {
+            NeoForge.EVENT_BUS.addListener((final LootTableLoadEvent event) -> {
                 final LootTableModifyEvent newEvent = new LootTableModifyEvent(event.getTable(), event.getName(), new ForgeLootTableModificationContext(event.getTable()), true);
                 Services.EVENTS.handleEvents(newEvent);
             });
@@ -83,10 +87,22 @@ public class AssortedLibForge {
         LibForgeWorldGen.init(modBus);
     }
 
-    private void registerRecipeSerializers(final RegisterEvent event) {
-        if (event.getRegistryKey().equals(ForgeRegistries.Keys.RECIPE_SERIALIZERS)) {
+    /**
+     * Custom ingredients are no longer recipe serializers; they live in their own
+     * {@code NeoForgeRegistries.INGREDIENT_TYPES} registry.
+     */
+    private void registerIngredientTypes(final RegisterEvent event) {
+        if (event.getRegistryKey().equals(NeoForgeRegistries.Keys.INGREDIENT_TYPES)) {
             Services.INGREDIENTS.register();
         }
+    }
+
+    /**
+     * Condition types are {@code MapCodec}s in their own registry now, so they can only be registered
+     * from a {@link RegisterEvent} rather than from {@code IConditionHelper#init()}.
+     */
+    private void registerConditionCodecs(final RegisterEvent event) {
+        LibConditions.registerCodecs(event);
     }
 
     private void modifyCreativeTabs(final BuildCreativeModeTabContentsEvent event) {
@@ -97,15 +113,17 @@ public class AssortedLibForge {
         }
     }
 
-    private void gatherData(final GatherDataEvent event) {
-        DataGenerator datagenerator = event.getGenerator();
-        PackOutput packOutput = datagenerator.getPackOutput();
-        ExistingFileHelper fileHelper = event.getExistingFileHelper();
+    /**
+     * {@code ExistingFileHelper} was removed from datagen, and the event owns the provider list now
+     * ({@code addProvider} instead of {@code DataGenerator#addProvider(boolean, provider)}), so the
+     * include flags are gone as well - the server and client halves are separate events.
+     */
+    private void gatherData(final GatherDataEvent.Server event) {
+        PackOutput packOutput = event.getGenerator().getPackOutput();
         CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
 
-        ForgeBlockTagProvider blockTagProvider = new ForgeBlockTagProvider(packOutput, lookupProvider, fileHelper, LibConstants.MOD_ID, new LibCommonTagProvider.BlockTagProvider(packOutput, lookupProvider));
-        datagenerator.addProvider(event.includeServer(), blockTagProvider);
-        datagenerator.addProvider(event.includeServer(), new ForgeItemTagProvider(packOutput, lookupProvider, blockTagProvider.contentsGetter(), fileHelper, LibConstants.MOD_ID, new LibCommonTagProvider.ItemTagProvider(packOutput, lookupProvider, blockTagProvider.contentsGetter())));
-        datagenerator.addProvider(event.includeServer(), new ForgeBiomeTagProvider(packOutput, lookupProvider, fileHelper, LibConstants.MOD_ID, new LibCommonTagProvider.BiomeTagProvider(packOutput, lookupProvider)));
+        ForgeBlockTagProvider blockTagProvider = event.addProvider(new ForgeBlockTagProvider(packOutput, lookupProvider, LibConstants.MOD_ID, new LibCommonTagProvider.BlockTagProvider(packOutput, lookupProvider)));
+        event.addProvider(new ForgeItemTagProvider(packOutput, lookupProvider, blockTagProvider.contentsGetter(), LibConstants.MOD_ID, new LibCommonTagProvider.ItemTagProvider(packOutput, lookupProvider, blockTagProvider.contentsGetter())));
+        event.addProvider(new ForgeBiomeTagProvider(packOutput, lookupProvider, LibConstants.MOD_ID, new LibCommonTagProvider.BiomeTagProvider(packOutput, lookupProvider)));
     }
 }

@@ -1,54 +1,46 @@
 package com.grim3212.assorted.lib.conditions;
 
-import com.google.gson.JsonObject;
 import com.grim3212.assorted.lib.LibConstants;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.GsonHelper;
 import net.neoforged.neoforge.common.conditions.ICondition;
-import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
-import net.minecraftforge.registries.ForgeRegistries;
 
+/**
+ * Conditions are codec based in 26.2, so the old {@code IConditionSerializer} inner class is gone;
+ * the {@link MapCodec} below is what identifies the condition on both sides and is registered
+ * against {@code NeoForgeRegistries.CONDITION_SERIALIZERS} by {@link LibConditions}.
+ */
 public class BlockExistsCondition implements ICondition {
 
-    private static final Identifier NAME = Identifier.fromNamespaceAndPath(LibConstants.MOD_ID, "block_exists");
+    public static final Identifier NAME = Identifier.fromNamespaceAndPath(LibConstants.MOD_ID, "block_exists");
+    public static final MapCodec<BlockExistsCondition> CODEC = RecordCodecBuilder.mapCodec(instance -> instance
+            .group(Identifier.CODEC.fieldOf("block").forGetter(condition -> condition.block))
+            .apply(instance, BlockExistsCondition::new));
+
     private final Identifier block;
 
     public BlockExistsCondition(Identifier block) {
         this.block = block;
     }
 
-    @Override
-    public Identifier getID() {
-        return NAME;
+    public Identifier getBlock() {
+        return this.block;
     }
 
     @Override
     public boolean test(IContext context) {
-        return ForgeRegistries.BLOCKS.containsKey(this.block);
+        return BuiltInRegistries.BLOCK.containsKey(this.block);
+    }
+
+    @Override
+    public MapCodec<? extends ICondition> codec() {
+        return CODEC;
     }
 
     @Override
     public String toString() {
         return "block_exists(\"" + this.block + "\")";
-    }
-
-    public static class Serializer implements IConditionSerializer<BlockExistsCondition> {
-
-        public static final BlockExistsCondition.Serializer INSTANCE = new BlockExistsCondition.Serializer();
-
-        @Override
-        public void write(JsonObject json, BlockExistsCondition value) {
-            json.addProperty("block", value.block.toString());
-        }
-
-        @Override
-        public BlockExistsCondition read(JsonObject json) {
-            return new BlockExistsCondition(Identifier.parse(GsonHelper.getAsString(json, "block")));
-        }
-
-        @Override
-        public Identifier getID() {
-            return BlockExistsCondition.NAME;
-        }
     }
 }

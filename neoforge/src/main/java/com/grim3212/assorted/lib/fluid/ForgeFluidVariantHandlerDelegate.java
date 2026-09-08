@@ -6,7 +6,9 @@ import com.grim3212.assorted.lib.platform.ForgeFluidManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.FluidModel;
+import net.neoforged.neoforge.client.fluid.FluidTintSource;
 import net.neoforged.neoforge.common.SoundActions;
 import net.neoforged.neoforge.fluids.FluidType;
 
@@ -56,16 +58,28 @@ public class ForgeFluidVariantHandlerDelegate implements IFluidVariantHandler {
 
     @Override
     public int getTintColor(final FluidInformation variant) {
-        return IClientFluidTypeExtensions.of(delegate).getTintColor(ForgeFluidManager.buildFluidStack(variant));
+        final FluidTintSource tintSource = fluidModel(variant).fluidTintSource();
+        return tintSource == null ? -1 : tintSource.colorAsStack(ForgeFluidManager.buildFluidStack(variant));
     }
 
     @Override
     public Optional<Identifier> getStillTexture(final FluidInformation variant) {
-        return Optional.ofNullable(IClientFluidTypeExtensions.of(delegate).getStillTexture(ForgeFluidManager.buildFluidStack(variant)));
+        return Optional.of(fluidModel(variant).stillMaterial().sprite().contents().name());
     }
 
     @Override
     public Optional<Identifier> getFlowingTexture(final FluidInformation variant) {
-        return Optional.ofNullable(IClientFluidTypeExtensions.of(delegate).getFlowingTexture(ForgeFluidManager.buildFluidStack(variant)));
+        return Optional.of(fluidModel(variant).flowingMaterial().sprite().contents().name());
+    }
+
+    // TODO(26.2): the still/flowing textures and the tint colour no longer live on the FluidType.
+    //  IClientFluidTypeExtensions#getStillTexture / #getFlowingTexture / #getTintColor are gone; a
+    //  fluid's appearance is a baked FluidModel registered per Fluid through
+    //  RegisterFluidModelsEvent, so it is only reachable through the client model manager and only
+    //  after the models have been baked. The delegate therefore looks the model up by the fluid of
+    //  the variant instead of asking the FluidType, and the extra fluid data (FluidInformation#data)
+    //  can no longer influence the result the way a FluidStack aware extension could.
+    private static FluidModel fluidModel(final FluidInformation variant) {
+        return Minecraft.getInstance().getModelManager().getFluidStateModelSet().get(variant.fluid().defaultFluidState());
     }
 }

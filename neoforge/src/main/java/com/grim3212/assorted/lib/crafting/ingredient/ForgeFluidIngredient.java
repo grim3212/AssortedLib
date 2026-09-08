@@ -1,37 +1,56 @@
 package com.grim3212.assorted.lib.crafting.ingredient;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.grim3212.assorted.lib.LibConstants;
 import com.grim3212.assorted.lib.core.crafting.ingredient.LibFluidIngredient;
-import net.minecraft.network.FriendlyByteBuf;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.crafting.AbstractIngredient;
-import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.crafting.IIngredientSerializer;
+import net.neoforged.neoforge.common.crafting.ICustomIngredient;
+import net.neoforged.neoforge.common.crafting.IngredientType;
 import net.neoforged.neoforge.fluids.FluidType;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
-public class ForgeFluidIngredient extends AbstractIngredient {
+/**
+ * {@code AbstractIngredient} and {@code IIngredientSerializer} are gone. A custom ingredient is an
+ * {@link ICustomIngredient} now - a separate object that a vanilla {@link Ingredient} wraps through
+ * {@link ICustomIngredient#toVanilla()} - and it is serialised by a {@link MapCodec} carried by an
+ * {@link IngredientType} registered against {@code NeoForgeRegistries.INGREDIENT_TYPES}.
+ */
+public class ForgeFluidIngredient implements ICustomIngredient {
 
-    public static final Serializer SERIALIZER = new Serializer();
+    public static final Identifier NAME = Identifier.fromNamespaceAndPath(LibConstants.MOD_ID, "stored_fluid_ingredient");
+
+    public static final MapCodec<ForgeFluidIngredient> CODEC = RecordCodecBuilder.mapCodec(instance -> instance
+            .group(TagKey.codec(Registries.ITEM).optionalFieldOf("item").forGetter(ingredient -> Optional.ofNullable(ingredient.fluidIngredient.getItemTag())),
+                    TagKey.codec(Registries.FLUID).fieldOf("fluid").forGetter(ingredient -> ingredient.fluidIngredient.getFluidTag()),
+                    Codec.LONG.optionalFieldOf("amount", (long) FluidType.BUCKET_VOLUME).forGetter(ingredient -> ingredient.fluidIngredient.getAmount()))
+            .apply(instance, ForgeFluidIngredient::new));
+
+    public static final IngredientType<ForgeFluidIngredient> TYPE = new IngredientType<>(CODEC);
+
     protected final LibFluidIngredient fluidIngredient;
 
-    protected ForgeFluidIngredient(LibFluidIngredient fluidIngredient) {
-        this(fluidIngredient.getItemTag(), fluidIngredient.getFluidTag(), (int) fluidIngredient.getAmount());
+    protected ForgeFluidIngredient(Optional<TagKey<Item>> itemTag, TagKey<Fluid> fluidTag, long amount) {
+        this(itemTag.orElse(null), fluidTag, amount);
     }
 
     protected ForgeFluidIngredient(@Nullable TagKey<Item> itemTag, TagKey<Fluid> fluidTag) {
         this(itemTag, fluidTag, FluidType.BUCKET_VOLUME);
     }
 
-    protected ForgeFluidIngredient(@Nullable TagKey<Item> itemTag, TagKey<Fluid> fluidTag, int amount) {
-        super(itemTag != null ? Stream.of(new Ingredient.TagValue(itemTag)) : Stream.of());
+    protected ForgeFluidIngredient(@Nullable TagKey<Item> itemTag, TagKey<Fluid> fluidTag, long amount) {
         this.fluidIngredient = new LibFluidIngredient(itemTag, fluidTag, amount);
     }
 
@@ -39,18 +58,13 @@ public class ForgeFluidIngredient extends AbstractIngredient {
         return new ForgeFluidIngredient(itemTag, fluidTag);
     }
 
-    public static ForgeFluidIngredient of(@Nullable TagKey<Item> itemTag, TagKey<Fluid> fluidTag, int amount) {
+    public static ForgeFluidIngredient of(@Nullable TagKey<Item> itemTag, TagKey<Fluid> fluidTag, long amount) {
         return new ForgeFluidIngredient(itemTag, fluidTag, amount);
     }
 
     @Override
-    public boolean test(@Nullable ItemStack input) {
+    public boolean test(ItemStack input) {
         return this.fluidIngredient.test(input);
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return false;
     }
 
     @Override
@@ -59,48 +73,38 @@ public class ForgeFluidIngredient extends AbstractIngredient {
     }
 
     @Override
-    protected void invalidate() {
+    public IngredientType<?> getType() {
+        return TYPE;
+    }
+
+    /**
+     * TODO(26.2): the old {@code getItems()} handed back whole {@link ItemStack}s, filled buckets
+     * included. An ingredient only reports the {@linkplain Item items} it can accept now - the stack
+     * shown to the client comes from {@link #display()} - so the fluid contents of the matching
+     * stacks are lost here. The default {@code display()} is kept rather than hand-rolling a
+     * {@code SlotDisplay} out of {@code ItemStackTemplate}s.
+     */
+    @Override
+    public Stream<Holder<Item>> items() {
+        return this.fluidIngredient.getMatchingStacks().stream().map(ItemStack::typeHolder).distinct();
+    }
+
+    public void invalidate() {
         this.fluidIngredient.invalidate();
     }
 
     @Override
-    public IIngredientSerializer<? extends Ingredient> getSerializer() {
-        return SERIALIZER;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ForgeFluidIngredient that = (ForgeFluidIngredient) o;
+        return this.fluidIngredient.getAmount() == that.fluidIngredient.getAmount()
+                && Objects.equals(this.fluidIngredient.getItemTag(), that.fluidIngredient.getItemTag())
+                && Objects.equals(this.fluidIngredient.getFluidTag(), that.fluidIngredient.getFluidTag());
     }
 
     @Override
-    public JsonElement toJson() {
-        JsonObject json = new JsonObject();
-        json.addProperty("type", CraftingHelper.getID(SERIALIZER).toString());
-        SERIALIZER.write(json, this.fluidIngredient);
-        return json;
-    }
-
-    @Override
-    public ItemStack[] getItems() {
-        return this.fluidIngredient.getMatchingStacks().toArray(new ItemStack[0]);
-    }
-
-    public static class Serializer extends LibFluidIngredient.Serializer<LibFluidIngredient> implements IIngredientSerializer<ForgeFluidIngredient> {
-
-        @Override
-        public ForgeFluidIngredient parse(JsonObject json) {
-            return new ForgeFluidIngredient(this.read(json));
-        }
-
-        @Override
-        public ForgeFluidIngredient parse(FriendlyByteBuf buffer) {
-            return new ForgeFluidIngredient(this.read(buffer));
-        }
-
-        @Override
-        public void write(FriendlyByteBuf buffer, ForgeFluidIngredient ingredient) {
-            this.write(buffer, ingredient.fluidIngredient);
-        }
-
-        @Override
-        protected LibFluidIngredient create(@Nullable TagKey<Item> itemTag, TagKey<Fluid> fluidTag, long amount) {
-            return new LibFluidIngredient(itemTag, fluidTag, amount);
-        }
+    public int hashCode() {
+        return Objects.hash(this.fluidIngredient.getItemTag(), this.fluidIngredient.getFluidTag(), this.fluidIngredient.getAmount());
     }
 }

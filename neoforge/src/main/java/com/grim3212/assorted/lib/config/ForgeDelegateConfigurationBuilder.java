@@ -1,6 +1,6 @@
 package com.grim3212.assorted.lib.config;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -8,12 +8,12 @@ import java.util.function.Supplier;
 
 public class ForgeDelegateConfigurationBuilder implements IConfigurationBuilder {
 
-    private final Consumer<ForgeConfigSpec> specConsumer;
-    private final ForgeConfigSpec.Builder builder;
+    private final Consumer<ModConfigSpec> specConsumer;
+    private final ModConfigSpec.Builder builder;
 
-    public ForgeDelegateConfigurationBuilder(final Consumer<ForgeConfigSpec> specConsumer) {
+    public ForgeDelegateConfigurationBuilder(final Consumer<ModConfigSpec> specConsumer) {
         this.specConsumer = specConsumer;
-        builder = new ForgeConfigSpec.Builder();
+        builder = new ModConfigSpec.Builder();
     }
 
     @Override
