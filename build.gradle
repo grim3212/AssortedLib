@@ -40,22 +40,46 @@ subprojects {
         maven {
             name = 'Sponge / Mixin'
             url = 'https://repo.spongepowered.org/repository/maven-public/'
-        }
+        
+            content {
+                excludeGroupByRegex "net\\.minecraft.*"
+                excludeGroupByRegex "net\\.fabricmc.*"
+                excludeGroupByRegex "net\\.neoforged.*"
+            }
+       }
 
         maven {
             name = 'BlameJared Maven (CrT / Bookshelf)'
             url = 'https://maven.blamejared.com'
-        }
+        
+            content {
+                excludeGroupByRegex "net\\.minecraft.*"
+                excludeGroupByRegex "net\\.fabricmc.*"
+                excludeGroupByRegex "net\\.neoforged.*"
+            }
+       }
 
         maven {
             name = "ModMaven"
             url = "https://modmaven.dev"
-        }
+        
+            content {
+                excludeGroupByRegex "net\\.minecraft.*"
+                excludeGroupByRegex "net\\.fabricmc.*"
+                excludeGroupByRegex "net\\.neoforged.*"
+            }
+       }
 
         maven {
             name = "AssortedMods"
             url = "https://maven.grimoid.com/mods"
-        }
+        
+            content {
+                excludeGroupByRegex "net\\.minecraft.*"
+                excludeGroupByRegex "net\\.fabricmc.*"
+                excludeGroupByRegex "net\\.neoforged.*"
+            }
+       }
     }
 
     tasks.withType(JavaCompile).configureEach {
