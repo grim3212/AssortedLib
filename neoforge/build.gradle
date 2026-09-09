@@ -90,20 +90,15 @@ neoForge.ideSyncTask tasks.named('generateModMetadata')
 processResources {
     from project(":common").sourceSets.main.resources
     duplicatesStrategy(DuplicatesStrategy.FAIL)
-    exclude 'pack.mcmeta'
     exclude '.cache'
     exclude "${mod_id}_common.accesswidener"
-}
 
-// pack.mcmeta needs the mod name expanded, so it is handled separately from the bulk copy above.
-tasks.register('copyPackMeta', Copy) {
-    from(project(":common").sourceSets.main.resources) {
-        include 'pack.mcmeta'
+    // Expanded in place rather than via a follow-up Copy task: writing into build/resources/main
+    // from a second task made :jar consume an output it did not declare a dependency on.
+    filesMatching('pack.mcmeta') {
         expand 'mod_name': mod_name
     }
-    into "${layout.buildDirectory.get()}/resources/main/"
 }
-processResources.finalizedBy('copyPackMeta')
 
 publishing {
     publications {

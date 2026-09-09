@@ -6,7 +6,6 @@
   "mixins": [
     "world.entity.EntityWorldlyBlockMixin",
     "world.entity.ExperienceOrbWorldlyBlockMixin",
-    "world.entity.FlyingMobWorldlyBlockMixin",
     "world.entity.LivingEntityWorldlyBlockMixin",
     "world.entity.animal.horse.AbstractHorseWorldlyBlockMixin",
     "world.entity.item.ItemEntityWorldlyBlockMixin",
@@ -16,13 +15,11 @@
     "world.item.BlockItemWorldlyBlockMixin",
     "world.item.ItemMixin",
     "world.item.ItemStackMixin",
-    "world.item.enchantment.EnchantmentHelperMixin",
     "world.item.enchantment.EnchantmentMixin",
     "world.level.BlockBehaviourPropertiesMixin",
     "world.level.BlockBehaviourWorldlyBlockMixin",
     "world.level.BlockGetterWorldlyBlockMixin",
     "world.level.ExplosionDamageCalculatorWorldlyBlockMixin",
-    "world.level.LevelWorldlyBlockMixin",
     "world.level.ServerPlayerGameModeMixin",
     "world.level.SignalGetterMixin",
     "world.level.lighting.BlockLightEngineMixin",
@@ -31,11 +28,9 @@
     "world.level.lighting.LightEngineMixin"
   ],
   "client": [
-    "client.model.BlockModelAccessorMixin",
-    "client.model.ItemModelGeneratorMixin",
-    "client.model.ModelManagerMixin",
     "client.multiplayer.MultiPlayerGameModeWorldlyBlockMixin",
-    "client.render.LevelRendererWorldlyBlockMixin",
+    "client.render.LevelEventHandlerWorldlyBlockMixin",
+    "client.render.LightCoordsUtilMixin",
     "client.render.block.ModelBlockRendererWorldlyBlockMixin"
   ],
   "injectors": {

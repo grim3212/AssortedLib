@@ -2,8 +2,9 @@ package com.grim3212.assorted.lib.inventory;
 
 import com.grim3212.assorted.lib.core.inventory.IItemStorageHandler;
 import com.grim3212.assorted.lib.platform.Services;
-import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
+import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.world.item.ItemStack;
@@ -12,17 +13,17 @@ import org.jetbrains.annotations.NotNull;
 
 public class FabricWrappedItemHandler implements IItemStorageHandler {
 
-    private final InventoryStorage storage;
+    private final SlottedStorage<ItemVariant> storage;
     private final BlockEntity entity;
 
-    public FabricWrappedItemHandler(BlockEntity entity, @NotNull InventoryStorage storage) {
+    public FabricWrappedItemHandler(BlockEntity entity, @NotNull SlottedStorage<ItemVariant> storage) {
         this.storage = storage;
         this.entity = entity;
     }
 
     @Override
     public int getSlots() {
-        return this.storage.getSlots().size();
+        return this.storage.getSlotCount();
     }
 
     @Override
@@ -44,7 +45,7 @@ public class FabricWrappedItemHandler implements IItemStorageHandler {
 
         ItemVariant toInsert = ItemVariant.of(stack);
         if (simulate) {
-            int inserted = (int) slotStorage.simulateInsert(toInsert, stack.getCount(), null);
+            int inserted = (int) StorageUtil.simulateInsert(slotStorage, toInsert, stack.getCount(), null);
             if (inserted <= 0) {
                 return stack;
             } else {
@@ -84,7 +85,7 @@ public class FabricWrappedItemHandler implements IItemStorageHandler {
         }
 
         if (simulate) {
-            int extracted = (int) slotStorage.simulateExtract(variant, amount, null);
+            int extracted = (int) StorageUtil.simulateExtract(slotStorage, variant, amount, null);
             if (extracted <= 0) {
                 return ItemStack.EMPTY;
             } else {
@@ -112,7 +113,7 @@ public class FabricWrappedItemHandler implements IItemStorageHandler {
     @Override
     public boolean isItemValid(int slot, @NotNull ItemStack stack) {
         SingleSlotStorage<ItemVariant> slotStorage = this.storage.getSlot(slot);
-        return slotStorage.supportsInsertion() && slotStorage.simulateInsert(ItemVariant.of(stack), stack.getCount(), null) > 0;
+        return slotStorage.supportsInsertion() && StorageUtil.simulateInsert(slotStorage, ItemVariant.of(stack), stack.getCount(), null) > 0;
     }
 
     @Override

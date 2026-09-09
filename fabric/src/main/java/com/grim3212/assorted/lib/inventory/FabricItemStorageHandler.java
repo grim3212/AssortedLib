@@ -1,8 +1,8 @@
 package com.grim3212.assorted.lib.inventory;
 
 import com.grim3212.assorted.lib.core.inventory.IItemStorageHandler;
-import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import org.jetbrains.annotations.NotNull;
@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FabricItemStorageHandler extends CombinedStorage<ItemVariant, SingleSlotStorage<ItemVariant>> implements InventoryStorage {
+public class FabricItemStorageHandler extends CombinedStorage<ItemVariant, SingleSlotStorage<ItemVariant>> implements SlottedStorage<ItemVariant> {
 
     private final IItemStorageHandler storage;
 
@@ -32,5 +32,15 @@ public class FabricItemStorageHandler extends CombinedStorage<ItemVariant, Singl
     @Override
     public List<SingleSlotStorage<ItemVariant>> getSlots() {
         return this.parts;
+    }
+
+    @Override
+    public int getSlotCount() {
+        return this.parts.size();
+    }
+
+    @Override
+    public SingleSlotStorage<ItemVariant> getSlot(int slot) {
+        return this.parts.get(slot);
     }
 }

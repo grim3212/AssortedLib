@@ -10,6 +10,6 @@ import net.minecraft.world.level.levelgen.GenerationStep;
 public class FabricWorldGenHelper implements IWorldGenHelper {
     @Override
     public void addFeatureToBiomes(BiomePredicate biomePredicate, GenerationStep.Decoration step, Identifier placedFeatureIdentifier) {
-        BiomeModifications.addFeature(it -> biomePredicate.test(it.getBiomeKey().location(), it.getBiomeRegistryEntry()), step, ResourceKey.create(Registries.PLACED_FEATURE, placedFeatureIdentifier));
+        BiomeModifications.addFeature(it -> biomePredicate.test(it.getBiomeKey().identifier(), it.getBiomeHolder()), step, ResourceKey.create(Registries.PLACED_FEATURE, placedFeatureIdentifier));
     }
 }

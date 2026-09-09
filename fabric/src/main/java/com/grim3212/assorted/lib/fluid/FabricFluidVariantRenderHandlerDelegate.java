@@ -4,11 +4,8 @@ import com.grim3212.assorted.lib.core.fluid.IFluidVariantHandler;
 import com.grim3212.assorted.lib.platform.FabricFluidManager;
 import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRenderHandler;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.core.BlockPos;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.core.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
 public class FabricFluidVariantRenderHandlerDelegate implements FluidVariantRenderHandler {
@@ -18,13 +15,14 @@ public class FabricFluidVariantRenderHandlerDelegate implements FluidVariantRend
         this.delegate = delegate;
     }
 
-    @Override
-    public @Nullable TextureAtlasSprite[] getSprites(final FluidVariant fluidVariant) {
-        return new TextureAtlasSprite[]{
-                Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(delegate.getStillTexture(FabricFluidManager.makeInformation(fluidVariant)).orElseThrow()),
-                delegate.getFlowingTexture(FabricFluidManager.makeInformation(fluidVariant)).map(texture -> Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(texture)).orElse(null)
-        };
-    }
+    // TODO(26.2): the getSprites(FluidVariant) hook this class used to implement is gone from
+    //  FluidVariantRenderHandler; only appendTooltip and getColor are left on it. A fluid's still and
+    //  flowing textures are not supplied by code anymore - they come from a FluidModel.Unbaked
+    //  registered against the fluid through
+    //  net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderingRegistry#register(Fluid,
+    //  FluidModel.Unbaked[, FluidRenderHandler]), which is a different (and data shaped) API. The
+    //  IFluidVariantHandler still/flowing texture pair is therefore only readable back out of this
+    //  delegate, not out of a foreign handler; see FabricFluidVariantHandlerDelegate.
 
     @Override
     public int getColor(final FluidVariant fluidVariant, @Nullable final BlockAndTintGetter view, @Nullable final BlockPos pos) {

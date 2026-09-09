@@ -7,7 +7,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.sprite.SpriteId;
+import net.minecraft.data.AtlasIds;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import org.joml.Matrix4f;
@@ -101,8 +101,9 @@ public class FluidCuboidUtils {
         matrices.pushPose();
         matrices.translate(x1, y1, z1);
 
-        final TextureAtlasSprite stillSprite = Minecraft.getInstance().getAtlasManager().get(new SpriteId(TextureAtlas.LOCATION_BLOCKS, still));
-        final TextureAtlasSprite flowingSprite = Minecraft.getInstance().getAtlasManager().get(new SpriteId(TextureAtlas.LOCATION_BLOCKS, flowing));
+        final TextureAtlas blockAtlas = Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.BLOCKS);
+        final TextureAtlasSprite stillSprite = blockAtlas.getSprite(still);
+        final TextureAtlasSprite flowingSprite = blockAtlas.getSprite(flowing);
 
         // x/y/z2 - x/y/z1 is because we need the width/height/depth
         putTexturedQuad(renderer, matrices.last(), stillSprite, x2 - x1, y2 - y1, z2 - z1, DOWN, color, combinedOverlay, combinedLight, false);

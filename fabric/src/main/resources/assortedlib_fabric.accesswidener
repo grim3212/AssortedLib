@@ -1,4 +1,14 @@
 accessWidener	v2	official
-# Entries are reintroduced as each area is ported to 26.2.
-# The 1.20.1 list targeted ItemOverrides, SimpleBakedModel$Builder, ModelBakery$BakedCacheKey
-# and friends, all of which were removed in the 1.21.4-26.x model pipeline rewrite.
+# Nothing is widened any more.
+#
+# The 1.20.1 list widened ItemBlockRenderTypes.TYPE_BY_BLOCK, the BlockElement / BlockElementFace /
+# BlockFaceUV / ItemTransform / ItemTransforms / ItemOverride deserializers, SimpleBakedModel$Builder,
+# ItemOverrides, ItemModelGenerator.processFrames, ModelManager$ReloadState, RenderType.create and
+# ItemRenderer.renderModelLists. Every one of those was deleted or made private by the 1.21.4-26.x
+# model pipeline rewrite, and the code that needed them has been rebuilt on the public API:
+# custom model json goes through Fabric's UnbakedModelDeserializer and the public
+# CuboidModel.Deserializer, and unbaked models are collected through the model loading plugin
+# instead of by reaching into ModelManager.
+#
+# Add entries back only when a real access problem shows up, and only in the "official" namespace -
+# "named" is gone along with intermediary in 26.x.

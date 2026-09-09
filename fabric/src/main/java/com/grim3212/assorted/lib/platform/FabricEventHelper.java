@@ -9,7 +9,7 @@ import com.grim3212.assorted.lib.events.LootTableModifyEvent;
 import com.grim3212.assorted.lib.events.UseBlockEvent;
 import com.grim3212.assorted.lib.platform.services.IEventHelper;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
-import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
+import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -67,8 +67,11 @@ public class FabricEventHelper implements IEventHelper {
             return event.getInteractionResult();
         }));
 
-        Services.EVENTS.registerEventType(LootTableModifyEvent.class, () -> LootTableEvents.MODIFY.register((resourceManager, lootManager, id, tableBuilder, source) -> {
-            final LootTableModifyEvent event = new LootTableModifyEvent(lootManager.getLootTable(id), id, new FabricLootTableModificationContext(tableBuilder), source.isBuiltin());
+        // Loot API v3 hands over the table's key and its builder rather than the loaded table itself -
+        // there is no loot manager to look the table up in any more - so the event's table is built from
+        // the builder as it stands before this modification runs.
+        Services.EVENTS.registerEventType(LootTableModifyEvent.class, () -> LootTableEvents.MODIFY.register((key, tableBuilder, source, registries) -> {
+            final LootTableModifyEvent event = new LootTableModifyEvent(tableBuilder.build(), key.identifier(), new FabricLootTableModificationContext(tableBuilder), source.isBuiltin());
             Services.EVENTS.handleEvents(event);
         }));
     }

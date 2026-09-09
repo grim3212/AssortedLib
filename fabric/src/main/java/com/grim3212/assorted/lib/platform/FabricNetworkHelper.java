@@ -1,17 +1,19 @@
 package com.grim3212.assorted.lib.platform;
 
+import com.grim3212.assorted.lib.core.network.LibPayload;
 import com.grim3212.assorted.lib.platform.services.INetworkHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.client.Minecraft;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
@@ -19,53 +21,63 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 26.x removed raw {@code FriendlyByteBuf} channels: every packet is a {@link CustomPacketPayload}
+ * with a {@link StreamCodec}, declared up front through Fabric's {@link PayloadTypeRegistry}.
+ * {@link LibPayload} keeps {@code INetworkHelper.MessageHandler} usable as it is by wrapping the
+ * message and building the codec from the encoder/decoder pair the handler already carries.
+ */
 public class FabricNetworkHelper implements INetworkHelper {
 
-    private static final Map<Class<?>, MessageHandler<?>> messageHandlers = new ConcurrentHashMap<>();
-    private static final List<MessageHandler<?>> clientMessageHandlers = new ArrayList<>();
-    private static Player replyPlayer;
+    private static final Map<Class<?>, Registration<?>> messageHandlers = new ConcurrentHashMap<>();
+    private static final List<Registration<?>> clientMessageHandlers = new ArrayList<>();
+
+    private record Registration<MSG>(MessageHandler<MSG> handler, CustomPacketPayload.Type<LibPayload<MSG>> type) {
+    }
 
     @Override
     public <MSG> void register(MessageHandler<MSG> handler) {
-        messageHandlers.put(handler.messageType(), handler);
+        final CustomPacketPayload.Type<LibPayload<MSG>> type = LibPayload.type(handler.id());
+        final StreamCodec<RegistryFriendlyByteBuf, LibPayload<MSG>> codec = LibPayload.codec(type, handler.encoder(), handler.decoder());
+        final Registration<MSG> registration = new Registration<>(handler, type);
+
+        messageHandlers.put(handler.messageType(), registration);
 
         if (handler.side() == MessageBoundSide.CLIENT) {
-            clientMessageHandlers.add(handler);
+            // The payload has to be declared on both sides, but only the client can receive it, and
+            // the receiver is registered later from the client entrypoint.
+            PayloadTypeRegistry.clientboundPlay().register(type, codec);
+            clientMessageHandlers.add(registration);
             return;
         }
 
-        ServerPlayNetworking.registerGlobalReceiver(handler.id(), ((server, player, listener, buf, responseSender) -> {
-            MSG message = handler.decoder().apply(buf);
-            server.execute(() -> {
-                replyPlayer = player;
-                handler.messageConsumer().accept(message, player);
-                replyPlayer = null;
-            });
-        }));
+        PayloadTypeRegistry.serverboundPlay().register(type, codec);
+        ServerPlayNetworking.registerGlobalReceiver(type, (payload, context) -> context.server().execute(
+                () -> handler.messageConsumer().accept(payload.message(), context.player())));
     }
 
     public static void initializeClientHandlers() {
-        for (MessageHandler<?> handler : clientMessageHandlers) {
-            registerClientReceiver(handler);
+        for (Registration<?> registration : clientMessageHandlers) {
+            registerClientReceiver(registration);
         }
     }
 
-    private static <MSG> void registerClientReceiver(MessageHandler<MSG> handler) {
-        ClientPlayNetworking.registerGlobalReceiver(handler.id(), ((client, listener, buf, responseSender) -> {
-            MSG message = handler.decoder().apply(buf);
-            client.execute(() -> handler.messageConsumer().accept(message, Minecraft.getInstance().player));
-        }));
+    private static <MSG> void registerClientReceiver(Registration<MSG> registration) {
+        ClientPlayNetworking.registerGlobalReceiver(registration.type(), (payload, context) -> context.client().execute(
+                () -> registration.handler().messageConsumer().accept(payload.message(), context.player())));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <MSG> Registration<MSG> registrationFor(MSG toSend) {
+        return (Registration<MSG>) messageHandlers.get(toSend.getClass());
     }
 
     @Override
     public <MSG> void sendToNearby(Level world, BlockPos pos, MSG toSend) {
-        if (world instanceof ServerLevel) {
-            MessageHandler<MSG> handler = (MessageHandler<MSG>) messageHandlers.get(toSend.getClass());
-
-            ServerLevel ws = (ServerLevel) world;
-            FriendlyByteBuf buf = PacketByteBufs.create();
-            handler.encoder().accept(toSend, buf);
-            ws.getChunkSource().chunkMap.getPlayers(new ChunkPos(pos), false).stream().filter(p -> p.distanceToSqr(pos.getX(), pos.getY(), pos.getZ()) < 64 * 64).forEach(p -> ServerPlayNetworking.send(p, handler.id(), buf));
+        if (world instanceof ServerLevel serverLevel) {
+            final Registration<MSG> registration = registrationFor(toSend);
+            final LibPayload<MSG> payload = new LibPayload<>(registration.type(), toSend);
+            PlayerLookup.around(serverLevel, pos, 64.0D).forEach(p -> ServerPlayNetworking.send(p, payload));
         }
     }
 
@@ -76,17 +88,13 @@ public class FabricNetworkHelper implements INetworkHelper {
 
     @Override
     public <MSG> void sendTo(Player player, MSG toSend) {
-        MessageHandler<MSG> handler = (MessageHandler<MSG>) messageHandlers.get(toSend.getClass());
-        FriendlyByteBuf buf = PacketByteBufs.create();
-        handler.encoder().accept(toSend, buf);
-        ServerPlayNetworking.send((ServerPlayer) player, handler.id(), buf);
+        final Registration<MSG> registration = registrationFor(toSend);
+        ServerPlayNetworking.send((ServerPlayer) player, new LibPayload<>(registration.type(), toSend));
     }
 
     @Override
     public <MSG> void sendToServer(MSG toSend) {
-        MessageHandler<MSG> handler = (MessageHandler<MSG>) messageHandlers.get(toSend.getClass());
-        FriendlyByteBuf buf = PacketByteBufs.create();
-        handler.encoder().accept(toSend, buf);
-        ClientPlayNetworking.send(handler.id(), buf);
+        final Registration<MSG> registration = registrationFor(toSend);
+        ClientPlayNetworking.send(new LibPayload<>(registration.type(), toSend));
     }
 }

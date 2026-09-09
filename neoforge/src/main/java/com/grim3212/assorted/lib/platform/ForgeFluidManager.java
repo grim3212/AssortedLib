@@ -81,7 +81,7 @@ public class ForgeFluidManager implements IFluidManager {
         final ResourceHandler<FluidResource> handler = fluidHandler(stack);
         if (handler != null && clamp(fluidInformation.amount()) > 0) {
             try (Transaction transaction = Transaction.openRoot()) {
-                ResourceHandlerUtil.insertStacking(handler, FluidResource.of(fluidInformation.fluid()), clamp(fluidInformation.amount()), transaction);
+                ResourceHandlerUtil.insertStacking(handler, FluidResource.of(buildFluidStack(fluidInformation)), clamp(fluidInformation.amount()), transaction);
                 transaction.commit();
             }
         }
@@ -95,7 +95,7 @@ public class ForgeFluidManager implements IFluidManager {
             return 0;
 
         try (Transaction transaction = Transaction.openRoot()) {
-            return ResourceHandlerUtil.insertStacking(handler, FluidResource.of(fluidInformation.fluid()), clamp(fluidInformation.amount()), transaction);
+            return ResourceHandlerUtil.insertStacking(handler, FluidResource.of(buildFluidStack(fluidInformation)), clamp(fluidInformation.amount()), transaction);
         }
     }
 

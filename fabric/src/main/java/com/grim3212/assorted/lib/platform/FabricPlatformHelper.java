@@ -3,25 +3,24 @@ package com.grim3212.assorted.lib.platform;
 import com.grim3212.assorted.lib.dist.Dist;
 import com.grim3212.assorted.lib.platform.services.IPlatformHelper;
 import com.grim3212.assorted.lib.registry.ILoaderRegistry;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import io.netty.buffer.Unpooled;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
+import net.fabricmc.fabric.api.menu.v1.ExtendedMenuProvider;
+import net.fabricmc.fabric.api.menu.v1.ExtendedMenuType;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
-import net.fabricmc.fabric.api.registry.FuelRegistry;
-import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
+import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -35,13 +34,26 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class FabricPlatformHelper implements IPlatformHelper {
+
+    // TODO(26.2): IPlatformHelper still passes the extra menu opening data as a raw
+    //  FriendlyByteBuf (openMenu's Consumer<FriendlyByteBuf> and MenuFactory's buf parameter), but
+    //  Fabric's ExtendedMenuType is codec driven and NeoForge's payload based menu opening is too, so
+    //  both loaders now want a typed D plus a StreamCodec<RegistryFriendlyByteBuf, D>. Until
+    //  IPlatformHelper carries that type, the buffer's contents travel as a byte array and are handed
+    //  back as a RegistryFriendlyByteBuf so registry aware reads keep working.
+    private static final StreamCodec<RegistryFriendlyByteBuf, FriendlyByteBuf> EXTRA_DATA_CODEC = StreamCodec.of(
+            (buf, data) -> {
+                final byte[] bytes = new byte[data.readableBytes()];
+                data.getBytes(data.readerIndex(), bytes);
+                buf.writeByteArray(bytes);
+            },
+            buf -> new RegistryFriendlyByteBuf(Unpooled.wrappedBuffer(buf.readByteArray()), buf.registryAccess())
+    );
 
     @Override
     public String getPlatformName() {
@@ -98,37 +110,27 @@ public class FabricPlatformHelper implements IPlatformHelper {
 
     @Override
     public void modifyCreativeTab(ResourceKey<CreativeModeTab> key, Supplier<List<ItemStack>> displayStacks) {
-        ItemGroupEvents.modifyEntriesEvent(key).register(populator -> {
-            populator.acceptAll(displayStacks.get());
+        CreativeModeTabEvents.modifyOutputEvent(key).register(output -> {
+            output.acceptAll(displayStacks.get());
         });
     }
 
     @Override
     public void addReloadListener(Identifier identifier, PreparableReloadListener reloadListener) {
-        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new IdentifiableResourceReloadListener() {
-            @Override
-            public Identifier getFabricId() {
-                return identifier;
-            }
-
-            @Override
-            public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller profilerFiller, ProfilerFiller profilerFiller2, Executor executor, Executor executor2) {
-                return reloadListener.reload(preparationBarrier, resourceManager, profilerFiller, profilerFiller2, executor, executor2);
-            }
-        });
+        ResourceLoader.get(PackType.SERVER_DATA).registerReloadListener(identifier, reloadListener);
     }
 
     @Override
     public <T extends BlockEntity> BlockEntityType<T> createBlockEntityType(BiFunction<BlockPos, BlockState, T> builder, Block... blocks) {
-        return FabricBlockEntityTypeBuilder.create(builder::apply, blocks).build(null);
+        return FabricBlockEntityTypeBuilder.create(builder::apply, blocks).build();
     }
 
     @Override
     public <T extends AbstractContainerMenu> MenuType<T> createMenuType(MenuFactory<T> factory) {
-        return new ExtendedScreenHandlerType(factory::create);
+        return new ExtendedMenuType<>(factory::create, EXTRA_DATA_CODEC);
     }
 
-    public static class ExtendedScreenHandlerImpl implements ExtendedScreenHandlerFactory {
+    public static class ExtendedScreenHandlerImpl implements ExtendedMenuProvider<FriendlyByteBuf> {
         private final MenuProvider provider;
         private final Consumer<FriendlyByteBuf> extraDataWriter;
 
@@ -138,8 +140,10 @@ public class FabricPlatformHelper implements IPlatformHelper {
         }
 
         @Override
-        public void writeScreenOpeningData(ServerPlayer player, FriendlyByteBuf buf) {
+        public FriendlyByteBuf getScreenOpeningData(ServerPlayer player) {
+            final FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
             extraDataWriter.accept(buf);
+            return buf;
         }
 
         @Override

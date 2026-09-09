@@ -38,15 +38,17 @@ public abstract class EntityWorldlyBlockMixin {
             cancellable = true
     )
     public void assortedlib_redirectGetOffsetBlockStateSoundType(BlockPos pos, BlockState state, CallbackInfo ci) {
-        if (!state.liquid()) {
-            BlockState blockState = this.level.getBlockState(pos.above());
-            blockState = blockState.is(BlockTags.INSIDE_STEP_SOUND_BLOCKS) ? blockState : state;
+        // The BlockStateBase#liquid() guard this used to open with is gone: the method is deprecated,
+        // and vanilla no longer checks it here either - Entity#playStepSound plays the step sound
+        // unconditionally, with the "am I actually walking on this" decision made by its caller
+        // (vibrationAndSoundEffectsFromBlock, which skips swimming entities and air).
+        BlockState blockState = this.level.getBlockState(pos.above());
+        blockState = blockState.is(BlockTags.INSIDE_STEP_SOUND_BLOCKS) ? blockState : state;
 
-            if (blockState.getBlock() instanceof IBlockSoundType extraProperties) {
-                SoundType soundType = extraProperties.getSoundType(blockState, this.level, pos, this.getThis());
-                this.playSound(soundType.getStepSound(), soundType.getVolume() * 0.15F, soundType.getPitch());
-                ci.cancel();
-            }
+        if (blockState.getBlock() instanceof IBlockSoundType extraProperties) {
+            SoundType soundType = extraProperties.getSoundType(blockState, this.level, pos, this.getThis());
+            this.playSound(soundType.getStepSound(), soundType.getVolume() * 0.15F, soundType.getPitch());
+            ci.cancel();
         }
     }
 

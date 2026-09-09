@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.network.chat.Component;
@@ -21,7 +22,6 @@ import net.minecraft.world.level.material.Fluids;
 
 import java.util.Optional;
 
-@SuppressWarnings("removal")
 public class FabricFluidManager implements IFluidManager {
     @Override
     public Optional<FluidInformation> get(final ItemStack stack) {
@@ -34,13 +34,7 @@ public class FabricFluidManager implements IFluidManager {
 
         final StorageView<FluidVariant> view = target.iterator().next();
 
-        return Optional.of(
-                new FluidInformation(
-                        view.getResource().getFluid(),
-                        view.getAmount(),
-                        view.getResource().copyNbt()
-                )
-        );
+        return Optional.of(makeInformation(view.getResource(), view.getAmount()));
     }
 
     @Override
@@ -61,7 +55,6 @@ public class FabricFluidManager implements IFluidManager {
     }
 
     @Override
-    @SuppressWarnings("removal")
     public ItemStack insertInto(final ItemStack stack, final FluidInformation fluidInformation) {
         try (final Transaction context = Transaction.openOuter()) {
             final Optional<FluidInformation> contained = get(stack);
@@ -81,8 +74,8 @@ public class FabricFluidManager implements IFluidManager {
     @Override
     public long simulateInsert(final ItemStack stack, final FluidInformation fluidInformation) {
         final FluidVariant variant = makeVariant(fluidInformation);
-        final ContainerItemContext containerContext = ContainerItemContext.withInitial(stack);
-        return FluidStorage.ITEM.find(stack, containerContext).simulateInsert(variant, fluidInformation.amount(), null);
+        final ContainerItemContext containerContext = ContainerItemContext.withConstant(stack);
+        return StorageUtil.simulateInsert(FluidStorage.ITEM.find(stack, containerContext), variant, fluidInformation.amount(), null);
     }
 
     @Override
@@ -91,9 +84,9 @@ public class FabricFluidManager implements IFluidManager {
 
         return contained.map(fluid -> {
             final FluidVariant variant = makeVariant(fluid);
-            final ContainerItemContext containerContext = ContainerItemContext.withInitial(stack);
+            final ContainerItemContext containerContext = ContainerItemContext.withConstant(stack);
 
-            return FluidStorage.ITEM.find(stack, containerContext).simulateExtract(variant, amount, null);
+            return StorageUtil.simulateExtract(FluidStorage.ITEM.find(stack, containerContext), variant, amount, null);
         }).orElse(0L);
     }
 
@@ -119,10 +112,13 @@ public class FabricFluidManager implements IFluidManager {
             return makeVariant(fluid.withSource());
         }
 
-        if (fluid.data() == null)
-            return FluidVariant.of(fluid.fluid());
-
-        return FluidVariant.of(fluid.fluid(), fluid.data());
+        // TODO(26.2): FluidInformation still carries a CompoundTag, but a FluidVariant is keyed by a
+        //  DataComponentPatch now - TransferVariant#copyNbt was replaced by #getComponentsPatch - and
+        //  there is no conversion between the two that can be done here: a patch is only readable
+        //  through DataComponentPatch.CODEC against a registry aware DynamicOps, which this static
+        //  helper has no access to. The extra data is dropped in both directions until
+        //  FluidInformation itself moves over to components in common.
+        return FluidVariant.of(fluid.fluid());
     }
 
     public static FluidInformation makeInformation(final FluidVariant fluid, final long count) {
@@ -130,14 +126,12 @@ public class FabricFluidManager implements IFluidManager {
             //We have a flowing fluid.
             //Let's make a none flowing variant of it.
             if (fluid.getFluid() instanceof FlowingFluid flowingFluid) {
-                return makeInformation(FluidVariant.of(flowingFluid.getSource(), fluid.copyNbt()), count);
+                return makeInformation(FluidVariant.of(flowingFluid.getSource(), fluid.getComponentsPatch()), count);
             }
         }
 
-        if (fluid.copyNbt() == null)
-            return new FluidInformation(fluid.getFluid(), count);
-
-        return new FluidInformation(fluid.getFluid(), count, fluid.copyNbt());
+        // See makeVariant: the variant's component patch has no CompoundTag to hand back.
+        return new FluidInformation(fluid.getFluid(), count);
     }
 
     public static FluidInformation makeInformation(final FluidVariant fluid) {

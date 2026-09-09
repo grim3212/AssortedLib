@@ -27,7 +27,14 @@ public class FabricIngredientHelper implements IIngredientHelper {
 
     @Override
     public Ingredient or(Ingredient... ingredients) {
-        return ingredients.length == 0 ? Ingredient.EMPTY : ingredients.length == 1 ? ingredients[0] : DefaultCustomIngredients.any(ingredients);
+        // TODO(26.2): there is no empty Ingredient any more - the constructor rejects an empty holder
+        //  set outright ("Ingredients can't be empty"), and Ingredient.EMPTY is gone with it. An empty
+        //  OR therefore has no representation and is rejected here rather than silently matching
+        //  nothing; recipes that want an absent ingredient use Optional<Ingredient> now.
+        if (ingredients.length == 0)
+            throw new IllegalArgumentException("You must supply at least 1 ingredient for an OR!");
+
+        return ingredients.length == 1 ? ingredients[0] : DefaultCustomIngredients.any(ingredients);
     }
 
     @Override
@@ -37,7 +44,8 @@ public class FabricIngredientHelper implements IIngredientHelper {
 
     @Override
     public Ingredient nbt(ItemStack item) {
-        return DefaultCustomIngredients.nbt(item, true);
+        // NBT is gone; the strict variant is now a component patch match against the stack.
+        return DefaultCustomIngredients.components(item);
     }
 
     @Override

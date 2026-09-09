@@ -6,23 +6,17 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.grim3212.assorted.lib.LibConstants;
 import com.grim3212.assorted.lib.config.*;
 import com.grim3212.assorted.lib.dist.Dist;
 import com.grim3212.assorted.lib.dist.DistExecutor;
 import com.grim3212.assorted.lib.platform.services.IConfigHelper;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -31,14 +25,16 @@ import java.util.Map;
 public class FabricConfigHelper implements IConfigHelper {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    private static final Identifier CONFIG_SYNC_CHANNEL_ID = Identifier.fromNamespaceAndPath(LibConstants.MOD_ID, "config_sync");
-
     private static final Map<String, FabricConfigurationSpec> syncedSources = Maps.newHashMap();
     private static final List<FabricConfigurationSpec> noneSyncedSources = Lists.newArrayList();
 
     public static void init() {
-        DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> FabricConfigurationNetworkingUtils.registerNetworkingChannel(
-                CONFIG_SYNC_CHANNEL_ID,
+        // The payload type has to be declared on both sides before any connection is opened; only the
+        // client side actually installs a receiver for it.
+        FabricConfigurationNetworkingUtils.registerPayloads();
+
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> FabricConfigurationNetworkingUtils.registerNetworkingChannel(
+                FabricConfigurationNetworkingUtils.CONFIG_SYNC_CHANNEL_ID,
                 GSON,
                 () -> syncedSources
         ));
@@ -53,12 +49,7 @@ public class FabricConfigHelper implements IConfigHelper {
             targetObject.add(key, specObject);
         });
 
-        final String payload = GSON.toJson(targetObject);
-        final FriendlyByteBuf buffer = PacketByteBufs.create();
-
-        buffer.writeUtf(payload);
-
-        ServerPlayNetworking.send(serverPlayer, CONFIG_SYNC_CHANNEL_ID, buffer);
+        FabricConfigurationNetworkingUtils.sendTo(serverPlayer, GSON.toJson(targetObject));
     }
 
     @Override
@@ -82,18 +73,17 @@ public class FabricConfigHelper implements IConfigHelper {
         });
     }
 
+    private Path configPath(final String name) {
+        return FabricLoader.getInstance().getConfigDir().resolve(name + ".json");
+    }
+
     private JsonObject loadLocalConfig(final String name) {
-        try {
-            final File configurationDirectory = FabricLoader.getInstance().getConfigDirectory();
-            final Path configPath = Path.of(configurationDirectory.getAbsolutePath(), name + ".json");
+        final Path configPath = configPath(name);
 
-            final FileReader fileReader = new FileReader(configPath.toAbsolutePath().toFile().getAbsolutePath());
-
-            final JsonElement containedElement = GSON.fromJson(fileReader, JsonElement.class);
+        try (final Reader reader = Files.newBufferedReader(configPath)) {
+            final JsonElement containedElement = GSON.fromJson(reader, JsonElement.class);
             if (!containedElement.isJsonObject())
                 throw new IllegalStateException("Config file: " + name + " is not a json object!");
-
-            fileReader.close();
 
             return containedElement.getAsJsonObject();
         } catch (IOException e) {
@@ -102,26 +92,18 @@ public class FabricConfigHelper implements IConfigHelper {
     }
 
     private boolean doesLocalConfigExist(final String name) {
-        final File configurationDirectory = FabricLoader.getInstance().getConfigDirectory();
-        final Path configPath = Path.of(configurationDirectory.getAbsolutePath(), name + ".json");
-        return Files.exists(configPath);
+        return Files.exists(configPath(name));
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void saveLocalConfig(final String name, final JsonObject config) {
+        final Path configPath = configPath(name);
+
         try {
-            final File configurationDirectory = FabricLoader.getInstance().getConfigDirectory();
-            final Path configPath = Path.of(configurationDirectory.getAbsolutePath(), name + ".json");
-            if (Files.exists(configPath))
-                Files.delete(configPath);
+            Files.createDirectories(configPath.getParent());
 
-            configPath.toFile().getParentFile().mkdirs();
-            Files.createFile(configPath);
-
-            final FileWriter fileWriter = new FileWriter(configPath.toAbsolutePath().toFile().getAbsolutePath());
-            GSON.toJson(config, fileWriter);
-
-            fileWriter.close();
+            try (final Writer writer = Files.newBufferedWriter(configPath)) {
+                GSON.toJson(config, writer);
+            }
         } catch (IOException e) {
             throw new IllegalStateException("Failed to open and read configuration file: " + name, e);
         }

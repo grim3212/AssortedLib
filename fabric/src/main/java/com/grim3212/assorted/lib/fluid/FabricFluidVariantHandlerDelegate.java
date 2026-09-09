@@ -7,8 +7,6 @@ import com.grim3212.assorted.lib.platform.FabricFluidManager;
 import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRenderHandler;
 import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributeHandler;
-import net.minecraft.client.renderer.texture.SpriteContents;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
@@ -39,7 +37,7 @@ public class FabricFluidVariantHandlerDelegate implements IFluidVariantHandler {
 
     @Override
     public int getLuminance(final FluidInformation variant) {
-        return delegate.getLuminance(FabricFluidManager.makeVariant(variant));
+        return delegate.getLightEmission(FabricFluidManager.makeVariant(variant));
     }
 
     @Override
@@ -79,7 +77,11 @@ public class FabricFluidVariantHandlerDelegate implements IFluidVariantHandler {
                         return renderDelegate.getDelegate().getStillTexture(variant);
                     }
 
-                    return Optional.ofNullable(FluidVariantRendering.getSprites(FabricFluidManager.makeVariant(variant))).map(sprites -> sprites[0]).map(TextureAtlasSprite::contents).map(SpriteContents::name);
+                    // TODO(26.2): FluidVariantRendering#getSprites and FluidVariantRenderHandler#getSprites
+                    //  were both removed. A fluid's textures live in a FluidModel.Unbaked registered
+                    //  through FluidRenderingRegistry now, and nothing hands them back as sprites, so a
+                    //  handler that is not one of ours can no longer be asked what it draws with.
+                    return Optional.empty();
                 },
                 () -> Optional::empty
         );
@@ -94,7 +96,9 @@ public class FabricFluidVariantHandlerDelegate implements IFluidVariantHandler {
                         return renderDelegate.getDelegate().getFlowingTexture(variant);
                     }
 
-                    return Optional.ofNullable(FluidVariantRendering.getSprites(FabricFluidManager.makeVariant(variant))).map(sprites -> sprites[1]).map(TextureAtlasSprite::contents).map(SpriteContents::name);
+                    // TODO(26.2): see getStillTexture - there is no sprite accessor left on the
+                    //  Fabric fluid rendering API.
+                    return Optional.empty();
                 },
                 () -> Optional::empty
         );

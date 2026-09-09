@@ -1,6 +1,6 @@
 package com.grim3212.assorted.lib.data;
 
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricDynamicRegistryProvider;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
@@ -13,7 +13,7 @@ public class FabricWorldGenProvider extends FabricDynamicRegistryProvider {
     private final LibWorldGenProvider commonWorldGen;
     private final String modId;
 
-    public FabricWorldGenProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture, String modId, LibWorldGenProvider commonWorldGen) {
+    public FabricWorldGenProvider(FabricPackOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture, String modId, LibWorldGenProvider commonWorldGen) {
         super(output, registriesFuture);
         this.commonWorldGen = commonWorldGen;
         this.modId = modId;

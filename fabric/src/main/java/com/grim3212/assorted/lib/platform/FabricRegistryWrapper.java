@@ -19,7 +19,7 @@ public class FabricRegistryWrapper<T> implements ILoaderRegistry<T> {
 
     public static <T> ILoaderRegistry<T> getRegistry(ResourceKey<? extends Registry<T>> key) {
         Registry<? extends Registry<?>> rootRegistry = BuiltInRegistries.REGISTRY;
-        Registry<?> registry = rootRegistry.get(key.location());
+        Registry<?> registry = rootRegistry.getValue(key.identifier());
         if (registry == null) {
             throw new NullPointerException("Could not find registry for key: " + key);
         }
@@ -36,8 +36,7 @@ public class FabricRegistryWrapper<T> implements ILoaderRegistry<T> {
 
     @Override
     public Optional<T> getValue(Identifier resourceLocation) {
-        T t = this.registry.get(resourceLocation);
-        return Optional.ofNullable(t);
+        return this.registry.getOptional(resourceLocation);
     }
 
     @Override

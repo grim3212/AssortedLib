@@ -9,10 +9,9 @@ import com.grim3212.assorted.lib.inventory.FabricPlatformInventoryStorageHandler
 import com.grim3212.assorted.lib.inventory.FabricWrappedItemHandler;
 import com.grim3212.assorted.lib.inventory.FabricWrappedStorageHandler;
 import com.grim3212.assorted.lib.platform.services.IInventoryHelper;
-import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.minecraft.core.Direction;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
@@ -26,10 +25,8 @@ import java.util.function.Function;
 public class FabricInventoryHelper implements IInventoryHelper {
     @Override
     public boolean canItemStacksStack(@NotNull ItemStack a, @NotNull ItemStack b) {
-        if (a.isEmpty() || !ItemStack.isSameItem(a, b) || a.hasTag() != b.hasTag())
-            return false;
-
-        return (!a.hasTag() || a.getTag().equals(b.getTag()));
+        // Stack NBT became data components, and vanilla already compares the whole component map.
+        return !a.isEmpty() && ItemStack.isSameItemSameComponents(a, b);
     }
 
     @Override
@@ -68,14 +65,11 @@ public class FabricInventoryHelper implements IInventoryHelper {
             }
         }
 
-        Storage<ItemVariant> inventory = ItemStorage.SIDED.find(blockEntity.getLevel(), blockEntity.getBlockPos(), direction);
-        if (inventory != null && inventory instanceof InventoryStorage inventoryStorage) {
-            // TODO: Look into supporting the base Storage<ItemVariant>
-            return Optional.of(new FabricWrappedItemHandler(blockEntity, inventoryStorage));
-        }
-
-        if (blockEntity instanceof Container container) {
-            return Optional.of(new FabricWrappedItemHandler(blockEntity, InventoryStorage.of(container, direction)));
+        // ItemStorage.SIDED already falls back to WorldlyContainerHolder blocks and to block entities
+        // that are plain Containers, so those need no special case of their own. A storage that is not
+        // slotted has nothing to map the slot indexed IItemStorageHandler onto, so it is left alone.
+        if (ItemStorage.SIDED.find(blockEntity.getLevel(), blockEntity.getBlockPos(), direction) instanceof SlottedStorage<ItemVariant> slottedStorage) {
+            return Optional.of(new FabricWrappedItemHandler(blockEntity, slottedStorage));
         }
 
         return Optional.empty();

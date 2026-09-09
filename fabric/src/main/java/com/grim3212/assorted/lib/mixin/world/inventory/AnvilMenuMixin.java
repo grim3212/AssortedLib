@@ -2,6 +2,7 @@ package com.grim3212.assorted.lib.mixin.world.inventory;
 
 import com.grim3212.assorted.lib.events.AnvilUpdatedEvent;
 import com.grim3212.assorted.lib.platform.Services;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
@@ -26,15 +27,16 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu {
     @Shadow
     private int repairItemCountCost;
 
-    public AnvilMenuMixin(@Nullable MenuType<?> menuType, int i, Inventory inventory, ContainerLevelAccess containerLevelAccess) {
-        super(menuType, i, inventory, containerLevelAccess);
+    public AnvilMenuMixin(@Nullable MenuType<?> menuType, int i, Inventory inventory, ContainerLevelAccess containerLevelAccess, ItemCombinerMenuSlotDefinition slotDefinition) {
+        super(menuType, i, inventory, containerLevelAccess, slotDefinition);
     }
 
     @Inject(method = "createResult", at = @At("HEAD"), cancellable = true)
     private void assortedlib_checkForResults(CallbackInfo ci) {
         ItemStack leftSlot = inputSlots.getItem(0);
         ItemStack rightSlot = inputSlots.getItem(1);
-        int baseCost = leftSlot.getBaseRepairCost() + (rightSlot.isEmpty() ? 0 : rightSlot.getBaseRepairCost());
+        // ItemStack#getBaseRepairCost is gone; the repair cost is a data component now.
+        int baseCost = leftSlot.getOrDefault(DataComponents.REPAIR_COST, 0) + (rightSlot.isEmpty() ? 0 : rightSlot.getOrDefault(DataComponents.REPAIR_COST, 0));
 
         final AnvilUpdatedEvent event = new AnvilUpdatedEvent(leftSlot, rightSlot, itemName, baseCost, this.player);
         Services.EVENTS.handleEvents(event);

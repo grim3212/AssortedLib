@@ -119,8 +119,11 @@ public abstract class ConditionalRecipeProvider extends RecipeProvider {
      */
     public abstract void registerConditions();
 
+    // public, not protected: RecipeProvider.buildRecipes() is public abstract on the vanilla jar
+    // (what Fabric compiles against) and protected on NeoForge's patched jar. Widening satisfies
+    // both.
     @Override
-    protected void buildRecipes() {
+    public void buildRecipes() {
         this.registerConditions();
     }
 

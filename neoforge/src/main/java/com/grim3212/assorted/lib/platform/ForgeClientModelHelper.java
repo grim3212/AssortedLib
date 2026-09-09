@@ -104,11 +104,12 @@ public class ForgeClientModelHelper implements IClientModelHelper {
             throw new IllegalArgumentException("data must be an instance of ForgeBlockModelData");
         }
 
+        // BlockStateModel#collectParts(RandomSource, List) is deprecated in favour of the level and
+        // position aware overload, which there is nothing to feed here. Adapting the model first -
+        // a no-op for one that already is - gives the data aware entry point instead.
         final List<BlockStateModelPart> parts = new ArrayList<>();
-        if (model instanceof IDataAwareBakedModel dataAwareBakedModel) {
+        if (adaptToPlatform(model) instanceof IDataAwareBakedModel dataAwareBakedModel) {
             dataAwareBakedModel.collectParts(rand, data, parts);
-        } else {
-            model.collectParts(rand, parts);
         }
 
         final Set<RenderType> renderTypes = new LinkedHashSet<>();
