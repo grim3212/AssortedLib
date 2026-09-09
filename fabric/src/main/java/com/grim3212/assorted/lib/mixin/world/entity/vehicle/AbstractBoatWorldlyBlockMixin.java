@@ -5,7 +5,7 @@ import com.grim3212.assorted.lib.mixin.entity.EntityAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.vehicle.boat.Boat;
+import net.minecraft.world.entity.vehicle.boat.AbstractBoat;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -18,15 +18,23 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-@Mixin(value = Boat.class, priority = Integer.MIN_VALUE)
-public abstract class BoatWorldlyBlockMixin extends Entity {
+/**
+ * Feeds the position dependent {@link IBlockExtraProperties} friction into the boat's ground
+ * friction calculation.
+ * <p>
+ * The 1.20.1 hook was {@code Boat#getGroundFriction}. 26.2 split the boat hierarchy and pulled the
+ * shared movement code - {@code getGroundFriction} included - up onto
+ * {@link AbstractBoat}, so the injections follow it there and now also cover rafts and chest boats.
+ */
+@Mixin(value = AbstractBoat.class, priority = Integer.MIN_VALUE)
+public abstract class AbstractBoatWorldlyBlockMixin extends Entity {
 
     @Unique
     private BlockState workingState;
     @Unique
     private BlockPos workingPos;
 
-    public BoatWorldlyBlockMixin(final EntityType<?> entityType, final Level level) {
+    public AbstractBoatWorldlyBlockMixin(final EntityType<?> entityType, final Level level) {
         super(entityType, level);
     }
 

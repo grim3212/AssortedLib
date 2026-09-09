@@ -5,7 +5,6 @@
   "package": "com.grim3212.assorted.lib.mixin",
   "mixins": [
     "block.BlockMixin",
-    "block.BushBlockMixin",
     "block.CactusBlockMixin",
     "block.CropBlockMixin",
     "block.DryVegetationBlockMixin",
@@ -13,14 +12,14 @@
     "block.NetherWartBlockMixin",
     "block.StemBlockMixin",
     "block.SugarCaneBlockMixin",
+    "block.VegetationBlockMixin",
     "data.AccessorBlockLootSubProvider",
     "entity.EntityAccessor",
     "item.ItemStackMixin",
     "world.level.MonsterRoomFeatureAccessor"
   ],
   "client": [
-    "client.AccessorBlockModel",
-    "client.particle.ParticleEngineMixin"
+    "client.multiplayer.ClientLevelMixin"
   ],
   "injectors": {
     "defaultRequire": 1

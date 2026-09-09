@@ -63,7 +63,7 @@ public abstract class MultiPlayerGameModeWorldlyBlockMixin {
         }
     }
 
-    @Inject(method = "destroyBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;playerWillDestroy(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/entity/player/Player;)V"), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
+    @Inject(method = "destroyBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;playerWillDestroy(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/entity/player/Player;)Lnet/minecraft/world/level/block/state/BlockState;"), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
     public void assortedlib_onDestroyedByPlayer(BlockPos pos, CallbackInfoReturnable<Boolean> cir, Level level, BlockState blockState, Block block) {
         if (blockState.getBlock() instanceof IBlockOnPlayerBreak extraProperties) {
             FluidState fluidstate = level.getFluidState(pos);

@@ -26,7 +26,7 @@ public abstract class ServerPlayerGameModeMixin {
     @Shadow
     protected abstract boolean isCreative();
 
-    @Inject(method = "destroyBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;playerWillDestroy(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/entity/player/Player;)V"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
+    @Inject(method = "destroyBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;playerWillDestroy(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/entity/player/Player;)Lnet/minecraft/world/level/block/state/BlockState;"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
     private void onDestroy(BlockPos pos, CallbackInfoReturnable<Boolean> info, BlockState state, BlockEntity blockEntity) {
         if (state.getBlock() instanceof IBlockOnPlayerBreak extraProperties) {
             if (this.isCreative()) {
