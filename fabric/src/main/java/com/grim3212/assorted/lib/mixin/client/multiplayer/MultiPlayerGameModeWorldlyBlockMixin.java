@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.EntityHitResult;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -54,7 +55,9 @@ public abstract class MultiPlayerGameModeWorldlyBlockMixin {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientPacketListener;send(Lnet/minecraft/network/protocol/Packet;)V",
                     shift = At.Shift.AFTER),
             cancellable = true)
-    private void assortedlib_entityInteract(Player player, Entity entity, InteractionHand interactionHand, CallbackInfoReturnable<InteractionResult> cir) {
+    // interact gained an EntityHitResult in 26.2. An @Inject handler must mirror the target's
+    // full parameter list, so it is taken here even though the event does not use it.
+    private void assortedlib_entityInteract(Player player, Entity entity, EntityHitResult hitResult, InteractionHand interactionHand, CallbackInfoReturnable<InteractionResult> cir) {
         final EntityInteractEvent event = new EntityInteractEvent(player, interactionHand, entity);
         Services.EVENTS.handleEvents(event);
 

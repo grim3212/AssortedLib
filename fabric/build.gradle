@@ -59,6 +59,12 @@ processResources {
     from project(":common").sourceSets.main.resources
     inputs.property "version", project.version
 
+    // Both `src/generated/resources` and `../common/src/generated/resources` are resource roots,
+    // and the Fabric data generator regenerates the shared tags into its own tree - so once
+    // runDatagenClient has been run the two hold byte identical copies of the same files. Without
+    // a strategy the second build fails on the collision.
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
     filesMatching("fabric.mod.json") {
         expand 'version': project.version, 'fabric_mc_version_range': project.fabric_mc_version_range, 'license': project.license,
                 'mod_id': project.mod_id, 'mod_author': project.mod_author, 'mod_description': project.mod_description,

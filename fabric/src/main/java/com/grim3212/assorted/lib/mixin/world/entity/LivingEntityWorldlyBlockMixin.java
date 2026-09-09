@@ -11,13 +11,14 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
@@ -28,14 +29,18 @@ public abstract class LivingEntityWorldlyBlockMixin extends Entity {
         super(entityType, level);
     }
 
-    @ModifyVariable(
-            method = "travel",
-            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getBlockPosBelowThatAffectsMyMovement()Lnet/minecraft/core/BlockPos;")),
-            at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/world/level/block/Block;getFriction()F"), ordinal = 0
+    // 26.2 split LivingEntity.travel into travelInFluid / travelFallFlying / travelInAir, and the
+    // ground friction is no longer stored straight out of Block.getFriction() - it is fed into
+    // computeModifiedFriction(F, F) with the FRICTION_MODIFIER attribute, so there is no local to
+    // modify at that point any more. Redirecting the getFriction() call keeps the attribute pass
+    // and matches what the old INVOKE_ASSIGN capture did.
+    @Redirect(
+            method = "travelInAir",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;getFriction()F")
     )
-    private float assortedlib_rewriteFrictionValueForWorldlyBlocks(float original) {
+    private float assortedlib_rewriteFrictionValueForWorldlyBlocks(Block block) {
         if (!(this instanceof EntityAccessor entityAccessor))
-            return original;
+            return block.getFriction();
 
         final BlockPos pos = this.getBlockPosBelowThatAffectsMyMovement();
         final BlockState blockState = entityAccessor.getLevel().getBlockState(pos);
@@ -43,7 +48,7 @@ public abstract class LivingEntityWorldlyBlockMixin extends Entity {
             return extraProperties.getFriction(blockState, entityAccessor.getLevel(), pos, this);
         }
 
-        return original;
+        return block.getFriction();
     }
 
 
@@ -82,12 +87,12 @@ public abstract class LivingEntityWorldlyBlockMixin extends Entity {
             locals = LocalCapture.CAPTURE_FAILHARD,
             cancellable = true
     )
-    protected void assortedlib_checkFallEffects(double y, boolean onGround, BlockState state, BlockPos pos, CallbackInfo ci, double d, double e, double f, BlockPos blockPos, float j, double k, int count) {
-        if (!(this instanceof EntityAccessor entityAccessor))
-            return;
-
-        if (state.getBlock() instanceof IBlockLandingEffects extraProps && extraProps.addLandingEffects(state, (ServerLevel) entityAccessor.getLevel(), pos, state, (LivingEntity) (Object) this, count)) {
-            super.checkFallDamage(y, onGround, state, pos);
+    // 26.2 LVT of LivingEntity.checkFallDamage at the sendParticles call, in slot order:
+    // 6 ServerLevel level, 7 double power, 9 double x, 11 double y, 13 double z,
+    // 15 BlockPos entityPos, 16 double scale, 18 int particles.
+    protected void assortedlib_checkFallEffects(double ya, boolean onGround, BlockState onState, BlockPos pos, CallbackInfo ci, ServerLevel level, double power, double x, double y, double z, BlockPos entityPos, double scale, int particles) {
+        if (onState.getBlock() instanceof IBlockLandingEffects extraProps && extraProps.addLandingEffects(onState, level, pos, onState, (LivingEntity) (Object) this, particles)) {
+            super.checkFallDamage(ya, onGround, onState, pos);
             ci.cancel();
         }
     }

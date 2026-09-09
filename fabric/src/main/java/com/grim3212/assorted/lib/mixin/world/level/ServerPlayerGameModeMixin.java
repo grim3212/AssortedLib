@@ -13,7 +13,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(ServerPlayerGameMode.class)
 public abstract class ServerPlayerGameModeMixin {
@@ -26,14 +25,20 @@ public abstract class ServerPlayerGameModeMixin {
     @Shadow
     protected abstract boolean isCreative();
 
-    @Inject(method = "destroyBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;playerWillDestroy(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/entity/player/Player;)Lnet/minecraft/world/level/block/state/BlockState;"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
-    private void onDestroy(BlockPos pos, CallbackInfoReturnable<Boolean> info, BlockState state, BlockEntity blockEntity) {
+    // 26.2 reordered destroyBlock's locals: at the playerWillDestroy call the live slots are
+    // 2 BlockEntity, 3 Block and 5 BlockState, with slot 4 not yet assigned - a gap a
+    // LocalCapture list cannot describe. Nothing in the method has touched the world yet at
+    // that point, so the two values this needs are read straight back off the level instead.
+    @Inject(method = "destroyBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;playerWillDestroy(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/entity/player/Player;)Lnet/minecraft/world/level/block/state/BlockState;"), cancellable = true)
+    private void onDestroy(BlockPos pos, CallbackInfoReturnable<Boolean> info) {
+        final BlockState state = this.level.getBlockState(pos);
         if (state.getBlock() instanceof IBlockOnPlayerBreak extraProperties) {
             if (this.isCreative()) {
                 this.removeBlock(state, extraProperties, pos, false);
                 info.setReturnValue(true);
                 return;
             }
+            final BlockEntity blockEntity = this.level.getBlockEntity(pos);
             ItemStack itemStack = this.player.getMainHandItem();
             ItemStack itemStack2 = itemStack.copy();
             boolean canHarvest = this.player.hasCorrectToolForDrops(state);
