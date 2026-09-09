@@ -44,7 +44,6 @@ neoForge {
         }
 
         configureEach {
-            jvmArgument '-XX:+AllowEnhancedClassRedefinition'
             logLevel = org.slf4j.event.Level.DEBUG
         }
     }
