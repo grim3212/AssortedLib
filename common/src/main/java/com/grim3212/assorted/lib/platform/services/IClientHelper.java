@@ -18,7 +18,11 @@ import net.minecraft.client.renderer.rendertype.RenderType;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.ModelState;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.item.ItemModel;
+import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.Identifier;
@@ -68,6 +72,36 @@ public interface IClientHelper {
     BlockColors getBlockColors();
 
     void registerModelLoader(Identifier name, IModelSpecificationLoader<?> modelLoader);
+
+    /**
+     * Registers the {@link MapCodec} that reads a custom {@code ItemModel.Unbaked} type, so an item
+     * model json can name it under {@code "model": {"type": "<id>"}}.
+     * <p>
+     * The 1.20.1 way of varying an item's model per stack - an {@code ItemOverrides} on the baked
+     * model - is gone; an item model is a codec-registered {@link ItemModel} whose {@code update} is
+     * handed the stack, and this is the only registration point for one.
+     */
+    void registerItemModelType(Identifier id, MapCodec<? extends ItemModel.Unbaked> codec);
+
+    /**
+     * Bakes the model at {@code modelLocation} into a whole {@link BlockStateModel}, keeping it
+     * dynamic when the model json behind it was produced by a
+     * {@link com.grim3212.assorted.lib.client.model.loaders.IModelSpecification}.
+     * <p>
+     * The model json pipeline can only carry geometry, so a specification reached that way is baked
+     * once with empty model data and flattened. Reached through here the specification's own
+     * {@code BlockStateModel} survives, wrapped in the loader's level-aware bridge, so a model whose
+     * geometry depends on a block entity - a colorizer, say - draws what the block entity actually
+     * holds. Models that are not specification backed fall through to an ordinary baked variant, so
+     * this is safe to point at any model.
+     *
+     * @param baker         The bakery to bake with. Note that a data aware model keeps this past the
+     *                      bake, because the states it has to bake for are only known while rendering.
+     * @param modelLocation The model to bake. It must have been marked as a dependency during
+     *                      discovery, or the bakery will not have it.
+     * @param modelState    The rotation and uv lock to bake with.
+     */
+    BlockStateModel bakeSpecificationModel(ModelBaker baker, Identifier modelLocation, ModelState modelState);
 
     // TODO(26.2): registerItemProperty has no replacement. ClampedItemPropertyFunction and the
     //  ItemProperties registry are gone; model selection by a numeric property is data-driven through

@@ -2,9 +2,11 @@ package com.grim3212.assorted.lib.client.model.loader;
 
 import com.grim3212.assorted.lib.LibConstants;
 import com.grim3212.assorted.lib.client.model.loaders.IModelSpecification;
+import com.grim3212.assorted.lib.client.model.loaders.IModelSpecificationHolder;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
+import net.minecraft.client.resources.model.ResolvableModel;
 import net.minecraft.client.resources.model.geometry.QuadCollection;
 import net.minecraft.client.resources.model.geometry.UnbakedGeometry;
 import net.minecraft.core.BlockPos;
@@ -42,7 +44,7 @@ import java.util.List;
  *  produces for an unseeded random and empty data. Models that need that behaviour have to be wrapped
  *  with {@link ForgeBakedModelDelegate} from the blockstate side instead.
  */
-public final class ForgeModelGeometryToSpecificationPlatformDelegator<T extends IModelSpecification<T>> extends AbstractUnbakedModel {
+public final class ForgeModelGeometryToSpecificationPlatformDelegator<T extends IModelSpecification<T>> extends AbstractUnbakedModel implements IModelSpecificationHolder {
 
     private static final Identifier UNKNOWN_MODEL = Identifier.fromNamespaceAndPath(LibConstants.MOD_ID, "unknown_model");
 
@@ -55,6 +57,22 @@ public final class ForgeModelGeometryToSpecificationPlatformDelegator<T extends 
 
     public T getDelegate() {
         return this.delegate;
+    }
+
+    @Override
+    public T getModelSpecification() {
+        return this.delegate;
+    }
+
+    /**
+     * Forwards to the specification so anything it resolves through the baker is discovered first.
+     * The vanilla {@code parent} of this json is handled by {@link #parent()}; this covers the model
+     * ids a specification reaches for on its own.
+     */
+    @Override
+    public void resolveDependencies(ResolvableModel.Resolver resolver) {
+        super.resolveDependencies(resolver);
+        this.delegate.resolveDependencies(resolver);
     }
 
     @Override

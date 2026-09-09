@@ -11,7 +11,19 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.model.loading.v1.ExtraModelKey;
 import net.fabricmc.fabric.api.client.model.loading.v1.FabricModelManager;
+import com.grim3212.assorted.lib.client.model.loader.FabricBakedModelDelegate;
+import com.grim3212.assorted.lib.client.model.loaders.IModelSpecification;
+import com.grim3212.assorted.lib.client.model.loaders.IModelSpecificationHolder;
+import com.grim3212.assorted.lib.client.model.loaders.context.ResolvedModelBakingContext;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
+import net.minecraft.client.renderer.block.dispatch.ModelState;
+import net.minecraft.client.renderer.block.dispatch.SingleVariant;
+import net.minecraft.client.renderer.item.ItemModel;
+import net.minecraft.client.renderer.item.ItemModels;
+import net.minecraft.client.resources.model.ModelBaker;
+import net.minecraft.client.resources.model.ResolvedModel;
+import net.minecraft.client.resources.model.SimpleModelWrapper;
+import net.minecraft.client.resources.model.sprite.TextureSlots;
 import net.fabricmc.fabric.api.client.model.loading.v1.SimpleUnbakedExtraModel;
 import net.fabricmc.fabric.api.client.model.loading.v1.UnbakedModelDeserializer;
 import net.fabricmc.fabric.api.client.particle.v1.FabricSpriteSet;
@@ -146,6 +158,32 @@ public class FabricClientHelper implements IClientHelper {
     @Override
     public void registerModelLoader(Identifier name, IModelSpecificationLoader<?> modelLoader) {
         UnbakedModelDeserializer.register(name, new FabricPlatformModelLoaderPlatformDelegate<>(name, modelLoader));
+    }
+
+    /**
+     * Fabric API has no item model registry of its own, so this goes at vanilla's - reached through
+     * the access widener, since {@code ItemModels.ID_MAPPER} is private. Registering has to happen
+     * before the first item model json is read, which client initialisation is.
+     */
+    @Override
+    public void registerItemModelType(Identifier id, MapCodec<? extends ItemModel.Unbaked> codec) {
+        ItemModels.ID_MAPPER.put(id, codec);
+    }
+
+    @Override
+    public BlockStateModel bakeSpecificationModel(ModelBaker baker, Identifier modelLocation, ModelState modelState) {
+        ResolvedModel resolved = baker.getModel(modelLocation);
+        if (resolved.wrapped() instanceof IModelSpecificationHolder holder) {
+            IModelSpecification<?> specification = holder.getModelSpecification();
+            TextureSlots slots = resolved.getTopTextureSlots();
+            ResolvedModelBakingContext context = new ResolvedModelBakingContext(baker, resolved, slots);
+
+            return new FabricBakedModelDelegate(specification.bake(context, baker, modelState, modelLocation));
+        }
+
+        // Not a specification model, so there is nothing dynamic to preserve - bake it the way a
+        // vanilla variant would.
+        return new SingleVariant(SimpleModelWrapper.bake(baker, modelLocation, modelState));
     }
 
     // TODO(26.2): registerRenderType has no runtime equivalent on Fabric any more, so this is a no-op.

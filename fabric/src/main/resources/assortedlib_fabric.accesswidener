@@ -12,3 +12,8 @@ accessWidener	v2	official
 #
 # Add entries back only when a real access problem shows up, and only in the "official" namespace -
 # "named" is gone along with intermediary in 26.x.
+
+# ItemModels.ID_MAPPER is the only registry for a custom ItemModel.Unbaked type. NeoForge fires
+# RegisterItemModelsEvent over the same mapper; Fabric API has no equivalent, so the mapper itself is
+# what IClientHelper#registerItemModelType has to reach.
+accessible	field	net/minecraft/client/renderer/item/ItemModels	ID_MAPPER	Lnet/minecraft/util/ExtraCodecs$LateBoundIdMapper;

@@ -3,7 +3,11 @@ package com.grim3212.assorted.lib.platform;
 import com.google.common.collect.Maps;
 import com.grim3212.assorted.lib.client.events.ClientTickHandler;
 import com.grim3212.assorted.lib.client.model.loader.ForgePlatformModelLoaderPlatformDelegate;
+import com.grim3212.assorted.lib.client.model.loader.ForgeBakedModelDelegate;
+import com.grim3212.assorted.lib.client.model.loaders.IModelSpecification;
+import com.grim3212.assorted.lib.client.model.loaders.IModelSpecificationHolder;
 import com.grim3212.assorted.lib.client.model.loaders.IModelSpecificationLoader;
+import com.grim3212.assorted.lib.client.model.loaders.context.ResolvedModelBakingContext;
 import com.grim3212.assorted.lib.client.render.IBEWLR;
 import com.grim3212.assorted.lib.client.screen.LibScreenFactory;
 import com.grim3212.assorted.lib.platform.services.IClientHelper;
@@ -21,8 +25,16 @@ import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.ModelState;
+import net.minecraft.client.renderer.block.dispatch.SingleVariant;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.resources.model.ModelBaker;
+import net.minecraft.client.resources.model.ResolvedModel;
+import net.minecraft.client.resources.model.SimpleModelWrapper;
+import net.minecraft.client.resources.model.sprite.TextureSlots;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
@@ -43,6 +55,7 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.client.event.RegisterItemModelsEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
@@ -129,6 +142,27 @@ public class ForgeClientHelper implements IClientHelper {
         getRegistration().modelLoaders.put(name, modelLoader);
     }
 
+    @Override
+    public void registerItemModelType(Identifier id, MapCodec<? extends ItemModel.Unbaked> codec) {
+        getRegistration().itemModelTypes.put(id, codec);
+    }
+
+    @Override
+    public BlockStateModel bakeSpecificationModel(ModelBaker baker, Identifier modelLocation, ModelState modelState) {
+        ResolvedModel resolved = baker.getModel(modelLocation);
+        if (resolved.wrapped() instanceof IModelSpecificationHolder holder) {
+            IModelSpecification<?> specification = holder.getModelSpecification();
+            TextureSlots slots = resolved.getTopTextureSlots();
+            ResolvedModelBakingContext context = new ResolvedModelBakingContext(baker, resolved, slots);
+
+            return new ForgeBakedModelDelegate(specification.bake(context, baker, modelState, modelLocation));
+        }
+
+        // Not a specification model, so there is nothing dynamic to preserve - bake it the way a
+        // vanilla variant would.
+        return new SingleVariant(SimpleModelWrapper.bake(baker, modelLocation, modelState));
+    }
+
     // TODO(26.2): a block's render layer can no longer be set from code. ItemBlockRenderTypes is
     //  gone; the pass a block draws in is a ChunkSectionLayer derived per quad from the transparency
     //  of the sprite the model uses (see BakedQuad.MaterialInfo#of), so it is decided by the model's
@@ -187,6 +221,7 @@ public class ForgeClientHelper implements IClientHelper {
         private final List<Consumer<IBEWLR>> specialModelRendererInitializers = Collections.synchronizedList(new ArrayList<>());
         private final Map<Identifier, PreparableReloadListener> clientReloadListeners = new HashMap<>();
         private final Map<Identifier, IModelSpecificationLoader<?>> modelLoaders = new HashMap<>();
+        private final Map<Identifier, MapCodec<? extends ItemModel.Unbaked>> itemModelTypes = new HashMap<>();
         private final Map<Supplier<ParticleType<?>>, Function<SpriteSet, ParticleProvider<?>>> particleProviders = new HashMap<>();
         private final Map<Supplier<MenuType<?>>, LibScreenFactory<?, ?>> menuTypes = new HashMap<>();
 
@@ -258,6 +293,13 @@ public class ForgeClientHelper implements IClientHelper {
         public void registerClientReloadListeners(final AddClientReloadListenersEvent event) {
             for (Map.Entry<Identifier, PreparableReloadListener> entry : clientReloadListeners.entrySet()) {
                 event.addListener(entry.getKey(), entry.getValue());
+            }
+        }
+
+        @SubscribeEvent
+        public void registerItemModelTypes(final RegisterItemModelsEvent event) {
+            for (Map.Entry<Identifier, MapCodec<? extends ItemModel.Unbaked>> entry : itemModelTypes.entrySet()) {
+                event.register(entry.getKey(), entry.getValue());
             }
         }
 

@@ -2,11 +2,13 @@ package com.grim3212.assorted.lib.client.model.loader;
 
 import com.grim3212.assorted.lib.LibConstants;
 import com.grim3212.assorted.lib.client.model.loaders.IModelSpecification;
+import com.grim3212.assorted.lib.client.model.loaders.IModelSpecificationHolder;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.block.dispatch.ModelState;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelDebugName;
+import net.minecraft.client.resources.model.ResolvableModel;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.client.resources.model.cuboid.CuboidModel;
 import net.minecraft.client.resources.model.cuboid.ItemTransforms;
@@ -34,7 +36,7 @@ import java.util.List;
  * specification is therefore hooked in as the geometry, and everything else is answered from the
  * vanilla half of the same json.
  */
-public class FabricExtendedBlockModel implements UnbakedModel {
+public class FabricExtendedBlockModel implements UnbakedModel, IModelSpecificationHolder {
 
     private static final Identifier UNKNOWN_MODEL_LOCATION = Identifier.fromNamespaceAndPath(LibConstants.MOD_ID, "unknown_model");
 
@@ -78,8 +80,26 @@ public class FabricExtendedBlockModel implements UnbakedModel {
     }
 
     @Override
+    public IModelSpecification<?> getModelSpecification() {
+        return this.specification;
+    }
+
+    @Override
     public UnbakedGeometry geometry() {
         return this::bakeGeometry;
+    }
+
+    /**
+     * Marks the models the specification resolves through the baker while baking, so discovery picks
+     * them up. The vanilla {@code parent} of the json is walked separately, off {@link #parent()}.
+     * <p>
+     * This is not an override: {@code UnbakedModel} only carries {@code resolveDependencies} on
+     * NeoForge, where it is an extension interface. On Fabric nothing calls it, so
+     * {@link com.grim3212.assorted.lib.client.model.FabricUnbakedModelTracker} collects these models
+     * as they load and drives them from an extra model instead.
+     */
+    public void resolveDependencies(ResolvableModel.Resolver resolver) {
+        specification.resolveDependencies(resolver);
     }
 
     // TODO(26.2): the specification's BlockStateModel is flattened into a QuadCollection here.
