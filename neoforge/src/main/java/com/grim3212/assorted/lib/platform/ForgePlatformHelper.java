@@ -43,7 +43,10 @@ public class ForgePlatformHelper implements IPlatformHelper {
 
     @Override
     public String getCommonTagPrefix() {
-        return "forge";
+        // "c", not "forge". NeoForge unified on Fabric's common tag namespace: the 26.2.0.82 jar
+        // ships 593 data/c/tags entries and no data/forge/tags at all. Returning "forge" compiled
+        // and loaded fine but pointed every common tag at a namespace nothing populates.
+        return "c";
     }
 
     @Override

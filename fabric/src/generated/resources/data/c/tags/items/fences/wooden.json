@@ -1,9 +1,0 @@
-{
-  "replace": false,
-  "values": [
-    {
-      "id": "#minecraft:wooden_fences",
-      "required": false
-    }
-  ]
-}

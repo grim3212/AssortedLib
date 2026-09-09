@@ -35,8 +35,10 @@ neoForge {
             programArgument '--nogui'
         }
 
+        // AssortedLib only registers server-data providers (tags), which fire on
+        // GatherDataEvent.Server. clientData() runs the client generator, so nothing ran.
         data {
-            clientData()
+            serverData()
             gameDirectory = project.file('run')
             programArguments.addAll '--mod', mod_id, '--all',
                     '--output', file('../common/src/generated/resources/').getAbsolutePath(),

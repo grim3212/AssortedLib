@@ -1,9 +1,0 @@
-{
-  "replace": false,
-  "values": [
-    {
-      "id": "#minecraft:gold_ores",
-      "required": false
-    }
-  ]
-}

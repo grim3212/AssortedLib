@@ -29,3 +29,6 @@ logs
 common/src/generated/resources/.cache
 forge/src/generated/resources/.cache
 fabric/src/generated/resources/.cache
+
+# Datagen hash cache - regenerated output, not source
+**/src/generated/resources/.cache/
