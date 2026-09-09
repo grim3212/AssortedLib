@@ -1,10 +1,10 @@
 {
   "values": [
-    "#c:ingots/brick",
+    "#c:bricks/normal",
     "#c:ingots/copper",
     "#c:ingots/gold",
     "#c:ingots/iron",
     "#c:ingots/netherite",
-    "#c:ingots/nether_brick"
+    "#c:bricks/nether"
   ]
 }

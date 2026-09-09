@@ -105,8 +105,8 @@ public class LibCommonTagProvider {
                 tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_REDSTONE).add(key(Blocks.REDSTONE_BLOCK));
                 tagger.apply(LibCommonTags.Blocks.STORAGE_BLOCKS_NETHERITE).add(key(Blocks.NETHERITE_BLOCK));
 
-                addColored(tagger.apply(LibCommonTags.Blocks.STAINED_GLASS)::add, LibCommonTags.Blocks.GLASS, "{color}_stained_glass", tagger);
-                addColored(tagger.apply(LibCommonTags.Blocks.STAINED_GLASS_PANES)::add, LibCommonTags.Blocks.GLASS_PANES, "{color}_stained_glass_pane", tagger);
+                addColored(tagger.apply(LibCommonTags.Blocks.STAINED_GLASS)::add, "GLASS", "{color}_stained_glass", tagger);
+                addColored(tagger.apply(LibCommonTags.Blocks.STAINED_GLASS_PANES)::add, "GLASS_PANES", "{color}_stained_glass_pane", tagger);
 
                 tagger.apply(LibCommonTags.Blocks.GLASS).addTag(LibCommonTags.Blocks.GLASS_COLORLESS).addOptionalTag(LibCommonTags.Blocks.STAINED_GLASS).addTag(LibCommonTags.Blocks.GLASS_TINTED);
                 tagger.apply(LibCommonTags.Blocks.GLASS_COLORLESS).add(key(Blocks.GLASS));
@@ -120,8 +120,14 @@ public class LibCommonTagProvider {
             DyeHelper.CARPET_BY_DYE.entrySet().stream().forEach((x) -> tagger.apply(LibCommonTags.Blocks.CARPET).add(key(x.getValue())));
         }
 
-        private void addColored(Consumer<ResourceKey<Block>> consumer, TagKey<Block> group, String pattern, Function<TagKey<Block>, TagAppender<Block>> tagger) {
-            String prefix = group.location().getPath().toUpperCase(Locale.ENGLISH) + '_';
+        /**
+         * @param constantPrefix the {@link LibCommonTags.Blocks} constant name the per-colour tags are
+         *                       named after. Passed in rather than derived from the tag path: since 26.2
+         *                       the conventional path ({@code c:glass_blocks}) no longer matches the
+         *                       constant name ({@code GLASS}).
+         */
+        private void addColored(Consumer<ResourceKey<Block>> consumer, String constantPrefix, String pattern, Function<TagKey<Block>, TagAppender<Block>> tagger) {
+            String prefix = constantPrefix + '_';
             for (DyeColor color : DyeColor.values()) {
                 Identifier key = Identifier.fromNamespaceAndPath("minecraft", pattern.replace("{color}", color.getName()));
                 TagKey<Block> tag = getCommonTag(prefix + color.getName());
@@ -237,7 +243,6 @@ public class LibCommonTagProvider {
                 tagger.apply(LibCommonTags.Items.RODS).addTag(LibCommonTags.Items.RODS_BLAZE);
                 tagger.apply(LibCommonTags.Items.RODS_BLAZE).add(key(Items.BLAZE_ROD));
                 tagger.apply(LibCommonTags.Items.RODS_WOODEN).add(key(Items.STICK));
-                tagger.apply(LibCommonTags.Items.SHEARS).add(key(Items.SHEARS));
                 tagger.apply(LibCommonTags.Items.SLIMEBALLS).add(key(Items.SLIME_BALL));
                 copier.accept(LibCommonTags.Blocks.STORAGE_BLOCKS, LibCommonTags.Items.STORAGE_BLOCKS);
                 copier.accept(LibCommonTags.Blocks.STORAGE_BLOCKS_AMETHYST, LibCommonTags.Items.STORAGE_BLOCKS_AMETHYST);
@@ -255,35 +260,15 @@ public class LibCommonTagProvider {
                 copier.accept(LibCommonTags.Blocks.STORAGE_BLOCKS_RAW_IRON, LibCommonTags.Items.STORAGE_BLOCKS_RAW_IRON);
                 copier.accept(LibCommonTags.Blocks.STORAGE_BLOCKS_NETHERITE, LibCommonTags.Items.STORAGE_BLOCKS_NETHERITE);
                 tagger.apply(LibCommonTags.Items.STRING).add(key(Items.STRING));
-                tagger.apply(LibCommonTags.Items.TOOLS_SWORDS).add(key(Items.WOODEN_SWORD), key(Items.STONE_SWORD), key(Items.IRON_SWORD), key(Items.GOLDEN_SWORD), key(Items.DIAMOND_SWORD), key(Items.NETHERITE_SWORD));
-                tagger.apply(LibCommonTags.Items.TOOLS_AXES).add(key(Items.WOODEN_AXE), key(Items.STONE_AXE), key(Items.IRON_AXE), key(Items.GOLDEN_AXE), key(Items.DIAMOND_AXE), key(Items.NETHERITE_AXE));
-                tagger.apply(LibCommonTags.Items.TOOLS_PICKAXES).add(key(Items.WOODEN_PICKAXE), key(Items.STONE_PICKAXE), key(Items.IRON_PICKAXE), key(Items.GOLDEN_PICKAXE), key(Items.DIAMOND_PICKAXE), key(Items.NETHERITE_PICKAXE));
-                tagger.apply(LibCommonTags.Items.TOOLS_SHOVELS).add(key(Items.WOODEN_SHOVEL), key(Items.STONE_SHOVEL), key(Items.IRON_SHOVEL), key(Items.GOLDEN_SHOVEL), key(Items.DIAMOND_SHOVEL), key(Items.NETHERITE_SHOVEL));
-                tagger.apply(LibCommonTags.Items.TOOLS_HOES).add(key(Items.WOODEN_HOE), key(Items.STONE_HOE), key(Items.IRON_HOE), key(Items.GOLDEN_HOE), key(Items.DIAMOND_HOE), key(Items.NETHERITE_HOE));
-                tagger.apply(LibCommonTags.Items.TOOLS_SHIELDS).add(key(Items.SHIELD));
-                tagger.apply(LibCommonTags.Items.TOOLS_BOWS).add(key(Items.BOW));
-                tagger.apply(LibCommonTags.Items.TOOLS_CROSSBOWS).add(key(Items.CROSSBOW));
-                tagger.apply(LibCommonTags.Items.TOOLS_FISHING_RODS).add(key(Items.FISHING_ROD));
-                tagger.apply(LibCommonTags.Items.TOOLS_TRIDENTS).add(key(Items.TRIDENT));
-
-                List<TagKey<Item>> toolTags = Arrays.asList(LibCommonTags.Items.TOOLS_SWORDS, LibCommonTags.Items.TOOLS_AXES, LibCommonTags.Items.TOOLS_PICKAXES, LibCommonTags.Items.TOOLS_SHOVELS, LibCommonTags.Items.TOOLS_HOES, LibCommonTags.Items.TOOLS_SHIELDS, LibCommonTags.Items.TOOLS_BOWS, LibCommonTags.Items.TOOLS_CROSSBOWS, LibCommonTags.Items.TOOLS_FISHING_RODS, LibCommonTags.Items.TOOLS_TRIDENTS);
-                for (TagKey<Item> toolTag : toolTags)
-                    tagger.apply(LibCommonTags.Items.TOOLS).addTag(toolTag);
-
-                tagger.apply(LibCommonTags.Items.ARMORS_HELMETS).add(key(Items.LEATHER_HELMET), key(Items.TURTLE_HELMET), key(Items.CHAINMAIL_HELMET), key(Items.IRON_HELMET), key(Items.GOLDEN_HELMET), key(Items.DIAMOND_HELMET), key(Items.NETHERITE_HELMET));
-                tagger.apply(LibCommonTags.Items.ARMORS_CHESTPLATES).add(key(Items.LEATHER_CHESTPLATE), key(Items.CHAINMAIL_CHESTPLATE), key(Items.IRON_CHESTPLATE), key(Items.GOLDEN_CHESTPLATE), key(Items.DIAMOND_CHESTPLATE), key(Items.NETHERITE_CHESTPLATE));
-                tagger.apply(LibCommonTags.Items.ARMORS_LEGGINGS).add(key(Items.LEATHER_LEGGINGS), key(Items.CHAINMAIL_LEGGINGS), key(Items.IRON_LEGGINGS), key(Items.GOLDEN_LEGGINGS), key(Items.DIAMOND_LEGGINGS), key(Items.NETHERITE_LEGGINGS));
-                tagger.apply(LibCommonTags.Items.ARMORS_BOOTS).add(key(Items.LEATHER_BOOTS), key(Items.CHAINMAIL_BOOTS), key(Items.IRON_BOOTS), key(Items.GOLDEN_BOOTS), key(Items.DIAMOND_BOOTS), key(Items.NETHERITE_BOOTS));
-
-                List<TagKey<Item>> armorTags = Arrays.asList(LibCommonTags.Items.ARMORS_HELMETS, LibCommonTags.Items.ARMORS_CHESTPLATES, LibCommonTags.Items.ARMORS_LEGGINGS, LibCommonTags.Items.ARMORS_BOOTS);
-                for (TagKey<Item> armorTag : armorTags)
-                    tagger.apply(LibCommonTags.Items.ARMORS).addTag(armorTag);
+                // c:tools, c:armors and every subtag below them are shipped fully populated by
+                // both NeoForge and Fabric API, down to the same vanilla items this used to add
+                // by hand. Re-declaring them only risked drifting from the loaders.
 
                 copier.accept(LibCommonTags.Blocks.GLASS, LibCommonTags.Items.GLASS);
                 copier.accept(LibCommonTags.Blocks.GLASS_TINTED, LibCommonTags.Items.GLASS_TINTED);
                 copier.accept(LibCommonTags.Blocks.GLASS_PANES, LibCommonTags.Items.GLASS_PANES);
-                copyColored(LibCommonTags.Blocks.GLASS, LibCommonTags.Items.GLASS, copier);
-                copyColored(LibCommonTags.Blocks.GLASS_PANES, LibCommonTags.Items.GLASS_PANES, copier);
+                copyColored("GLASS", copier);
+                copyColored("GLASS_PANES", copier);
 
                 tagger.apply(LibCommonTags.Items.CROPS).addTag(LibCommonTags.Items.CROPS_BEETROOT).addTag(LibCommonTags.Items.CROPS_CARROT).addTag(LibCommonTags.Items.CROPS_NETHER_WART).addTag(LibCommonTags.Items.CROPS_POTATO).addTag(LibCommonTags.Items.CROPS_WHEAT);
                 tagger.apply(LibCommonTags.Items.CROPS_BEETROOT).add(key(Items.BEETROOT));
@@ -300,9 +285,14 @@ public class LibCommonTagProvider {
             tagger.apply(LibCommonTags.Items.BUCKETS_MILK).add(key(Items.MILK_BUCKET));
         }
 
-        private void copyColored(TagKey<Block> blockGroup, TagKey<Item> itemGroup, BiConsumer<TagKey<Block>, TagKey<Item>> copier) {
-            String blockPre = blockGroup.location().getPath().toUpperCase(Locale.ENGLISH) + '_';
-            String itemPre = itemGroup.location().getPath().toUpperCase(Locale.ENGLISH) + '_';
+        /**
+         * @param constantPrefix the constant name in {@link LibCommonTags.Blocks} / {@link LibCommonTags.Items}
+         *                       the per-colour tags are named after. See
+         *                       {@link BlockTagProvider#addColored}.
+         */
+        private void copyColored(String constantPrefix, BiConsumer<TagKey<Block>, TagKey<Item>> copier) {
+            String blockPre = constantPrefix + '_';
+            String itemPre = constantPrefix + '_';
             for (DyeColor color : DyeColor.values()) {
                 TagKey<Block> from = getCommonBlockTag(blockPre + color.getName());
                 TagKey<Item> to = getCommonItemTag(itemPre + color.getName());

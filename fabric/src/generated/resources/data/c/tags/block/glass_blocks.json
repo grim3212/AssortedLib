@@ -1,10 +1,10 @@
 {
   "values": [
-    "#c:glass/colorless",
+    "#c:glass_blocks/colorless",
     {
       "id": "#c:stained_glass",
       "required": false
     },
-    "#c:glass/tinted"
+    "#c:glass_blocks/tinted"
   ]
 }
