@@ -44,7 +44,12 @@ public class FabricConfigurationValue<T> implements Supplier<T> {
             this.value = verify(value);
             return value;
         } catch (KeyResolveException e) {
-            LOGGER.error(e.getMessage());
+            // An absent key is a normal condition, not a failure. It happens on first launch, when
+            // the config file does not exist yet and the source is an empty object, and again for
+            // any option added in a later version that an existing file predates. In both cases the
+            // default is the correct answer and the writeAll() that follows persists it. Logging
+            // this at error level made a clean first start look broken.
+            LOGGER.debug("{} - falling back to the default and writing it out.", e.getMessage());
             value = defaultValue;
             return value;
         } catch (Exception e) {
