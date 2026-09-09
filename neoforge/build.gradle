@@ -41,7 +41,7 @@ neoForge {
             serverData()
             gameDirectory = project.file('run')
             programArguments.addAll '--mod', mod_id, '--all',
-                    '--output', file('src/generated/resources/').getAbsolutePath(),
+                    '--output', file('../common/src/generated/resources/').getAbsolutePath(),
                     '--existing', file('../common/src/main/resources/').getAbsolutePath()
         }
 
@@ -51,10 +51,8 @@ neoForge {
     }
 }
 
-// Each loader generates into its own module. Nothing writes to common/src/generated any more, so
-// the two trees cannot produce the same file twice (which broke processResources and sourcesJar).
 sourceSets.main.resources {
-    srcDir 'src/generated/resources'
+    srcDir '../common/src/generated/resources'
     exclude '**/.cache'
 }
 

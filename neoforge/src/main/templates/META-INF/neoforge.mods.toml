@@ -1,7 +1,8 @@
 license = "${license}"
 logoBlur = false
 issueTrackerURL = "${issue_tracker}"
-logoFile = "logo.png"
+# logoFile was deprecated in 26.x; logo.png is square, so it is the icon.
+iconFile = "logo.png"
 
 [[mods]]
 modId = "${mod_id}"

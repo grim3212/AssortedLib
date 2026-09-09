@@ -52,7 +52,14 @@ loom {
 }
 
 sourceSets {
-    main.resources.srcDirs += ['src/generated/resources']
+    main.resources.srcDirs += ['src/generated/resources', '../common/src/generated/resources']
+}
+
+// Fabric consumes both its own generated tree and the shared one NeoForge writes into common, and
+// the two overlap on the shared c: tags (verified byte-identical). Allow the duplicate rather than
+// dropping a root - dropping the common root is what left every block with a missing model.
+tasks.withType(AbstractCopyTask).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
 processResources {
