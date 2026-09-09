@@ -52,7 +52,7 @@ loom {
 }
 
 sourceSets {
-    main.resources.srcDirs += ['src/generated/resources', '../common/src/generated/resources']
+    main.resources.srcDirs += ['src/generated/resources']
 }
 
 processResources {
@@ -63,7 +63,6 @@ processResources {
     // and the Fabric data generator regenerates the shared tags into its own tree - so once
     // runDatagenClient has been run the two hold byte identical copies of the same files. Without
     // a strategy the second build fails on the collision.
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 
     filesMatching("fabric.mod.json") {
         expand 'version': project.version, 'fabric_mc_version_range': project.fabric_mc_version_range, 'license': project.license,
