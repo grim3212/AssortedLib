@@ -74,6 +74,9 @@ public final class QuadTransformers {
         return EMISSIVE_TRANSFORMERS[15];
     }
 
+    // NeoForge deprecates the canonical MaterialInfo constructor in favour of one that also takes its
+    // own ambient occlusion flag; that overload does not exist in vanilla, which this module builds against.
+    @SuppressWarnings("deprecation")
     private static IQuadTransformer makeEmissive(int emissivity) {
         return quad -> {
             BakedQuad.MaterialInfo material = quad.materialInfo();

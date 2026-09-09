@@ -2,13 +2,16 @@ package com.grim3212.assorted.lib.client.model.loader;
 
 import com.grim3212.assorted.lib.LibConstants;
 import com.grim3212.assorted.lib.client.model.loaders.IModelSpecification;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.resources.model.geometry.QuadCollection;
 import net.minecraft.client.resources.model.geometry.UnbakedGeometry;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.client.model.AbstractUnbakedModel;
 import net.neoforged.neoforge.client.model.ExtendedUnbakedGeometry;
 import net.neoforged.neoforge.client.model.StandardModelParameters;
@@ -67,7 +70,9 @@ public final class ForgeModelGeometryToSpecificationPlatformDelegator<T extends 
             final BlockStateModel model = this.delegate.bake(context, baker, modelState, modelLocation);
 
             final List<BlockStateModelPart> parts = new ArrayList<>();
-            model.collectParts(RandomSource.create(), parts);
+            // Baking has no level or position, so this is the same empty context DynamicBlockStateModel
+            // feeds the level aware overload with.
+            model.collectParts(BlockAndTintGetter.EMPTY, BlockPos.ZERO, Blocks.AIR.defaultBlockState(), RandomSource.create(), parts);
 
             final QuadCollection.Builder builder = new QuadCollection.Builder();
             for (BlockStateModelPart part : parts) {

@@ -27,6 +27,9 @@ public abstract class BaseBakedPerspectiveModel implements ITransformAwareBakedM
     private static final ItemTransform THIRD_PERSON = transform(0.0F, 2.5F / 16.0F, 0.0F, 75.0F, 45.0F, 0.0F, 0.375F);
     private static final ItemTransform FIRST_PERSON = transform(0.0F, 0.0F, 0.0F, 0.0F, 45.0F, 0.0F, 0.40F);
 
+    // NeoForge deprecates the canonical nine argument constructor in favour of one that also takes its
+    // own modded transform map; that overload does not exist in vanilla, which this module builds against.
+    @SuppressWarnings("deprecation")
     private static final ItemTransforms TRANSFORMS = new ItemTransforms(THIRD_PERSON, THIRD_PERSON, FIRST_PERSON, FIRST_PERSON, FIXED, GUI, GROUND, FIXED, FIXED);
 
     private static ItemTransform transform(

@@ -1,16 +1,23 @@
 package com.grim3212.assorted.lib.core.fluid;
 
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 
-public record FluidInformation(Fluid fluid, long amount, CompoundTag data) {
+/**
+ * A fluid, an amount of it, and whatever extra data rides along with it.
+ * <p>
+ * That extra data is a {@link DataComponentPatch} in 26.2 - the same thing a fluid stack carries on
+ * both loaders - rather than the loose {@code CompoundTag} it used to be, so no loader has to
+ * serialise components through NBT to hand one over.
+ */
+public record FluidInformation(Fluid fluid, long amount, DataComponentPatch data) {
     public FluidInformation(Fluid fluid) {
-        this(fluid, 1, new CompoundTag());
+        this(fluid, 1, DataComponentPatch.EMPTY);
     }
 
     public FluidInformation(Fluid fluid, long amount) {
-        this(fluid, amount, new CompoundTag());
+        this(fluid, amount, DataComponentPatch.EMPTY);
     }
 
     public FluidInformation withSource() {

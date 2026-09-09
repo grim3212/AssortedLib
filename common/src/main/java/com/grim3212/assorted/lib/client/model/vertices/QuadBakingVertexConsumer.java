@@ -94,6 +94,9 @@ public class QuadBakingVertexConsumer implements VertexConsumer {
     /**
      * Emits the quad built from the vertices seen so far, if there are four of them.
      */
+    // NeoForge deprecates MaterialInfo#of in favour of an overload that also takes its own ambient
+    // occlusion flag; that overload does not exist in vanilla, which this module builds against.
+    @SuppressWarnings("deprecation")
     public void flush() {
         if (vertexIndex != 4)
             return;

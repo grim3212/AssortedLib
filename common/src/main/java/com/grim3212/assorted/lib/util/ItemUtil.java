@@ -55,6 +55,9 @@ public class ItemUtil {
                 } else {
                     ItemStack mainHandItem = player.getMainHandItem();
                     ItemStack mainHandCopy = mainHandItem.copy();
+                    // NeoForge deprecates this in favour of a level/pos aware overload that only exists in
+                    // its patched jar; vanilla only has the state based one, which is what this builds against.
+                    @SuppressWarnings("deprecation")
                     boolean hasCorrectToolForDrops = player.hasCorrectToolForDrops(blockState);
                     mainHandItem.mineBlock(level, blockState, blockPos, player);
                     if (flag && hasCorrectToolForDrops) {

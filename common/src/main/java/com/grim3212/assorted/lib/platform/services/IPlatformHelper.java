@@ -99,7 +99,12 @@ public interface IPlatformHelper {
      * Burn times are data-driven in 26.x and resolved per level, so this needs a level to look
      * against. Both loaders now feed the vanilla fuel registry, so there is no platform-specific
      * behaviour left here.
+     * <p>
+     * NeoForge deprecates {@code FuelValues#burnDuration} in favour of an {@code ItemStack} extension
+     * that also takes the recipe type; that extension only exists in its patched jar, while this module
+     * builds against vanilla, so the vanilla lookup is the only one available here.
      */
+    @SuppressWarnings("deprecation")
     default int getFuelTime(Level level, ItemStack stack) {
         return level.fuelValues().burnDuration(stack);
     }

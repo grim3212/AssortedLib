@@ -11,6 +11,7 @@ import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.model.DynamicBlockStateModel;
 import net.neoforged.neoforge.model.data.ModelData;
@@ -67,10 +68,15 @@ public final class ForgeBakedModelDelegate implements DynamicBlockStateModel, ID
             return;
         }
 
-        this.delegate.collectParts(random, parts);
+        // This overload carries no level or position, so hand the delegate the same empty context
+        // DynamicBlockStateModel feeds the level aware overload with.
+        this.delegate.collectParts(BlockAndTintGetter.EMPTY, BlockPos.ZERO, Blocks.AIR.defaultBlockState(), random, parts);
     }
 
+    // Deprecated by NeoForge in favour of the level aware overload above; it still has to be implemented
+    // here to pick a winner between DynamicBlockStateModel's and IDataAwareBakedModel's defaults.
     @Override
+    @Deprecated
     public void collectParts(final @NotNull RandomSource random, final @NotNull List<BlockStateModelPart> parts) {
         this.delegate.collectParts(random, parts);
     }
@@ -83,6 +89,7 @@ public final class ForgeBakedModelDelegate implements DynamicBlockStateModel, ID
     }
 
     @Override
+    @Deprecated
     public Material.Baked particleMaterial() {
         return this.delegate.particleMaterial();
     }
@@ -93,6 +100,7 @@ public final class ForgeBakedModelDelegate implements DynamicBlockStateModel, ID
     }
 
     @Override
+    @Deprecated
     public @BakedQuad.MaterialFlags int materialFlags() {
         return this.delegate.materialFlags();
     }

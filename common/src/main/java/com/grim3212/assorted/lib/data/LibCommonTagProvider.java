@@ -4,6 +4,7 @@ import com.grim3212.assorted.lib.platform.Services;
 import com.grim3212.assorted.lib.util.DyeHelper;
 import com.grim3212.assorted.lib.util.LibCommonTags;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.TagAppender;
@@ -32,11 +33,11 @@ import java.util.function.Function;
 public class LibCommonTagProvider {
 
     private static ResourceKey<Block> key(Block block) {
-        return block.builtInRegistryHolder().key();
+        return BuiltInRegistries.BLOCK.getResourceKey(block).orElseThrow();
     }
 
     private static ResourceKey<Item> key(Item item) {
-        return item.builtInRegistryHolder().key();
+        return BuiltInRegistries.ITEM.getResourceKey(item).orElseThrow();
     }
 
     public static class BlockTagProvider extends LibBlockTagProvider {

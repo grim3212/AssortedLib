@@ -10,8 +10,8 @@ public class ForgeDamageTypeTagsProvider extends DamageTypeTagsProvider {
 
     private final LibDamageTypeTagsProvider commonTags;
 
-    public ForgeDamageTypeTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookup, LibDamageTypeTagsProvider commonTags) {
-        super(output, lookup);
+    public ForgeDamageTypeTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookup, String modId, LibDamageTypeTagsProvider commonTags) {
+        super(output, lookup, modId);
         this.commonTags = commonTags;
     }
 

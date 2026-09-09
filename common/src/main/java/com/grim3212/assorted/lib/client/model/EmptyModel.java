@@ -3,12 +3,10 @@ package com.grim3212.assorted.lib.client.model;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
-import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.client.resources.model.sprite.Material;
-import net.minecraft.client.resources.model.sprite.SpriteId;
 import net.minecraft.core.Direction;
+import net.minecraft.data.AtlasIds;
 import net.minecraft.util.RandomSource;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,22 +34,27 @@ public class EmptyModel {
      */
     public static Material.Baked missingMaterial() {
         if (missingMaterial == null) {
-            missingMaterial = new Material.Baked(Minecraft.getInstance().getAtlasManager().get(new SpriteId(TextureAtlas.LOCATION_BLOCKS, MissingTextureAtlasSprite.getLocation())), false);
+            missingMaterial = new Material.Baked(Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.BLOCKS).missingSprite(), false);
         }
 
         return missingMaterial;
     }
 
     private static class Baked implements BlockStateModel {
+        // Deprecated by NeoForge in favour of level/pos aware overloads that only exist in its
+        // patched jar; vanilla still declares these abstract, so they have to be implemented here.
+        @SuppressWarnings("deprecation")
         @Override
         public void collectParts(RandomSource random, List<BlockStateModelPart> output) {
         }
 
+        @SuppressWarnings("deprecation")
         @Override
         public Material.Baked particleMaterial() {
             return missingMaterial();
         }
 
+        @SuppressWarnings("deprecation")
         @Override
         public @BakedQuad.MaterialFlags int materialFlags() {
             return 0;
@@ -64,6 +67,9 @@ public class EmptyModel {
             return List.of();
         }
 
+        // Deprecated by NeoForge in favour of level/pos aware overloads that only exist in its
+        // patched jar; vanilla still declares these abstract, so they have to be implemented here.
+        @SuppressWarnings("deprecation")
         @Override
         public boolean useAmbientOcclusion() {
             return false;

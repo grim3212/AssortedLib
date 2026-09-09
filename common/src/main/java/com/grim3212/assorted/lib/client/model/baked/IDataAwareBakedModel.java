@@ -34,6 +34,9 @@ public interface IDataAwareBakedModel extends BlockStateModel {
      */
     void collectParts(@NotNull RandomSource random, @NotNull IBlockModelData extraData, @NotNull List<BlockStateModelPart> output);
 
+    // Deprecated by NeoForge in favour of a level/pos aware overload that only exists in its patched
+    // jar; vanilla still declares this one abstract, so it has to be implemented here.
+    @SuppressWarnings("deprecation")
     @Override
     default void collectParts(@NotNull RandomSource random, @NotNull List<BlockStateModelPart> output) {
         collectParts(random, IBlockModelData.empty(), output);

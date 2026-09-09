@@ -14,6 +14,9 @@ import java.util.function.Function;
 
 public abstract class LibEntityTagProvider extends TagsProvider<EntityType<?>> {
 
+    // NeoForge deprecates this constructor in favour of one that also takes a mod id; that overload does
+    // not exist in vanilla, which this module builds against.
+    @SuppressWarnings("deprecation")
     public LibEntityTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
         super(output, Registries.ENTITY_TYPE, lookupProvider);
     }

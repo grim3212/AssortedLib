@@ -25,6 +25,9 @@ public class CombinedModel implements BlockStateModel {
         this.merged = args;
     }
 
+    // Deprecated by NeoForge in favour of level/pos aware overloads that only exist in its patched
+    // jar; vanilla still declares these abstract, so they have to be implemented here.
+    @SuppressWarnings("deprecation")
     @Override
     public void collectParts(final RandomSource random, final List<BlockStateModelPart> output) {
         for (final BlockStateModel model : merged) {
@@ -32,6 +35,7 @@ public class CombinedModel implements BlockStateModel {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public Material.Baked particleMaterial() {
         for (final BlockStateModel model : merged) {
@@ -41,6 +45,7 @@ public class CombinedModel implements BlockStateModel {
         return EmptyModel.missingMaterial();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public @BakedQuad.MaterialFlags int materialFlags() {
         int flags = 0;

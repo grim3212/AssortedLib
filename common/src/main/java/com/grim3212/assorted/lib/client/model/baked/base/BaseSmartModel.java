@@ -23,6 +23,9 @@ import java.util.List;
  */
 public abstract class BaseSmartModel implements IDataAwareBakedModel {
 
+    // The BlockStateModel members below are deprecated by NeoForge in favour of level/pos aware
+    // overloads that only exist in its patched jar; vanilla still declares them abstract.
+    @SuppressWarnings("deprecation")
     @Override
     public void collectParts(final @NotNull RandomSource random, final @NotNull IBlockModelData extraData, final @NotNull List<BlockStateModelPart> output) {
         handleBlockState(random, extraData).collectParts(random, output);
@@ -40,11 +43,13 @@ public abstract class BaseSmartModel implements IDataAwareBakedModel {
         return NullBakedModel.instance;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public Material.Baked particleMaterial() {
         return handleBlockState(RandomSource.create(), IBlockModelData.empty()).particleMaterial();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public @BakedQuad.MaterialFlags int materialFlags() {
         return handleBlockState(RandomSource.create(), IBlockModelData.empty()).materialFlags();

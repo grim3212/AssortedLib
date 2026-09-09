@@ -15,6 +15,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Every {@code super} call below is the plain vanilla accessor. NeoForge deprecates all of them in
+ * favour of the level/pos aware versions its own extension interfaces add - which is exactly what the
+ * overriding methods here are - but those replacements only exist in NeoForge's patched jar, while
+ * this module builds against vanilla, so the vanilla accessor is the only source available.
+ */
+@SuppressWarnings("deprecation")
 public class ExtraPropertyBlock extends Block implements IBlockExtraProperties, IBlockSoundType, IBlockCloneStack, IBlockCanHarvest, IBlockLightEmission {
     public ExtraPropertyBlock(Properties props) {
         super(props);

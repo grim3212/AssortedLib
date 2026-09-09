@@ -65,7 +65,7 @@ public class LibFluidIngredient {
         Optional<FluidInformation> fluidInformation = Services.FLUIDS.get(stack);
         if (fluidInformation.isPresent()) {
             long extracted = Services.FLUIDS.simulateExtract(stack, this.amount);
-            return extracted == this.amount && fluidInformation.get().fluid().is(this.fluidTag);
+            return extracted == this.amount && BuiltInRegistries.FLUID.wrapAsHolder(fluidInformation.get().fluid()).is(this.fluidTag);
         }
         return false;
     }

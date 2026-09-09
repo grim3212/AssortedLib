@@ -55,6 +55,9 @@ public class SimpleGeneratedModel extends BaseBakedBlockModel {
 
     private final Material.Baked material;
 
+    // NeoForge deprecates MaterialInfo#of and this FaceBakery#bakeQuad overload in favour of ones that
+    // also take its own extra face data; those do not exist in vanilla, which this module builds against.
+    @SuppressWarnings("deprecation")
     public SimpleGeneratedModel(final TextureAtlasSprite texture) {
         this.material = new Material.Baked(texture, false);
 

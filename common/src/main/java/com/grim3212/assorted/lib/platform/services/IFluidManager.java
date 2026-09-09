@@ -66,8 +66,6 @@ public interface IFluidManager {
      */
     Component getDisplayName(final Fluid fluid);
 
-    String fluidStackTag();
-
     /**
      * Returns the fluid variant handler for the given fluid.
      * This might be empty or filled with a default handler depending on the platform.

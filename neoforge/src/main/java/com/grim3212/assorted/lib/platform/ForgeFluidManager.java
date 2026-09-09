@@ -4,10 +4,6 @@ import com.grim3212.assorted.lib.core.fluid.FluidInformation;
 import com.grim3212.assorted.lib.core.fluid.IFluidVariantHandler;
 import com.grim3212.assorted.lib.fluid.ForgeFluidVariantHandlerDelegate;
 import com.grim3212.assorted.lib.platform.services.IFluidManager;
-import net.minecraft.core.component.DataComponentPatch;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
@@ -104,15 +100,6 @@ public class ForgeFluidManager implements IFluidManager {
         return fluid.getFluidType().getDescription(buildFluidStack(new FluidInformation(fluid)));
     }
 
-    // TODO(26.2): nothing identifies an item's stored fluid by name any more - it lives in a
-    //  SimpleFluidContent data component whose type the holder picks - so this has no meaningful
-    //  answer on either loader and IFluidManager#fluidStackTag should be dropped from the common
-    //  interface. The Fabric side returns the same string, so the two still agree until it is.
-    @Override
-    public String fluidStackTag() {
-        return "Fluid";
-    }
-
     @Override
     public Optional<IFluidVariantHandler> getVariantHandlerFor(Fluid fluid) {
         return Optional.of(new ForgeFluidVariantHandlerDelegate(fluid.getFluidType()));
@@ -131,37 +118,15 @@ public class ForgeFluidManager implements IFluidManager {
         return (int) Math.max(0, Math.min(amount, Integer.MAX_VALUE));
     }
 
+    // FluidInformation carries the same DataComponentPatch a FluidStack does, so both directions are
+    // a straight copy.
     @NotNull
     public static FluidInformation buildFluidInformation(final FluidStack fluid) {
-        if (fluid.isComponentsPatchEmpty())
-            return new FluidInformation(fluid.getFluid(), fluid.getAmount());
-
-        return new FluidInformation(fluid.getFluid(), fluid.getAmount(), toTag(fluid.getComponentsPatch()));
+        return new FluidInformation(fluid.getFluid(), fluid.getAmount(), fluid.getComponentsPatch());
     }
 
     @NotNull
     public static FluidStack buildFluidStack(final FluidInformation fluid) {
-        if (fluid.data() == null || fluid.data().isEmpty())
-            return new FluidStack(fluid.fluid(), clamp(fluid.amount()));
-
-        return new FluidStack(fluid.fluid(), clamp(fluid.amount()), fromTag(fluid.data()));
-    }
-
-    // TODO(26.2): FluidInformation still models a fluid's extra data as a CompoundTag, which is the
-    //  1.20.1 shape; a FluidStack carries a DataComponentPatch. Converting between the two here is
-    //  the only reason these two methods exist, and it is lossy - plain NbtOps is used because there
-    //  is no registry access at these call sites, so a component that needs a registry to serialise
-    //  is dropped. FluidInformation#data should become a DataComponentPatch on the common side, at
-    //  which point both conversions go away.
-    private static CompoundTag toTag(final DataComponentPatch patch) {
-        return DataComponentPatch.CODEC.encodeStart(NbtOps.INSTANCE, patch)
-                .result()
-                .filter(tag -> tag instanceof CompoundTag)
-                .map(tag -> (CompoundTag) tag)
-                .orElseGet(CompoundTag::new);
-    }
-
-    private static DataComponentPatch fromTag(final Tag tag) {
-        return DataComponentPatch.CODEC.parse(NbtOps.INSTANCE, tag).result().orElse(DataComponentPatch.EMPTY);
+        return new FluidStack(fluid.fluid(), clamp(fluid.amount()), fluid.data());
     }
 }

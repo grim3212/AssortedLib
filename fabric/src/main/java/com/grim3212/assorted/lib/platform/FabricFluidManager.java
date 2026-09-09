@@ -96,11 +96,6 @@ public class FabricFluidManager implements IFluidManager {
     }
 
     @Override
-    public String fluidStackTag() {
-        return "Fluid";
-    }
-
-    @Override
     public Optional<IFluidVariantHandler> getVariantHandlerFor(Fluid fluid) {
         return Optional.of(new FabricFluidVariantHandlerDelegate(FluidVariantAttributes.getHandlerOrDefault(fluid)));
     }

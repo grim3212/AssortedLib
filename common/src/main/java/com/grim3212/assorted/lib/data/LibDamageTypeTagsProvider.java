@@ -12,6 +12,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public abstract class LibDamageTypeTagsProvider extends DamageTypeTagsProvider {
+    // NeoForge deprecates this constructor in favour of one that also takes a mod id; that overload does
+    // not exist in vanilla, which this module builds against.
+    @SuppressWarnings("deprecation")
     public LibDamageTypeTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookup) {
         super(output, lookup);
     }

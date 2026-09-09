@@ -15,6 +15,9 @@ import java.util.function.Function;
 
 public abstract class LibBiomeTagProvider extends TagsProvider<Biome> {
 
+    // NeoForge deprecates this constructor in favour of one that also takes a mod id; that overload does
+    // not exist in vanilla, which this module builds against.
+    @SuppressWarnings("deprecation")
     public LibBiomeTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
         super(output, Registries.BIOME, lookupProvider);
     }

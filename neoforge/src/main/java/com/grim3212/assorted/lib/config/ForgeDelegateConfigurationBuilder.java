@@ -25,7 +25,10 @@ public class ForgeDelegateConfigurationBuilder implements IConfigurationBuilder 
     @Override
     public <T> Supplier<List<? extends T>> defineList(final String key, final List<T> defaultValue, final Class<T> containedType, final String comment) {
         builder.comment(comment);
-        return builder.defineList(key, defaultValue, t -> true)::get;
+        // The three argument overload is deprecated; the supported one also takes a supplier for the
+        // "add entry" button in the config screen. There is no such notion on the common interface, and
+        // null is how NeoForge itself spells "no add button", which is what this already behaved like.
+        return builder.defineList(key, defaultValue, (Supplier<T>) null, t -> true)::get;
     }
 
     @Override

@@ -21,21 +21,27 @@ import java.util.List;
  */
 public abstract class BaseBakedBlockModel implements BlockStateModel, BlockStateModelPart {
 
+    // Deprecated by NeoForge in favour of level/pos aware overloads that only exist in its patched
+    // jar; vanilla still declares these abstract, so they have to be implemented here.
+    @SuppressWarnings("deprecation")
     @Override
     public void collectParts(final RandomSource random, final List<BlockStateModelPart> output) {
         output.add(this);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public boolean useAmbientOcclusion() {
         return true;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public Material.Baked particleMaterial() {
         return EmptyModel.missingMaterial();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public @BakedQuad.MaterialFlags int materialFlags() {
         int flags = 0;
