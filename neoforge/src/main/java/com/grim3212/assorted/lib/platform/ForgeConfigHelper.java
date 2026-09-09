@@ -28,6 +28,9 @@ public class ForgeConfigHelper implements IConfigHelper {
             case CLIENT_ONLY -> ModConfig.Type.CLIENT;
             case NOT_SYNCED -> ModConfig.Type.COMMON;
             case SYNCED -> ModConfig.Type.SERVER;
+            // STARTUP is loaded before the registries are populated, which is the whole point of
+            // this type. COMMON is not, and reading one during RegisterEvent throws.
+            case NEEDED_AT_REGISTRATION -> ModConfig.Type.STARTUP;
         };
     }
 }
