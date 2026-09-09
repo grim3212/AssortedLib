@@ -1,6 +1,5 @@
 package com.grim3212.assorted.lib.util;
 
-import com.grim3212.assorted.lib.platform.Services;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
@@ -9,6 +8,15 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 
 public class LibCommonTags {
+
+    /**
+     * The namespace shared, cross-loader convention tags live under.
+     * <p>
+     * This used to be a platform service, because Forge used "forge" and Fabric used "c". NeoForge
+     * has since unified on Fabric's namespace - the 26.2 jar ships only {@code data/c/tags} - so
+     * there is no longer a platform difference to abstract over.
+     */
+    public static final String COMMON_NAMESPACE = "c";
 
     public static class Blocks {
         public static final TagKey<Block> STONE = commonTag("stone");
@@ -103,7 +111,7 @@ public class LibCommonTags {
         public static final TagKey<Block> CARPET = commonTag("carpet");
 
         private static TagKey<Block> commonTag(String name) {
-            return TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(Services.PLATFORM.getCommonTagPrefix(), name));
+            return TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(COMMON_NAMESPACE, name));
         }
     }
 
@@ -278,7 +286,7 @@ public class LibCommonTags {
         public static final TagKey<Item> BUCKETS_MILK = commonTag("buckets/milk");
 
         private static TagKey<Item> commonTag(String name) {
-            return TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(Services.PLATFORM.getCommonTagPrefix(), name));
+            return TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(COMMON_NAMESPACE, name));
         }
     }
 
@@ -338,7 +346,7 @@ public class LibCommonTags {
         public static final TagKey<Biome> IS_MOUNTAIN = commonTag("is_mountain");
 
         private static TagKey<Biome> commonTag(String name) {
-            return TagKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath(Services.PLATFORM.getCommonTagPrefix(), name));
+            return TagKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath(COMMON_NAMESPACE, name));
         }
     }
 }

@@ -44,7 +44,6 @@ public interface IPlatformHelper {
      */
     String getPlatformName();
 
-    String getCommonTagPrefix();
 
     void openMenu(ServerPlayer player, MenuProvider provider, Consumer<FriendlyByteBuf> extraDataWriter);
 

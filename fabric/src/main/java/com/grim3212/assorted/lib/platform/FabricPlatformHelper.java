@@ -60,10 +60,6 @@ public class FabricPlatformHelper implements IPlatformHelper {
         return "Fabric";
     }
 
-    @Override
-    public String getCommonTagPrefix() {
-        return "c";
-    }
 
     @Override
     public void openMenu(ServerPlayer player, MenuProvider provider, Consumer<FriendlyByteBuf> extraDataWriter) {
