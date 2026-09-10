@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.client.renderer.v1.model.FabricBlockStateModelPar
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
@@ -59,6 +60,19 @@ public class FabricBakedModelDelegate extends WrapperBlockStateModel implements 
             // how it is reached from code that is not compiled against the injected interfaces.
             ((FabricBlockStateModelPart) part).emitQuads(emitter, cullTest);
         }
+    }
+
+    /**
+     * {@link WrapperBlockStateModel}'s own override forwards to the wrapped model, which would answer
+     * the sprite its model json named rather than the one the block entity's data selects.
+     */
+    @Override
+    public Material.Baked particleMaterial(final BlockAndTintGetter blockView, final BlockPos pos, final BlockState state) {
+        if (getDelegate() instanceof final IDataAwareBakedModel dataAwareBakedModel) {
+            return dataAwareBakedModel.particleMaterial(getBlockModelData(blockView, pos));
+        }
+
+        return super.particleMaterial(blockView, pos, state);
     }
 
     /**

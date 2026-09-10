@@ -3,6 +3,7 @@ package com.grim3212.assorted.lib.client.model.baked;
 import com.grim3212.assorted.lib.client.model.data.IBlockModelData;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
@@ -33,6 +34,19 @@ public interface IDataAwareBakedModel extends BlockStateModel {
      * @param output    The list the parts are appended to.
      */
     void collectParts(@NotNull RandomSource random, @NotNull IBlockModelData extraData, @NotNull List<BlockStateModelPart> output);
+
+    /**
+     * The particle sprite for the given data. Break and hit particles read this rather than the
+     * geometry, so a model textured from a block entity has to answer it from the model data too; the
+     * loader delegates route the loaders' position aware hooks here.
+     *
+     * @param extraData The data to use.
+     */
+    // Deprecated by NeoForge in favour of the level/pos aware overload the delegates implement.
+    @SuppressWarnings("deprecation")
+    default Material.Baked particleMaterial(@NotNull IBlockModelData extraData) {
+        return particleMaterial();
+    }
 
     // Deprecated by NeoForge in favour of a level/pos aware overload that only exists in its patched
     // jar; vanilla still declares this one abstract, so it has to be implemented here.

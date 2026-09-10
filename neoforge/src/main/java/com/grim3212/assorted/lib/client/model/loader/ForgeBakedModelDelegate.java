@@ -96,7 +96,21 @@ public final class ForgeBakedModelDelegate implements DynamicBlockStateModel, ID
 
     @Override
     public Material.Baked particleMaterial(final BlockAndTintGetter level, final BlockPos pos, final BlockState state) {
+        if (this.delegate instanceof IDataAwareBakedModel dataAwareBakedModel) {
+            return dataAwareBakedModel.particleMaterial(new ForgeBlockModelDataPlatformDelegate(level.getModelData(pos)));
+        }
+
         return this.delegate.particleMaterial(level, pos, state);
+    }
+
+    @Override
+    public Material.Baked particleMaterial(final @NotNull IBlockModelData extraData) {
+        if (this.delegate instanceof IDataAwareBakedModel dataAwareBakedModel) {
+            return dataAwareBakedModel.particleMaterial(extraData);
+        }
+
+        // No level or position here; same empty context the collectParts overload above uses.
+        return this.delegate.particleMaterial(BlockAndTintGetter.EMPTY, BlockPos.ZERO, Blocks.AIR.defaultBlockState());
     }
 
     @Override
