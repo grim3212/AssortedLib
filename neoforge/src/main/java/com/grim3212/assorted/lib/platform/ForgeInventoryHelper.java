@@ -39,16 +39,11 @@ public class ForgeInventoryHelper implements IInventoryHelper {
 
     @Override
     public Optional<IItemStorageHandler> getItemStorageHandler(ItemStack stack) {
-        // ForgeCapabilities and LazyOptional are gone: a capability lookup is a plain nullable value,
-        // and an item's is resolved against an ItemAccess describing which stack is being operated
-        // on. oneByOne() scopes that to a single item out of the stack, which is what a container
-        // item's storage is about.
-        ResourceHandler<ItemResource> capability = ItemAccess.forStack(stack).oneByOne().getCapability(Capabilities.Item.ITEM);
-        if (capability != null) {
-            return Optional.of(new ForgeWrappedItemHandler(null, capability));
-        }
-
-        // If we somehow fail to get it from capability try to see if its one of our own
+        // Our own handler first, matching FabricInventoryHelper. Callers type-check the result -
+        // BagContainer wants a BagItemHandler, StorageAccessUtil a KeyRingItemHandler - and the
+        // capability hands back a ForgeWrappedItemHandler view of the very same storage, which
+        // satisfies none of them. Answering with the wrapper left every container item's GUI without
+        // slots.
         if (stack.getItem() instanceof IInventoryItem itemStackStorage) {
             IPlatformInventoryStorageHandler storageHandler = itemStackStorage.getStorageHandler(stack);
             if (storageHandler != null) {
@@ -56,25 +51,34 @@ public class ForgeInventoryHelper implements IInventoryHelper {
             }
         }
 
+        // Anything else is a foreign inventory, reachable only through the capability. ForgeCapabilities
+        // and LazyOptional are gone: the lookup is a plain nullable value resolved against an ItemAccess
+        // describing which stack is being operated on, and oneByOne() scopes it to a single item.
+        ResourceHandler<ItemResource> capability = ItemAccess.forStack(stack).oneByOne().getCapability(Capabilities.Item.ITEM);
+        if (capability != null) {
+            return Optional.of(new ForgeWrappedItemHandler(null, capability));
+        }
+
         return Optional.empty();
     }
 
     @Override
     public Optional<IItemStorageHandler> getItemStorageHandler(BlockEntity blockEntity, @Nullable Direction direction) {
+        // Our own handler first, for the same reason as the stack overload above: LockedHopperBlockEntity
+        // type-checks the result for a LockedStorageHandler.
+        if (blockEntity instanceof IInventoryBlockEntity inventoryBlockEntity) {
+            IPlatformInventoryStorageHandler storageHandler = inventoryBlockEntity.getStorageHandler();
+            if (storageHandler != null) {
+                return Optional.of(storageHandler.getItemStorageHandler(direction));
+            }
+        }
+
         // Block capabilities are resolved through the level rather than off the block entity itself.
         Level level = blockEntity.getLevel();
         if (level != null) {
             ResourceHandler<ItemResource> capability = level.getCapability(Capabilities.Item.BLOCK, blockEntity.getBlockPos(), blockEntity.getBlockState(), blockEntity, direction);
             if (capability != null) {
                 return Optional.of(new ForgeWrappedItemHandler(blockEntity, capability));
-            }
-        }
-
-        // If we somehow fail to get it from capability try to see if its one of our own
-        if (blockEntity instanceof IInventoryBlockEntity inventoryBlockEntity) {
-            IPlatformInventoryStorageHandler storageHandler = inventoryBlockEntity.getStorageHandler();
-            if (storageHandler != null) {
-                return Optional.of(storageHandler.getItemStorageHandler(direction));
             }
         }
 
