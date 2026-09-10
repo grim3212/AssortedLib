@@ -4,6 +4,7 @@ import com.grim3212.assorted.lib.client.key.IKeyConflictHelper;
 import com.grim3212.assorted.lib.client.key.KeyModifier;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.resources.Identifier;
 
 public interface IKeyBindingHelper {
 
@@ -29,10 +30,12 @@ public interface IKeyBindingHelper {
      * @param keyConflictContext  The optional key conflict context to apply.
      * @param inputType           The input type for the key mapping.
      * @param key                 The default configured key.
-     * @param groupTranslationKey The translation key for the group that the key belongs to.
+     * @param category            The id of the category the key sorts under. Its label is
+     *                            {@code key.category.<namespace>.<path>}, so whoever passes it has to
+     *                            ship that translation.
      * @return The new key mapping.
      */
-    KeyMapping createNew(String translationKey, IKeyConflictHelper keyConflictContext, InputConstants.Type inputType, int key, String groupTranslationKey);
+    KeyMapping createNew(String translationKey, IKeyConflictHelper keyConflictContext, InputConstants.Type inputType, int key, Identifier category);
 
     /**
      * Creates a new key mapping with the given properties.
@@ -43,10 +46,12 @@ public interface IKeyBindingHelper {
      * @param keyModifier         The key modifier for the default key.
      * @param inputType           The input type for the key mapping.
      * @param key                 The default configured key.
-     * @param groupTranslationKey The translation key for the group that the key belongs to.
+     * @param category            The id of the category the key sorts under. Its label is
+     *                            {@code key.category.<namespace>.<path>}, so whoever passes it has to
+     *                            ship that translation.
      * @return The new key mapping.
      */
-    KeyMapping createNew(String translationKey, IKeyConflictHelper keyConflictContext, KeyModifier keyModifier, InputConstants.Type inputType, int key, String groupTranslationKey);
+    KeyMapping createNew(String translationKey, IKeyConflictHelper keyConflictContext, KeyModifier keyModifier, InputConstants.Type inputType, int key, Identifier category);
 
     /**
      * Checks if the key conflict context of the key mapping is active or not.

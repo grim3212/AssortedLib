@@ -1,6 +1,5 @@
 package com.grim3212.assorted.lib.platform;
 
-import com.grim3212.assorted.lib.LibConstants;
 import com.grim3212.assorted.lib.client.key.ForgeKeyConflictContextPlatformDelegate;
 import com.grim3212.assorted.lib.client.key.IKeyConflictHelper;
 import com.grim3212.assorted.lib.client.key.KeyModifier;
@@ -11,19 +10,15 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ForgeKeyBindingHelper implements IKeyBindingHelper {
 
-    // TODO(26.2): a key mapping's group is no longer a free-form translation key. KeyMapping takes a
-    //  KeyMapping.Category, which is an Identifier that has to be registered through
-    //  RegisterKeyMappingsEvent#registerCategory and whose label is derived from that id
-    //  ("key.category.<namespace>.<path>"). The group string a caller passes is therefore turned into
-    //  a category id here rather than used as the label, so the translation key of an existing group
-    //  changes. Categories are cached so the same group string always maps to the same category.
-    private static final Map<String, KeyMapping.Category> CATEGORIES = new ConcurrentHashMap<>();
+    // A key mapping's group is a KeyMapping.Category: a record around an Identifier whose label is
+    // derived from that id as "key.category.<namespace>.<path>". Cached so the same id always yields
+    // the same category instance, which is what ForgeClientHelper deduplicates registration on.
+    private static final Map<Identifier, KeyMapping.Category> CATEGORIES = new ConcurrentHashMap<>();
 
     @Override
     public IKeyConflictHelper getGuiKeyConflictContext() {
@@ -37,13 +32,13 @@ public class ForgeKeyBindingHelper implements IKeyBindingHelper {
 
     @Override
     public KeyMapping createNew(
-            final String translationKey, final IKeyConflictHelper keyConflictContext, final InputConstants.Type inputType, final int key, final String groupTranslationKey) {
+            final String translationKey, final IKeyConflictHelper keyConflictContext, final InputConstants.Type inputType, final int key, final Identifier category) {
         return new KeyMapping(
                 translationKey,
                 new PlatformKeyConflictContextForgeDelegate(keyConflictContext),
                 inputType,
                 key,
-                getCategory(groupTranslationKey)
+                getCategory(category)
         );
     }
 
@@ -54,14 +49,14 @@ public class ForgeKeyBindingHelper implements IKeyBindingHelper {
             final KeyModifier keyModifier,
             final InputConstants.Type inputType,
             final int key,
-            final String groupTranslationKey) {
+            final Identifier category) {
         return new KeyMapping(
                 translationKey,
                 new PlatformKeyConflictContextForgeDelegate(keyConflictContext),
                 makePlatformSpecific(keyModifier),
                 inputType,
                 key,
-                getCategory(groupTranslationKey)
+                getCategory(category)
         );
     }
 
@@ -76,17 +71,12 @@ public class ForgeKeyBindingHelper implements IKeyBindingHelper {
     }
 
     /**
-     * The category for a group translation key. Categories are not registered here; every mapping
-     * carries its own, and {@link ForgeClientHelper} registers the distinct ones it sees when
+     * The category for a category id. Categories are not registered here; every mapping carries its
+     * own, and {@link ForgeClientHelper} registers the distinct ones it sees when
      * {@code RegisterKeyMappingsEvent} fires.
      */
-    public static KeyMapping.Category getCategory(final String groupTranslationKey) {
-        return CATEGORIES.computeIfAbsent(groupTranslationKey, key -> new KeyMapping.Category(Identifier.fromNamespaceAndPath(LibConstants.MOD_ID, toPath(key))));
-    }
-
-    private static String toPath(final String groupTranslationKey) {
-        final String path = groupTranslationKey.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_./-]", "_");
-        return path.isEmpty() ? "misc" : path;
+    public static KeyMapping.Category getCategory(final Identifier category) {
+        return CATEGORIES.computeIfAbsent(category, KeyMapping.Category::new);
     }
 
     private static net.neoforged.neoforge.client.settings.KeyModifier makePlatformSpecific(final KeyModifier keyModifier) {

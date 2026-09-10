@@ -5,6 +5,14 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.material.Fluid;
 
+/**
+ * <b>Every method here is render time only.</b> A fluid's appearance is a baked
+ * {@code net.minecraft.client.renderer.block.FluidModel}, and {@code ModelManager} bakes those
+ * <em>after</em> every other model and only publishes them in {@code apply}, so calling any of this
+ * during model baking throws {@code NullPointerException: Fluid models not yet initialized}. A model
+ * that needs a fluid's sprite therefore cannot be a model json loader - see AssortedTools'
+ * {@code FluidContainerItemModel} and section 3g of the upgrade guide.
+ */
 public interface IClientFluidHelper {
 
     int getFluidColor(final FluidInformation fluid);
