@@ -17,3 +17,7 @@ accessWidener	v2	official
 # RegisterItemModelsEvent over the same mapper; Fabric API has no equivalent, so the mapper itself is
 # what IClientHelper#registerItemModelType has to reach.
 accessible	field	net/minecraft/client/renderer/item/ItemModels	ID_MAPPER	Lnet/minecraft/util/ExtraCodecs$LateBoundIdMapper;
+
+# Same story for a custom ConditionalItemModelProperty: NeoForge fires
+# RegisterConditionalItemModelPropertyEvent over this mapper, Fabric API has no equivalent.
+accessible	field	net/minecraft/client/renderer/item/properties/conditional/ConditionalItemModelProperties	ID_MAPPER	Lnet/minecraft/util/ExtraCodecs$LateBoundIdMapper;

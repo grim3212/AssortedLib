@@ -22,6 +22,7 @@ import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.block.dispatch.ModelState;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.item.ItemModel;
+import net.minecraft.client.renderer.item.properties.conditional.ConditionalItemModelProperty;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
@@ -82,6 +83,18 @@ public interface IClientHelper {
      * handed the stack, and this is the only registration point for one.
      */
     void registerItemModelType(Identifier id, MapCodec<? extends ItemModel.Unbaked> codec);
+
+    /**
+     * Registers the {@link MapCodec} that reads a custom {@link ConditionalItemModelProperty}, so a
+     * {@code minecraft:condition} item model can branch on it.
+     * <p>
+     * This is the replacement for {@code ItemProperties.register} plus a model {@code overrides} list:
+     * the branch is chosen before baking, from the item json, and only the predicate is code. Vanilla's
+     * own conditionals cannot read an arbitrary value out of {@code CUSTOM_DATA} - the nearest,
+     * {@code minecraft:component_matches}, needs an exact {@code NbtPredicate} - so a mod-owned tag
+     * needs its own property here.
+     */
+    void registerConditionalItemModelProperty(Identifier id, MapCodec<? extends ConditionalItemModelProperty> codec);
 
     /**
      * Bakes the model at {@code modelLocation} into a whole {@link BlockStateModel}, keeping it

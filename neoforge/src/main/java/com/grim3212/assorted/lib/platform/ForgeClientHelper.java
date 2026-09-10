@@ -30,6 +30,7 @@ import net.minecraft.client.renderer.block.dispatch.ModelState;
 import net.minecraft.client.renderer.block.dispatch.SingleVariant;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.item.ItemModel;
+import net.minecraft.client.renderer.item.properties.conditional.ConditionalItemModelProperty;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ResolvedModel;
@@ -55,6 +56,7 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.client.event.RegisterConditionalItemModelPropertyEvent;
 import net.neoforged.neoforge.client.event.RegisterItemModelsEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
@@ -148,6 +150,11 @@ public class ForgeClientHelper implements IClientHelper {
     }
 
     @Override
+    public void registerConditionalItemModelProperty(Identifier id, MapCodec<? extends ConditionalItemModelProperty> codec) {
+        getRegistration().conditionalItemModelProperties.put(id, codec);
+    }
+
+    @Override
     public BlockStateModel bakeSpecificationModel(ModelBaker baker, Identifier modelLocation, ModelState modelState) {
         ResolvedModel resolved = baker.getModel(modelLocation);
         if (resolved.wrapped() instanceof IModelSpecificationHolder holder) {
@@ -222,6 +229,7 @@ public class ForgeClientHelper implements IClientHelper {
         private final Map<Identifier, PreparableReloadListener> clientReloadListeners = new HashMap<>();
         private final Map<Identifier, IModelSpecificationLoader<?>> modelLoaders = new HashMap<>();
         private final Map<Identifier, MapCodec<? extends ItemModel.Unbaked>> itemModelTypes = new HashMap<>();
+        private final Map<Identifier, MapCodec<? extends ConditionalItemModelProperty>> conditionalItemModelProperties = new HashMap<>();
         private final Map<Supplier<ParticleType<?>>, Function<SpriteSet, ParticleProvider<?>>> particleProviders = new HashMap<>();
         private final Map<Supplier<MenuType<?>>, LibScreenFactory<?, ?>> menuTypes = new HashMap<>();
 
@@ -299,6 +307,13 @@ public class ForgeClientHelper implements IClientHelper {
         @SubscribeEvent
         public void registerItemModelTypes(final RegisterItemModelsEvent event) {
             for (Map.Entry<Identifier, MapCodec<? extends ItemModel.Unbaked>> entry : itemModelTypes.entrySet()) {
+                event.register(entry.getKey(), entry.getValue());
+            }
+        }
+
+        @SubscribeEvent
+        public void registerConditionalItemModelProperties(final RegisterConditionalItemModelPropertyEvent event) {
+            for (Map.Entry<Identifier, MapCodec<? extends ConditionalItemModelProperty>> entry : conditionalItemModelProperties.entrySet()) {
                 event.register(entry.getKey(), entry.getValue());
             }
         }

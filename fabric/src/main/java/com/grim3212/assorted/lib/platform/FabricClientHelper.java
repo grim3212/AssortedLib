@@ -20,6 +20,8 @@ import net.minecraft.client.renderer.block.dispatch.ModelState;
 import net.minecraft.client.renderer.block.dispatch.SingleVariant;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemModels;
+import net.minecraft.client.renderer.item.properties.conditional.ConditionalItemModelProperties;
+import net.minecraft.client.renderer.item.properties.conditional.ConditionalItemModelProperty;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ResolvedModel;
 import net.minecraft.client.resources.model.SimpleModelWrapper;
@@ -168,6 +170,13 @@ public class FabricClientHelper implements IClientHelper {
     @Override
     public void registerItemModelType(Identifier id, MapCodec<? extends ItemModel.Unbaked> codec) {
         ItemModels.ID_MAPPER.put(id, codec);
+    }
+
+    @Override
+    public void registerConditionalItemModelProperty(Identifier id, MapCodec<? extends ConditionalItemModelProperty> codec) {
+        // Widened in assortedlib_fabric.accesswidener; Fabric API has no equivalent of NeoForge's
+        // RegisterConditionalItemModelPropertyEvent, so the vanilla mapper is the only registry.
+        ConditionalItemModelProperties.ID_MAPPER.put(id, codec);
     }
 
     @Override
