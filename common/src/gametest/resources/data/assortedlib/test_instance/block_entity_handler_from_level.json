@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:function",
+  "environment": "minecraft:default",
+  "function": "assortedlib:block_entity_handler_from_level",
+  "structure": "assortedlib:test_box",
+  "max_ticks": 20,
+  "setup_ticks": 0,
+  "required": true
+}
