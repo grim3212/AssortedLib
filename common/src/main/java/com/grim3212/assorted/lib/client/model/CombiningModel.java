@@ -57,9 +57,8 @@ public class CombiningModel implements IModelSpecification<CombiningModel> {
         this.logWarning = logWarning;
     }
 
-    // Every child is reached through the baker at bake time, so discovery has to be told about them
-    // here or they bake to the missing model. See IModelSpecification#resolveDependencies; AssortedStorage's
-    // LockedModel shipped without this and turned every locked barrel and hopper into the missing cube.
+    // ModelBaker#getModel only resolves ids marked during discovery; an unmarked child bakes to the
+    // missing model. See IModelSpecification#resolveDependencies.
     @Override
     public void resolveDependencies(ResolvableModel.Resolver resolver) {
         this.children.values().forEach(resolver::markDependency);
