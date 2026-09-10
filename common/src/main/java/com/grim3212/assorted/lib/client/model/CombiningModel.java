@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.block.dispatch.ModelState;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelDebugName;
+import net.minecraft.client.resources.model.ResolvableModel;
 import net.minecraft.client.resources.model.SimpleModelWrapper;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.client.resources.model.sprite.Material;
@@ -54,6 +55,14 @@ public class CombiningModel implements IModelSpecification<CombiningModel> {
     private CombiningModel(ImmutableMap<String, Identifier> children, boolean logWarning) {
         this.children = children;
         this.logWarning = logWarning;
+    }
+
+    // Every child is reached through the baker at bake time, so discovery has to be told about them
+    // here or they bake to the missing model. See IModelSpecification#resolveDependencies; AssortedStorage's
+    // LockedModel shipped without this and turned every locked barrel and hopper into the missing cube.
+    @Override
+    public void resolveDependencies(ResolvableModel.Resolver resolver) {
+        this.children.values().forEach(resolver::markDependency);
     }
 
     @Override
