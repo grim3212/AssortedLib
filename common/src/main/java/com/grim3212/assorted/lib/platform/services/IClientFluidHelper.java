@@ -11,7 +11,7 @@ import net.minecraft.world.level.material.Fluid;
  * <em>after</em> every other model and only publishes them in {@code apply}, so calling any of this
  * during model baking throws {@code NullPointerException: Fluid models not yet initialized}. A model
  * that needs a fluid's sprite therefore cannot be a model json loader - see AssortedTools'
- * {@code FluidContainerItemModel} and section 3g of the upgrade guide.
+ * {@code FluidContainerItemModel}.
  */
 public interface IClientFluidHelper {
 

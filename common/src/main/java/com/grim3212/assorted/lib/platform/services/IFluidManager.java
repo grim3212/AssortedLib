@@ -27,25 +27,38 @@ public interface IFluidManager {
     }
 
     /**
-     * Extracts the given amount of fluids from the given stack.
+     * Extracts up to the given amount of fluid from one item of the given stack.
+     * <p>
+     * Works on a copy of a single item and never modifies {@code stack} itself; the caller decides
+     * what to do with the result, e.g. shrink the stack by one and give the result back.
      *
      * @param stack  The stack to extract from.
      * @param amount The amount to extract.
-     * @return The resulting itemstack from the extraction.
+     * @return What that one item became, e.g. an empty bucket. An unchanged copy of it when nothing
+     * could be extracted.
      */
     ItemStack extractFrom(final ItemStack stack, final long amount);
 
+    /**
+     * How much {@link #extractFrom(ItemStack, long)} would extract, without extracting it.
+     */
     long simulateExtract(final ItemStack stack, final long amount);
 
     /**
-     * Invoked to insert a given amount of fluid into the given stack.
+     * Inserts the given fluid into one item of the given stack.
+     * <p>
+     * Works on a copy of a single item and never modifies {@code stack} itself.
      *
      * @param stack            The stack to insert into.
      * @param fluidInformation The fluid to insert.
-     * @return The resulting stack of the insertion.
+     * @return What that one item became, e.g. a water bucket. An unchanged copy of it when nothing
+     * could be inserted.
      */
     ItemStack insertInto(ItemStack stack, FluidInformation fluidInformation);
 
+    /**
+     * How much {@link #insertInto(ItemStack, FluidInformation)} would insert, without inserting it.
+     */
     long simulateInsert(ItemStack stack, FluidInformation fluidInformation);
 
     /**

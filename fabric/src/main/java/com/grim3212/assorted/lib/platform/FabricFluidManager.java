@@ -9,22 +9,28 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
-import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.item.base.SingleStackStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.ResourceAmount;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
 public class FabricFluidManager implements IFluidManager {
     @Override
     public Optional<FluidInformation> get(final ItemStack stack) {
+        if (stack.isEmpty())
+            return Optional.empty();
+
+        // Reading only, so the constant context is enough here.
         final Storage<FluidVariant> target = FluidStorage.ITEM.find(stack, ContainerItemContext.withConstant(stack));
         if (target == null)
             return Optional.empty();
@@ -39,55 +45,59 @@ public class FabricFluidManager implements IFluidManager {
 
     @Override
     public ItemStack extractFrom(final ItemStack stack, final long amount) {
-        try (final Transaction context = Transaction.openOuter()) {
-            final Optional<FluidInformation> contained = get(stack);
+        final SingleItem item = new SingleItem(stack);
+        final Storage<FluidVariant> fluids = item.fluids();
+        if (fluids != null && amount > 0) {
+            try (Transaction transaction = Transaction.openOuter()) {
+                final ResourceAmount<FluidVariant> extracted = StorageUtil.extractAny(fluids, amount, transaction);
+                if (extracted != null && extracted.amount() > 0) {
+                    transaction.commit();
+                }
+            }
+        }
 
-            return contained.map(fluid -> {
-                final FluidVariant variant = makeVariant(fluid);
-                final ContainerItemContext containerContext = ContainerItemContext.withConstant(stack);
+        return item.contents();
+    }
 
-                FluidStorage.ITEM.find(stack, containerContext).extract(variant, amount, context);
+    @Override
+    public long simulateExtract(final ItemStack stack, final long amount) {
+        final Storage<FluidVariant> fluids = new SingleItem(stack).fluids();
+        if (fluids == null || amount <= 0)
+            return 0;
 
-                final StorageView<ItemVariant> itemVariant = containerContext.getMainSlot().iterator().next();
-                return itemVariant.getResource().toStack((int) itemVariant.getAmount());
-            }).orElse(ItemStack.EMPTY);
+        // Closing the transaction without committing it rolls the extraction back.
+        try (Transaction transaction = Transaction.openOuter()) {
+            final ResourceAmount<FluidVariant> extracted = StorageUtil.extractAny(fluids, amount, transaction);
+            return extracted == null ? 0 : extracted.amount();
         }
     }
 
     @Override
     public ItemStack insertInto(final ItemStack stack, final FluidInformation fluidInformation) {
-        try (final Transaction context = Transaction.openOuter()) {
-            final Optional<FluidInformation> contained = get(stack);
-
-            return contained.map(fluid -> {
-                final FluidVariant variant = makeVariant(fluid);
-                final ContainerItemContext containerContext = ContainerItemContext.withConstant(stack);
-
-                FluidStorage.ITEM.find(stack, containerContext).insert(variant, fluidInformation.amount(), context);
-
-                final StorageView<ItemVariant> itemVariant = containerContext.getMainSlot().iterator().next();
-                return itemVariant.getResource().toStack((int) itemVariant.getAmount());
-            }).orElse(ItemStack.EMPTY);
+        final SingleItem item = new SingleItem(stack);
+        final Storage<FluidVariant> fluids = item.fluids();
+        final FluidVariant variant = makeVariant(fluidInformation);
+        if (fluids != null && !variant.isBlank() && fluidInformation.amount() > 0) {
+            try (Transaction transaction = Transaction.openOuter()) {
+                if (fluids.insert(variant, fluidInformation.amount(), transaction) > 0) {
+                    transaction.commit();
+                }
+            }
         }
+
+        return item.contents();
     }
 
     @Override
     public long simulateInsert(final ItemStack stack, final FluidInformation fluidInformation) {
+        final Storage<FluidVariant> fluids = new SingleItem(stack).fluids();
         final FluidVariant variant = makeVariant(fluidInformation);
-        final ContainerItemContext containerContext = ContainerItemContext.withConstant(stack);
-        return StorageUtil.simulateInsert(FluidStorage.ITEM.find(stack, containerContext), variant, fluidInformation.amount(), null);
-    }
+        if (fluids == null || variant.isBlank() || fluidInformation.amount() <= 0)
+            return 0;
 
-    @Override
-    public long simulateExtract(final ItemStack stack, final long amount) {
-        final Optional<FluidInformation> contained = get(stack);
-
-        return contained.map(fluid -> {
-            final FluidVariant variant = makeVariant(fluid);
-            final ContainerItemContext containerContext = ContainerItemContext.withConstant(stack);
-
-            return StorageUtil.simulateExtract(FluidStorage.ITEM.find(stack, containerContext), variant, amount, null);
-        }).orElse(0L);
+        try (Transaction transaction = Transaction.openOuter()) {
+            return fluids.insert(variant, fluidInformation.amount(), transaction);
+        }
     }
 
     @Override
@@ -136,5 +146,41 @@ public class FabricFluidManager implements IFluidManager {
     @Override
     public long getBucketAmount() {
         return FluidConstants.BUCKET;
+    }
+
+    /**
+     * One item out of the stack, in a slot of its own that a fluid storage can write to.
+     * <p>
+     * {@code ContainerItemContext.withConstant} is read only by contract, so a water bucket emptied
+     * through it stays a water bucket. Transfers go through this slot instead: the item's storage
+     * swaps what the slot holds (a water bucket for an empty one) inside the transaction, and the
+     * slot is read back afterwards. It is a {@link SingleStackStorage}, so an aborted transaction
+     * restores it.
+     */
+    private static final class SingleItem extends SingleStackStorage {
+        private ItemStack stack;
+
+        private SingleItem(final ItemStack stack) {
+            this.stack = stack.copyWithCount(1);
+        }
+
+        @Override
+        protected ItemStack getStack() {
+            return this.stack;
+        }
+
+        @Override
+        protected void setStack(final ItemStack stack) {
+            this.stack = stack;
+        }
+
+        @Nullable
+        private Storage<FluidVariant> fluids() {
+            return this.stack.isEmpty() ? null : FluidStorage.ITEM.find(this.stack, ContainerItemContext.ofSingleSlot(this));
+        }
+
+        private ItemStack contents() {
+            return this.stack;
+        }
     }
 }
