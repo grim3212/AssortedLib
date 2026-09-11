@@ -9,13 +9,10 @@ import com.grim3212.assorted.lib.platform.services.IClientHelper;
 import com.mojang.serialization.MapCodec;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
-import net.fabricmc.fabric.api.client.model.loading.v1.ExtraModelKey;
-import net.fabricmc.fabric.api.client.model.loading.v1.FabricModelManager;
 import com.grim3212.assorted.lib.client.model.loader.FabricBakedModelDelegate;
 import com.grim3212.assorted.lib.client.model.loaders.IModelSpecification;
 import com.grim3212.assorted.lib.client.model.loaders.IModelSpecificationHolder;
 import com.grim3212.assorted.lib.client.model.loaders.context.ResolvedModelBakingContext;
-import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.minecraft.client.renderer.block.dispatch.ModelState;
 import net.minecraft.client.renderer.block.dispatch.SingleVariant;
 import net.minecraft.client.renderer.item.ItemModel;
@@ -26,7 +23,6 @@ import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ResolvedModel;
 import net.minecraft.client.resources.model.SimpleModelWrapper;
 import net.minecraft.client.resources.model.sprite.TextureSlots;
-import net.fabricmc.fabric.api.client.model.loading.v1.SimpleUnbakedExtraModel;
 import net.fabricmc.fabric.api.client.model.loading.v1.UnbakedModelDeserializer;
 import net.fabricmc.fabric.api.client.particle.v1.FabricSpriteSet;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry;
@@ -69,50 +65,15 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class FabricClientHelper implements IClientHelper {
 
-    // TODO(26.2): extra models are no longer addressed by their Identifier. Fabric's model loading API
-    //  hands out an opaque ExtraModelKey when a model is added, and the baked model is only reachable
-    //  as FabricModelManager#getModel(key), so the id -> key mapping has to be kept here for callers
-    //  that only know the model's location. Use #getAdditionalModel to read one back.
-    private static final Map<Identifier, ExtraModelKey<BlockStateModel>> ADDITIONAL_MODELS = new ConcurrentHashMap<>();
-
     @Override
     public <T extends AbstractContainerMenu, S extends Screen & MenuAccess<T>> void registerScreen(Supplier<MenuType<? extends T>> menuType, LibScreenFactory<T, S> factory) {
         MenuScreens.register(menuType.get(), factory::create);
-    }
-
-    @Override
-    public void registerAdditionalModel(List<Identifier> modelLocations) {
-        final List<Identifier> models = List.copyOf(modelLocations);
-        ModelLoadingPlugin.register(context -> {
-            for (Identifier model : models) {
-                context.addModel(additionalModelKey(model), SimpleUnbakedExtraModel.blockStateModel(model));
-            }
-        });
-    }
-
-    /**
-     * The key an additionally loaded model is baked under.
-     */
-    public static ExtraModelKey<BlockStateModel> additionalModelKey(final Identifier model) {
-        return ADDITIONAL_MODELS.computeIfAbsent(model, id -> ExtraModelKey.create(id::toString));
-    }
-
-    /**
-     * Reads back a model registered through {@link #registerAdditionalModel(List)}.
-     *
-     * @param model The location the model was registered under.
-     * @return The baked model.
-     */
-    public static BlockStateModel getAdditionalModel(final Identifier model) {
-        return ((FabricModelManager) Minecraft.getInstance().getModelManager()).getModel(additionalModelKey(model));
     }
 
     @Override

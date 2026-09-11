@@ -47,8 +47,6 @@ public interface IClientHelper {
 
     <T extends AbstractContainerMenu, S extends Screen & MenuAccess<T>> void registerScreen(Supplier<MenuType<? extends T>> menuType, LibScreenFactory<T, S> factory);
 
-    void registerAdditionalModel(List<Identifier> modelLocations);
-
     void addReloadListener(Identifier identifier, PreparableReloadListener reloadListener);
 
     void registerBEWLR(final Consumer<IBEWLR> register);
@@ -115,11 +113,6 @@ public interface IClientHelper {
      * @param modelState    The rotation and uv lock to bake with.
      */
     BlockStateModel bakeSpecificationModel(ModelBaker baker, Identifier modelLocation, ModelState modelState);
-
-    // TODO(26.2): registerItemProperty has no replacement. ClampedItemPropertyFunction and the
-    //  ItemProperties registry are gone; model selection by a numeric property is data-driven through
-    //  client.renderer.item.properties.numeric.* referenced from the item model JSON, so there is
-    //  nothing left to register from code. Removed rather than stubbed so callers fail loudly.
 
     void registerRenderType(Supplier<Block> block, RenderType renderType);
 

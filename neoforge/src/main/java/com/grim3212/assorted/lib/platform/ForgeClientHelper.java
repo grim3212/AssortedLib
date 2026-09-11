@@ -89,16 +89,6 @@ public class ForgeClientHelper implements IClientHelper {
         getRegistration().menuTypes.put(menuType::get, factory);
     }
 
-    // TODO(26.2): extra models can no longer be requested by plain identifier. ModelEvent
-    //  .RegisterAdditional is gone; its replacement, ModelEvent.RegisterStandalone, is keyed by a
-    //  StandaloneModelKey<T> that the requester creates and then reads back with
-    //  ModelManager#getStandaloneModel(key) - the model is no longer reachable by the id it was
-    //  loaded from. Honouring this would mean handing the caller a key back, which is a common side
-    //  interface change, so the request is dropped rather than silently half-implemented.
-    @Override
-    public void registerAdditionalModel(List<Identifier> modelLocations) {
-    }
-
     @Override
     public void addReloadListener(Identifier identifier, PreparableReloadListener reloadListener) {
         getRegistration().clientReloadListeners.put(identifier, reloadListener);
