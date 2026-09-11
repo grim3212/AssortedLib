@@ -180,19 +180,27 @@ public interface IPlatformHelper {
     }
 
     /**
-     * Probes a tool against one representative block per vanilla harvest tier. These are the blocks
-     * behind NEEDS_DIAMOND_TOOL, NEEDS_IRON_TOOL and NEEDS_STONE_TOOL respectively.
+     * Probes a tool against one representative block per vanilla harvest tier: the blocks behind
+     * NEEDS_DIAMOND_TOOL, NEEDS_IRON_TOOL and NEEDS_STONE_TOOL. Only the rules that deny drops are
+     * asked. Those carry the tool material whatever the tool type, so a shovel, axe or hoe reads the
+     * same tier as a pickaxe of the same material. Whether it can mine the block at all is not the
+     * question here; probing that is what used to leave every non-pickaxe at wood.
      */
     private static int harvestLevelOf(Tool tool) {
-        if (tool.isCorrectForDrops(Blocks.OBSIDIAN.defaultBlockState())) {
+        if (!deniesDrops(tool, Blocks.OBSIDIAN.defaultBlockState())) {
             return 3;
         }
-        if (tool.isCorrectForDrops(Blocks.DIAMOND_ORE.defaultBlockState())) {
+        if (!deniesDrops(tool, Blocks.DIAMOND_ORE.defaultBlockState())) {
             return 2;
         }
-        if (tool.isCorrectForDrops(Blocks.IRON_ORE.defaultBlockState())) {
+        if (!deniesDrops(tool, Blocks.IRON_ORE.defaultBlockState())) {
             return 1;
         }
         return 0;
+    }
+
+    private static boolean deniesDrops(Tool tool, BlockState state) {
+        return tool.rules().stream().anyMatch(rule -> rule.correctForDrops().filter(correct -> !correct).isPresent()
+                && rule.blocks().stream().anyMatch(block -> block.value() == state.getBlock()));
     }
 }

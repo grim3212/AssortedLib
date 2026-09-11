@@ -1,5 +1,6 @@
 package com.grim3212.assorted.lib.gametest;
 
+import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.locale.Language;
 import com.grim3212.assorted.lib.dist.Dist;
@@ -44,6 +45,7 @@ final class PlatformServiceTests {
         out.accept("services_all_resolve", PlatformServiceTests::servicesAllResolve);
         out.accept("registry_round_trips", PlatformServiceTests::registryRoundTrips);
         out.accept("tiered_tool_agrees_with_vanilla", PlatformServiceTests::tieredToolAgreesWithVanilla);
+        out.accept("tool_tiers_read_the_same_for_every_tool_type", PlatformServiceTests::toolTiersReadTheSameForEveryToolType);
         out.accept("level_properties_match_level", PlatformServiceTests::levelPropertiesMatchLevel);
         out.accept("common_tags_are_bound", PlatformServiceTests::commonTagsAreBound);
         out.accept("every_item_tag_has_a_name", PlatformServiceTests::everyItemTagHasAName);
@@ -250,5 +252,33 @@ final class PlatformServiceTests {
                 .toList();
         helper.assertTrue(missing.isEmpty(), "item tags with no name in any lang file: " + missing);
         helper.succeed();
+    }
+
+    /**
+     * A shovel, axe or hoe reads the tier of its material, as a pickaxe does. The tier used to be
+     * probed with ores only a pickaxe can mine, so every other tool type read as wood.
+     */
+    private static void toolTiersReadTheSameForEveryToolType(GameTestHelper helper) {
+        List<String> wrong = new ArrayList<>();
+        expectTier(wrong, Items.IRON_SHOVEL, IPlatformHelper.ToolType.SHOVEL, IPlatformHelper.ToolTier.IRON, IPlatformHelper.ToolTier.DIAMOND);
+        expectTier(wrong, Items.IRON_AXE, IPlatformHelper.ToolType.AXE, IPlatformHelper.ToolTier.IRON, IPlatformHelper.ToolTier.DIAMOND);
+        expectTier(wrong, Items.IRON_HOE, IPlatformHelper.ToolType.HOE, IPlatformHelper.ToolTier.IRON, IPlatformHelper.ToolTier.DIAMOND);
+        expectTier(wrong, Items.STONE_HOE, IPlatformHelper.ToolType.HOE, IPlatformHelper.ToolTier.STONE, IPlatformHelper.ToolTier.IRON);
+        expectTier(wrong, Items.WOODEN_SHOVEL, IPlatformHelper.ToolType.SHOVEL, IPlatformHelper.ToolTier.WOOD, IPlatformHelper.ToolTier.STONE);
+        expectTier(wrong, Items.DIAMOND_AXE, IPlatformHelper.ToolType.AXE, IPlatformHelper.ToolTier.DIAMOND, null);
+        expectTier(wrong, Items.IRON_PICKAXE, IPlatformHelper.ToolType.PICKAXE, IPlatformHelper.ToolTier.IRON, IPlatformHelper.ToolTier.DIAMOND);
+        helper.assertTrue(wrong.isEmpty(), String.join(", ", wrong));
+        helper.succeed();
+    }
+
+    /** The item reaches {@code tier} as a {@code type}, and does not reach {@code above} when one is given. */
+    private static void expectTier(List<String> wrong, Item item, IPlatformHelper.ToolType type, IPlatformHelper.ToolTier tier, IPlatformHelper.ToolTier above) {
+        ItemStack stack = new ItemStack(item);
+        if (!Services.PLATFORM.isTieredTool(stack, tier, type)) {
+            wrong.add(BuiltInRegistries.ITEM.getKey(item) + " does not reach " + tier);
+        }
+        if (above != null && Services.PLATFORM.isTieredTool(stack, above, type)) {
+            wrong.add(BuiltInRegistries.ITEM.getKey(item) + " reaches " + above);
+        }
     }
 }
