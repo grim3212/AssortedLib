@@ -43,6 +43,6 @@ public interface IDataAwareBakedModel extends BlockStateModel {
         collectParts(random, IBlockModelData.empty(), output);
     }
 
-    // TODO(26.2): getSupportedRenderTypes is gone: a quad's layer comes from its sprite's
-    //  transparency (MaterialInfo#layer()), so a model has no render type to answer.
+    // getSupportedRenderTypes is gone: a quad's layer comes from its sprite's transparency
+    // (MaterialInfo#layer()), so a model has no render type to answer.
 }

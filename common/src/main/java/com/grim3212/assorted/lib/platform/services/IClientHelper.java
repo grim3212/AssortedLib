@@ -59,9 +59,9 @@ public interface IClientHelper {
 
     void registerBlockColor(BlockTintSource color, Supplier<List<Block>> blocks);
 
-    // TODO(26.2): an item's tints live in its model json as ItemTintSource entries; code only
-    //  registers the codec for a custom source type. Callers that tinted items from code must emit
-    //  a "tints" entry naming this id in those items' model json instead.
+    // An item's tints live in its model json as ItemTintSource entries; code only registers the
+    // codec for a custom source type. A caller that tinted items from code emits a "tints" entry
+    // naming this id in those items' model json instead.
     void registerItemTintSource(Identifier id, MapCodec<? extends ItemTintSource> source);
 
     BlockColors getBlockColors();

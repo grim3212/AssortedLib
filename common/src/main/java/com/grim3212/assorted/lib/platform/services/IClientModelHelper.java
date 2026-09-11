@@ -60,10 +60,10 @@ public interface IClientModelHelper {
     @NotNull
     Collection<RenderType> getRenderTypesFor(BlockStateModel model, BlockState state, RandomSource rand, IBlockModelData data);
 
-    // TODO(26.2): the item-side getRenderTypesFor(model, stack, isFabulous) was removed, not
-    //  stubbed: item rendering is push-only, so an ItemModel's render types exist only inside one
-    //  ItemModel#update. A caller that needs them runs update() on its own ItemStackRenderState
-    //  and reads the layers.
+    // The item-side getRenderTypesFor(model, stack, isFabulous) was removed, not stubbed: item
+    // rendering is push-only, so an ItemModel's render types exist only inside one
+    // ItemModel#update. A caller that needs them runs update() on its own ItemStackRenderState and
+    // reads the layers.
 
     RenderType getItemUnlitUnsortedTranslucentRenderType();
 

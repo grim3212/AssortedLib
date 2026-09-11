@@ -21,7 +21,7 @@ public interface IQuadTransformer {
         return quad -> other.process(process(quad));
     }
 
-    // TODO(26.2): processInPlace and the vertex format offsets (STRIDE, POSITION, COLOR, ...) are
-    //  gone: a BakedQuad has no mutable vertex array, and colour, light and normals are supplied at
-    //  submit time, so there is nothing to mutate.
+    // processInPlace and the vertex format offsets (STRIDE, POSITION, COLOR, ...) are gone: a
+    // BakedQuad has no mutable vertex array, and colour, light and normals are supplied at submit
+    // time, so there is nothing to mutate.
 }

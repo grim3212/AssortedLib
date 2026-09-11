@@ -49,6 +49,6 @@ public interface IModelBakingContext {
      */
     ItemTransforms getTransforms();
 
-    // TODO(26.2): no getItemOverrides any more: item variants are picked by data driven ItemModel
-    //  types declared in the item's model json, not assembled by a model loader while baking.
+    // No getItemOverrides any more: item variants are picked by data driven ItemModel types
+    // declared in the item's model json, not assembled by a model loader while baking.
 }

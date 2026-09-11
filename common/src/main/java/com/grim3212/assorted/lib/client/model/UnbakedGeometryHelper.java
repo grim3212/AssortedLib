@@ -36,10 +36,9 @@ public class UnbakedGeometryHelper {
         throw new IllegalStateException("Can not instantiate an instance of: UnbakedGeometryHelper. This is a utility class");
     }
 
-    // TODO(26.2): createUnbakedItemElements (the extruded "builtin/generated" item shape as
-    //  elements) has no replacement: ItemModelGenerator's element code is private and bakes
-    //  straight to quads. A model that wants that shape parents onto
-    //  ItemModelGenerator.GENERATED_ITEM_MODEL_ID.
+    // createUnbakedItemElements (the extruded "builtin/generated" item shape as elements) has no
+    // replacement: ItemModelGenerator's element code is private and bakes straight to quads. A
+    // model that wants that shape parents onto ItemModelGenerator.GENERATED_ITEM_MODEL_ID.
 
     /**
      * Creates {@linkplain CuboidModelElement cuboid elements} covering only the opaque pixels of

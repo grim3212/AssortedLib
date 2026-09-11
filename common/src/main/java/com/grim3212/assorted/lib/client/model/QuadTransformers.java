@@ -98,8 +98,7 @@ public final class QuadTransformers {
                 | ((argb << 16) & 0x00FF0000); // blue moves to red
     }
 
-    // TODO(26.2): applyingLightmap and applyingColor are gone: a BakedQuad carries no per-vertex
-    //  colour or lightmap. Colour and light are passed at submit time
-    //  (SubmitNodeCollector#submitBlockModel / #submitItem); the only light a quad keeps is
-    //  MaterialInfo#lightEmission (settingEmissivity).
+    // applyingLightmap and applyingColor are gone: a BakedQuad carries no per-vertex colour or
+    // lightmap. Colour and light are passed at submit time (SubmitNodeCollector#submitBlockModel /
+    // #submitItem); the only light a quad keeps is MaterialInfo#lightEmission (settingEmissivity).
 }
