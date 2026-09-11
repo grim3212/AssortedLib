@@ -14,7 +14,6 @@ import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SpriteSet;
-import net.minecraft.client.renderer.rendertype.RenderType;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
@@ -113,8 +112,6 @@ public interface IClientHelper {
      * @param modelState    The rotation and uv lock to bake with.
      */
     BlockStateModel bakeSpecificationModel(ModelBaker baker, Identifier modelLocation, ModelState modelState);
-
-    void registerRenderType(Supplier<Block> block, RenderType renderType);
 
     void registerKeyMapping(KeyMapping keyMapping);
 

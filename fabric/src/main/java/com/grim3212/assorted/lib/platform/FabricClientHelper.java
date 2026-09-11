@@ -48,7 +48,6 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRenderers;
-import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.special.SpecialModelRenderers;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
@@ -154,16 +153,6 @@ public class FabricClientHelper implements IClientHelper {
         // Not a specification model, so there is nothing dynamic to preserve - bake it the way a
         // vanilla variant would.
         return new SingleVariant(SimpleModelWrapper.bake(baker, modelLocation, modelState));
-    }
-
-    // TODO(26.2): registerRenderType has no runtime equivalent on Fabric any more, so this is a no-op.
-    //  BlockRenderLayerMap is gone along with ItemBlockRenderTypes: a block's chunk layer is decided
-    //  per quad while baking, from the sprite's Transparency (or Material#forceTranslucent), and ends
-    //  up on BakedQuad.MaterialInfo#layer. A block therefore declares its render type from its model
-    //  json ("render_type") or by the transparency of its texture, and there is nothing left to
-    //  register from code.
-    @Override
-    public void registerRenderType(Supplier<Block> block, RenderType renderType) {
     }
 
     @Override

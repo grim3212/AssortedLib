@@ -11,6 +11,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
 public class StorageUtil {
@@ -28,6 +30,18 @@ public class StorageUtil {
         return nbt.getStringOr(LOCK_KEY, "");
     }
 
+    // Block entities save through ValueOutput / ValueInput, which cannot be bridged to a
+    // CompoundTag, so the lock has these overloads beside the tag ones.
+    public static void writeLock(ValueOutput output, String lock) {
+        if (!lock.isEmpty()) {
+            output.putString(LOCK_KEY, lock);
+        }
+    }
+
+    public static String readLock(ValueInput input) {
+        return input.getStringOr(LOCK_KEY, "");
+    }
+
     public static ItemStack setCodeOnStack(String code, ItemStack stack) {
         ItemStack output = stack.copy();
         writeCodeToStack(code, output);
@@ -38,6 +52,20 @@ public class StorageUtil {
     // holds an immutable CompoundTag that has to be replaced rather than mutated in place.
     public static void writeCodeToStack(String code, ItemStack stack) {
         CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> writeLock(tag, code));
+    }
+
+    /**
+     * Sets the lock cached on a stack, or removes it when the code is empty. {@link #writeCodeToStack}
+     * only ever writes, so a lock that has been taken off would otherwise stay in the component.
+     */
+    public static void setLockOnStack(ItemStack stack, String lock) {
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> {
+            if (lock.isEmpty()) {
+                tag.remove(LOCK_KEY);
+            } else {
+                tag.putString(LOCK_KEY, lock);
+            }
+        });
     }
 
     public static String getCode(BlockEntity te) {

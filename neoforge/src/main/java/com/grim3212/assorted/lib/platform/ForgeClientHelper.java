@@ -31,7 +31,6 @@ import net.minecraft.client.renderer.block.dispatch.SingleVariant;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.properties.conditional.ConditionalItemModelProperty;
-import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ResolvedModel;
 import net.minecraft.client.resources.model.SimpleModelWrapper;
@@ -158,14 +157,6 @@ public class ForgeClientHelper implements IClientHelper {
         // Not a specification model, so there is nothing dynamic to preserve - bake it the way a
         // vanilla variant would.
         return new SingleVariant(SimpleModelWrapper.bake(baker, modelLocation, modelState));
-    }
-
-    // TODO(26.2): a block's render layer can no longer be set from code. ItemBlockRenderTypes is
-    //  gone; the pass a block draws in is a ChunkSectionLayer derived per quad from the transparency
-    //  of the sprite the model uses (see BakedQuad.MaterialInfo#of), so it is decided by the model's
-    //  textures and by "render_type" in the model json, not by a registration.
-    @Override
-    public void registerRenderType(Supplier<Block> block, RenderType renderType) {
     }
 
     @Override
