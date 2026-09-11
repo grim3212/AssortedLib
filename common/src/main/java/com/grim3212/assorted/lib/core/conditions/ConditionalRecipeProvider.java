@@ -139,5 +139,13 @@ public abstract class ConditionalRecipeProvider extends RecipeProvider {
             super(output, registries);
             this.modId = modId;
         }
+
+        /**
+         * The provider this runner builds, for a loader-side runner that has to own the output
+         * itself - Fabric only writes load conditions through its own {@code FabricRecipeProvider}.
+         */
+        public RecipeProvider newProvider(HolderLookup.Provider registries, RecipeOutput output) {
+            return this.createRecipeProvider(registries, output);
+        }
     }
 }
