@@ -3,7 +3,7 @@ package com.grim3212.assorted.lib.platform;
 import com.grim3212.assorted.lib.client.events.ClientTickHandler;
 import com.grim3212.assorted.lib.client.model.loader.FabricPlatformModelLoaderPlatformDelegate;
 import com.grim3212.assorted.lib.client.model.loaders.IModelSpecificationLoader;
-import com.grim3212.assorted.lib.client.render.IBEWLR;
+import com.grim3212.assorted.lib.client.render.ISpecialModelRendererRegistry;
 import com.grim3212.assorted.lib.client.screen.LibScreenFactory;
 import com.grim3212.assorted.lib.platform.services.IClientHelper;
 import com.mojang.serialization.MapCodec;
@@ -81,7 +81,7 @@ public class FabricClientHelper implements IClientHelper {
     }
 
     @Override
-    public void registerBEWLR(final Consumer<IBEWLR> register) {
+    public void registerSpecialModelRenderers(final Consumer<ISpecialModelRendererRegistry> register) {
         // BlockEntityWithoutLevelRenderer is gone; a special item renderer is now an id -> unbaked
         // renderer codec that item models refer to by id. Fabric widens the id mapper for us.
         register.accept(SpecialModelRenderers.ID_MAPPER::put);

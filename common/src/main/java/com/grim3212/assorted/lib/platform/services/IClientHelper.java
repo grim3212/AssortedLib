@@ -2,7 +2,7 @@ package com.grim3212.assorted.lib.platform.services;
 
 import com.grim3212.assorted.lib.client.events.ClientTickHandler;
 import com.grim3212.assorted.lib.client.model.loaders.IModelSpecificationLoader;
-import com.grim3212.assorted.lib.client.render.IBEWLR;
+import com.grim3212.assorted.lib.client.render.ISpecialModelRendererRegistry;
 import com.grim3212.assorted.lib.client.screen.LibScreenFactory;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.color.block.BlockTintSource;
@@ -47,7 +47,7 @@ public interface IClientHelper {
 
     void addReloadListener(Identifier identifier, PreparableReloadListener reloadListener);
 
-    void registerBEWLR(final Consumer<IBEWLR> register);
+    void registerSpecialModelRenderers(final Consumer<ISpecialModelRendererRegistry> register);
 
     // BlockEntityRendererProvider gained a render-state type parameter in 26.x; renderers now
     // extract a state object and submit from it rather than rendering inline.

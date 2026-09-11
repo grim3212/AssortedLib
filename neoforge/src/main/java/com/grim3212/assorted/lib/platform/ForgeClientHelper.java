@@ -8,7 +8,7 @@ import com.grim3212.assorted.lib.client.model.loaders.IModelSpecification;
 import com.grim3212.assorted.lib.client.model.loaders.IModelSpecificationHolder;
 import com.grim3212.assorted.lib.client.model.loaders.IModelSpecificationLoader;
 import com.grim3212.assorted.lib.client.model.loaders.context.ResolvedModelBakingContext;
-import com.grim3212.assorted.lib.client.render.IBEWLR;
+import com.grim3212.assorted.lib.client.render.ISpecialModelRendererRegistry;
 import com.grim3212.assorted.lib.client.screen.LibScreenFactory;
 import com.grim3212.assorted.lib.platform.services.IClientHelper;
 import com.mojang.serialization.MapCodec;
@@ -94,7 +94,7 @@ public class ForgeClientHelper implements IClientHelper {
     }
 
     @Override
-    public void registerBEWLR(final Consumer<IBEWLR> register) {
+    public void registerSpecialModelRenderers(final Consumer<ISpecialModelRendererRegistry> register) {
         getRegistration().specialModelRendererInitializers.add(register);
     }
 
@@ -206,7 +206,7 @@ public class ForgeClientHelper implements IClientHelper {
         private final Map<BlockTintSource, Supplier<List<Block>>> blockColors = new HashMap<>();
         private final Map<Identifier, MapCodec<? extends ItemTintSource>> itemTintSources = new HashMap<>();
         private final List<KeyMapping> keyMappings = new ArrayList<>();
-        private final List<Consumer<IBEWLR>> specialModelRendererInitializers = Collections.synchronizedList(new ArrayList<>());
+        private final List<Consumer<ISpecialModelRendererRegistry>> specialModelRendererInitializers = Collections.synchronizedList(new ArrayList<>());
         private final Map<Identifier, PreparableReloadListener> clientReloadListeners = new HashMap<>();
         private final Map<Identifier, IModelSpecificationLoader<?>> modelLoaders = new HashMap<>();
         private final Map<Identifier, MapCodec<? extends ItemModel.Unbaked>> itemModelTypes = new HashMap<>();
@@ -264,7 +264,7 @@ public class ForgeClientHelper implements IClientHelper {
 
         @SubscribeEvent
         public void registerSpecialModelRenderers(final RegisterSpecialModelRendererEvent event) {
-            final IBEWLR register = event::register;
+            final ISpecialModelRendererRegistry register = event::register;
             specialModelRendererInitializers.forEach(callback -> callback.accept(register));
         }
 
