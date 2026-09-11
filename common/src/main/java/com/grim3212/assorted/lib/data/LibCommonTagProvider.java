@@ -117,7 +117,6 @@ public class LibCommonTagProvider {
 
             DyeHelper.CONCRETE_BY_DYE.entrySet().stream().forEach((x) -> tagger.apply(LibCommonTags.Blocks.CONCRETE).add(key(x.getValue())));
             DyeHelper.CONCRETE_POWDER_BY_DYE.entrySet().stream().forEach((x) -> tagger.apply(LibCommonTags.Blocks.CONCRETE_POWDER).add(key(x.getValue())));
-            DyeHelper.CARPET_BY_DYE.entrySet().stream().forEach((x) -> tagger.apply(LibCommonTags.Blocks.CARPET).add(key(x.getValue())));
         }
 
         /**
@@ -280,7 +279,6 @@ public class LibCommonTagProvider {
 
             copier.accept(LibCommonTags.Blocks.CONCRETE, LibCommonTags.Items.CONCRETE);
             copier.accept(LibCommonTags.Blocks.CONCRETE_POWDER, LibCommonTags.Items.CONCRETE_POWDER);
-            copier.accept(LibCommonTags.Blocks.CARPET, LibCommonTags.Items.CARPET);
             tagger.apply(LibCommonTags.Items.FLUID_CONTAINERS).add(key(Items.BUCKET), key(Items.WATER_BUCKET), key(Items.LAVA_BUCKET));
             tagger.apply(LibCommonTags.Items.BUCKETS_MILK).add(key(Items.MILK_BUCKET));
         }

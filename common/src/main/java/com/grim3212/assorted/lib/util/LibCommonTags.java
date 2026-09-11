@@ -108,7 +108,6 @@ public class LibCommonTags {
         /// ====================================================================
         public static final TagKey<Block> CONCRETE = commonTag("concretes");
         public static final TagKey<Block> CONCRETE_POWDER = commonTag("concrete_powders");
-        public static final TagKey<Block> CARPET = commonTag("carpet");
 
         private static TagKey<Block> commonTag(String name) {
             return TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(COMMON_NAMESPACE, name));
@@ -275,7 +274,6 @@ public class LibCommonTags {
         /// ====================================================================
         public static final TagKey<Item> CONCRETE = commonTag("concretes");
         public static final TagKey<Item> CONCRETE_POWDER = commonTag("concrete_powders");
-        public static final TagKey<Item> CARPET = commonTag("carpet");
         public static final TagKey<Item> FLUID_CONTAINERS = commonTag("containers/fluid");
         public static final TagKey<Item> BUCKETS_MILK = commonTag("buckets/milk");
 
