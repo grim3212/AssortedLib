@@ -36,26 +36,15 @@ public class UnbakedGeometryHelper {
         throw new IllegalStateException("Can not instantiate an instance of: UnbakedGeometryHelper. This is a utility class");
     }
 
-    // TODO(26.2): createUnbakedItemElements(int, SpriteContents) has no replacement.
-    //  What it used to do: ItemModelGenerator#processFrames(layerIndex, "layer" + layerIndex, sprite)
-    //  turned a sprite into the list of BlockElements vanilla uses for "builtin/generated" items -
-    //  one flat element for the north/south faces plus one element per extruded edge run - so callers
-    //  could re-bake that shape with a different texture.
-    //  Why it cannot be expressed: ItemModelGenerator is an UnbakedModel now. processFrames is gone
-    //  and every replacement (bake, bakeExtrudedSprite, bakeSideFaces, getSideFaces, the SideFace /
-    //  SideDirection helper types) is private static, producing a QuadCollection directly rather than
-    //  a list of elements - there is no public entry point that hands back geometry description
-    //  instead of baked quads. A model that wants the generated item shape has to parent onto
-    //  ItemModelGenerator.GENERATED_ITEM_MODEL_ID ("minecraft:builtin/generated") and let the baker
-    //  run ItemModelGenerator#geometry() over its layer0..layer4 slots.
+    // TODO(26.2): createUnbakedItemElements (the extruded "builtin/generated" item shape as
+    //  elements) has no replacement: ItemModelGenerator's element code is private and bakes
+    //  straight to quads. A model that wants that shape parents onto
+    //  ItemModelGenerator.GENERATED_ITEM_MODEL_ID.
 
     /**
-     * Creates a list of {@linkplain CuboidModelElement cuboid elements} covering only the opaque pixels
-     * of the specified sprite, so a flat item texture becomes a mask instead of a full quad.
-     * <p>
-     * Unlike the 1.20.1 version this returns <em>only</em> the mask elements. That version started from
-     * {@link #createUnbakedItemElements} and dropped its first (north/south) element to keep the
-     * extruded edge elements, which are no longer obtainable - see the note on that method.
+     * Creates {@linkplain CuboidModelElement cuboid elements} covering only the opaque pixels of
+     * the sprite, so a flat item texture becomes a mask instead of a full quad. Only the mask: the
+     * extruded edge elements are not obtainable (see the TODO above).
      */
     public static List<CuboidModelElement> createUnbakedItemMaskElements(int layerIndex, TextureAtlasSprite sprite) {
         var elements = new ArrayList<CuboidModelElement>();
@@ -152,27 +141,17 @@ public class UnbakedGeometryHelper {
     }
 
     /**
-     * Explanation:
-     * This takes anything that looks like a valid resourcepack texture location, and tries to extract a resourcelocation out of it.
-     * 1. it will ignore anything up to and including an /assets/ folder,
-     * 2. it will take the next path component as a namespace,
-     * 3. it will match but skip the /textures/ part of the path,
-     * 4. it will take the rest of the path up to but excluding the .png extension as the resource path
-     * It's a best-effort situation, to allow model files exported by modelling software to be used without post-processing.
-     * Example:
-     * C:\Something\Or Other\src\main\resources\assets\mymodid\textures\item\my_thing.png
-     * ........................................--------_______----------_____________----
-     * <namespace>        <path>
-     * Result after replacing '\' to '/': mymodid:item/my_thing
+     * Extracts {@code namespace:path} from anything that looks like a resource pack texture file
+     * path, so models exported by modelling software work unedited. Best effort: everything up to
+     * {@code /assets/} is skipped, backslashes count as slashes, and
+     * {@code .../assets/mymodid/textures/item/my_thing.png} gives {@code mymodid:item/my_thing}.
      */
     private static final Pattern FILESYSTEM_PATH_TO_RESLOC =
             Pattern.compile("(?:.*[\\\\/]assets[\\\\/](?<namespace>[a-z_-]+)[\\\\/]textures[\\\\/])?(?<path>[a-z_\\\\/-]+)\\.png");
 
     /**
-     * Resolves a material that may have been defined with a filesystem path instead of a proper {@link Identifier}.
-     * <p>
-     * A {@link Material} no longer names an atlas: which atlas a sprite is stitched into is decided by
-     * the {@link net.minecraft.client.resources.model.sprite.MaterialBaker} doing the baking.
+     * Resolves a material that may name a filesystem path instead of a proper {@link Identifier}.
+     * The atlas is not part of a {@link Material}; the baking {@code MaterialBaker} decides it.
      */
     public static Material resolveDirtyMaterial(@Nullable String tex, IModelBakingContext owner) {
         if (tex == null)

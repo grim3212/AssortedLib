@@ -10,12 +10,9 @@ import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.client.fluid.FluidTintSource;
 
 /**
- * TODO(26.2): {@code IClientFluidTypeExtensions#getStillTexture}, {@code #getFlowingTexture} and
- *  {@code #getTintColor} are gone. A fluid's appearance is a baked {@link FluidModel} registered per
- *  {@link Fluid} through {@code RegisterFluidModelsEvent}, so it can only be read off the client
- *  model manager and only once models have been baked. Everything here therefore resolves through
- *  the fluid alone; the extra fluid data a {@link FluidInformation} carries can no longer pick a
- *  different texture the way a FluidStack aware extension could - it only still feeds the tint.
+ * TODO(26.2): a fluid's textures are a baked {@link FluidModel} per {@link Fluid}, readable only
+ *  once models have baked, so everything resolves from the fluid alone; the extra data a
+ *  {@link FluidInformation} carries only still feeds the tint.
  */
 public class ForgeClientFluidHelper implements IClientFluidHelper {
 

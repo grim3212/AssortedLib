@@ -43,12 +43,9 @@ import java.util.function.Supplier;
 
 public class FabricPlatformHelper implements IPlatformHelper {
 
-    // TODO(26.2): IPlatformHelper still passes the extra menu opening data as a raw
-    //  FriendlyByteBuf (openMenu's Consumer<FriendlyByteBuf> and MenuFactory's buf parameter), but
-    //  Fabric's ExtendedMenuType is codec driven and NeoForge's payload based menu opening is too, so
-    //  both loaders now want a typed D plus a StreamCodec<RegistryFriendlyByteBuf, D>. Until
-    //  IPlatformHelper carries that type, the buffer's contents travel as a byte array and are handed
-    //  back as a RegistryFriendlyByteBuf so registry aware reads keep working.
+    // TODO(26.2): IPlatformHelper still passes extra menu data as a raw FriendlyByteBuf, while both
+    //  loaders want a typed value plus a StreamCodec. Until it does, the bytes travel as a byte
+    //  array and are handed back as a RegistryFriendlyByteBuf so registry aware reads still work.
     private static final StreamCodec<RegistryFriendlyByteBuf, FriendlyByteBuf> EXTRA_DATA_CODEC = StreamCodec.of(
             (buf, data) -> {
                 final byte[] bytes = new byte[data.readableBytes()];

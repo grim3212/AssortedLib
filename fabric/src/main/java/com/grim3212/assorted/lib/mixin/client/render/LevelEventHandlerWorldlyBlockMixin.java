@@ -15,13 +15,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 /**
  * Plays the {@link IBlockSoundType} sound instead of the baked in one for the block break level
- * event.
- * <p>
- * This used to hang off {@code LevelRenderer#levelEvent}. 26.2 pulled the whole level event switch
- * out of {@link net.minecraft.client.renderer.LevelRenderer} - which no longer owns a level, plays
- * no sounds and has no {@code levelEvent} at all - into {@link LevelEventHandler}, so the redirect
- * follows it there. Doing it as a redirect also means the event data (the block state id) no longer
- * has to be smuggled across two injections.
+ * event. A redirect, so the event data (the block state id) is at hand in a single injection.
  */
 @Mixin(LevelEventHandler.class)
 public abstract class LevelEventHandlerWorldlyBlockMixin {

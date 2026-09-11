@@ -15,14 +15,10 @@ public class FabricFluidVariantRenderHandlerDelegate implements FluidVariantRend
         this.delegate = delegate;
     }
 
-    // TODO(26.2): the getSprites(FluidVariant) hook this class used to implement is gone from
-    //  FluidVariantRenderHandler; only appendTooltip and getColor are left on it. A fluid's still and
-    //  flowing textures are not supplied by code anymore - they come from a FluidModel.Unbaked
-    //  registered against the fluid through
-    //  net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderingRegistry#register(Fluid,
-    //  FluidModel.Unbaked[, FluidRenderHandler]), which is a different (and data shaped) API. The
-    //  IFluidVariantHandler still/flowing texture pair is therefore only readable back out of this
-    //  delegate, not out of a foreign handler; see FabricFluidVariantHandlerDelegate.
+    // TODO(26.2): FluidVariantRenderHandler has no getSprites any more; textures come from a
+    //  FluidModel.Unbaked registered through FluidRenderingRegistry. So the still/flowing textures
+    //  can only be read back from this delegate, not a foreign handler (see
+    //  FabricFluidVariantHandlerDelegate).
 
     @Override
     public int getColor(final FluidVariant fluidVariant, @Nullable final BlockAndTintGetter view, @Nullable final BlockPos pos) {

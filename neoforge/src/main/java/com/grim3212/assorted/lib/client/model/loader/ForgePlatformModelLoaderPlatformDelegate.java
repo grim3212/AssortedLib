@@ -12,11 +12,8 @@ import net.neoforged.neoforge.client.model.UnbakedModelLoader;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * {@code IGeometryLoader} became {@link UnbakedModelLoader}: it reads a whole
- * {@link net.minecraft.client.resources.model.UnbakedModel} rather than just the geometry, so the
- * standard top level model fields are parsed here with {@link StandardModelParameters#parse} and
- * handed to the delegator. Registration moved from {@code ModelEvent.RegisterGeometryLoaders} to
- * {@code ModelEvent.RegisterLoaders}, which is keyed by an {@code Identifier} rather than a string.
+ * An {@link UnbakedModelLoader} that reads the standard top level model fields with
+ * {@link StandardModelParameters#parse} and hands them to the delegator.
  */
 public final class ForgePlatformModelLoaderPlatformDelegate<L extends IModelSpecificationLoader<T>, T extends IModelSpecification<T>>
         implements UnbakedModelLoader<ForgeModelGeometryToSpecificationPlatformDelegator<T>>, ResourceManagerReloadListener {

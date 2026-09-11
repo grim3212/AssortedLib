@@ -56,11 +56,8 @@ public class ForgeIngredientHelper implements IIngredientHelper {
         return ForgeFluidIngredient.of(itemTagKey, fluidTagKey, amount).toVanilla();
     }
 
-    // TODO(26.2): Ingredient.EMPTY has no replacement - an Ingredient may not be empty at all any
-    //  more (its constructor throws on an empty holder set), and "no ingredient" is expressed as an
-    //  Optional<Ingredient> by every vanilla recipe. The old and()/or() quietly handed back
-    //  Ingredient.EMPTY for a zero length argument list, which can only fail later now, so it fails
-    //  here instead.
+    // TODO(26.2): an Ingredient may not be empty (vanilla uses Optional<Ingredient> for "none"), so
+    //  a zero length and()/or() fails here rather than later.
     private static void requireNotEmpty(Ingredient... ingredients) {
         if (ingredients.length == 0) {
             throw new IllegalArgumentException("Cannot combine zero ingredients; an Ingredient can no longer be empty");

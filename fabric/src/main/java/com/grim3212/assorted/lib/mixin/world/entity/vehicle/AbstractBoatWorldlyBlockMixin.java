@@ -19,12 +19,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 /**
- * Feeds the position dependent {@link IBlockExtraProperties} friction into the boat's ground
- * friction calculation.
- * <p>
- * The 1.20.1 hook was {@code Boat#getGroundFriction}. 26.2 split the boat hierarchy and pulled the
- * shared movement code - {@code getGroundFriction} included - up onto
- * {@link AbstractBoat}, so the injections follow it there and now also cover rafts and chest boats.
+ * Feeds the position dependent {@link IBlockExtraProperties} friction into
+ * {@code getGroundFriction} on {@link AbstractBoat}, which covers boats, chest boats and rafts.
  */
 @Mixin(value = AbstractBoat.class, priority = Integer.MIN_VALUE)
 public abstract class AbstractBoatWorldlyBlockMixin extends Entity {

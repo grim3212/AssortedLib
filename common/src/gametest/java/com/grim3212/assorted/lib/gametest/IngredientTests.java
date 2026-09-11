@@ -23,12 +23,8 @@ final class IngredientTests {
     }
 
     /**
-     * Ingredients built through the abstraction match what they should and reject what they should not.
-     * <p>
-     * Nothing about this is shared code - NeoForge composes {@code CompoundIngredient} /
-     * {@code DifferenceIngredient} and Fabric {@code DefaultCustomIngredients} - so agreeing on what
-     * a composed ingredient accepts is the whole point. Fabric's {@code and()} used to throw on
-     * exactly the multi-branch case it exists for.
+     * Composed ingredients accept and reject the same stacks on both loaders. Each loader builds
+     * them from its own types, so nothing here is shared code.
      */
     private static void ingredientsCombine(GameTestHelper helper) {
         Ingredient either = Services.INGREDIENTS.or(Ingredient.of(Items.STICK), Ingredient.of(Items.STONE));

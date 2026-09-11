@@ -4,39 +4,15 @@ import net.minecraft.world.item.ItemStack;
 
 public interface IItemExtraProperties {
 
-    /**
-     * Return the itemDamage represented by this ItemStack. Defaults to the Damage
-     * entry in the stack NBT, but can be overridden here for other sources.
-     *
-     * @param stack The itemstack that is damaged
-     * @return the damage value
-     */
+    /** The stack's current damage. */
     int getDamage(ItemStack stack);
 
-    /**
-     * Return the maxDamage for this ItemStack. Defaults to the maxDamage field in
-     * this item, but can be overridden here for other sources such as NBT.
-     *
-     * @param stack The itemstack that is damaged
-     * @return the damage value
-     */
+    /** The stack's maximum damage. */
     int getMaxDamage(ItemStack stack);
 
-    /**
-     * Return if this itemstack is damaged. Note only called if
-     * {@link ItemStack#isDamageableItem()} is true.
-     *
-     * @param stack the stack
-     * @return if the stack is damaged
-     */
+    /** Whether the stack is damaged; only asked if {@link ItemStack#isDamageableItem()} is true. */
     boolean isDamaged(ItemStack stack);
 
-    /**
-     * Set the damage for this itemstack. Note, this method is responsible for zero
-     * checking.
-     *
-     * @param stack  the stack
-     * @param damage the new damage value
-     */
+    /** Sets the stack's damage. The implementation is responsible for checking it against zero. */
     void setDamage(ItemStack stack, int damage);
 }

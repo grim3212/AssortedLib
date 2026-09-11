@@ -8,14 +8,9 @@ import net.minecraft.client.resources.metadata.animation.FrameSize;
 import net.minecraft.resources.Identifier;
 
 /**
- * A helper sprite with UVs spanning the entire texture.
- * <p>
- * Useful for baking quads that won't be used with an atlas.
- * <p>
- * The sprite is stitched as a 1x1 sprite into a 1x1 atlas, so u0/v0 are 0 and u1/v1 are 1.
- * {@link TextureAtlasSprite#getU(float)} / {@link TextureAtlasSprite#getV(float)} therefore
- * already return their argument unchanged and no longer need to be overridden. Note that
- * those take a 0-1 offset in 26.2, where the 1.20.1 versions took a 0-16 model coordinate.
+ * A sprite whose UVs span the whole texture, for baking quads not used with an atlas. It is
+ * stitched as a 1x1 sprite into a 1x1 atlas, so {@link TextureAtlasSprite#getU(float)} and {@link
+ * TextureAtlasSprite#getV(float)} (which take a 0-1 offset) already return their argument.
  */
 public class UnitTextureAtlasSprite extends TextureAtlasSprite {
     public static final Identifier LOCATION = Identifier.fromNamespaceAndPath(LibConstants.MOD_ID, "unit");

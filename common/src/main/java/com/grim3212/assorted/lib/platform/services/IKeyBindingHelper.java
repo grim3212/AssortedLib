@@ -23,49 +23,24 @@ public interface IKeyBindingHelper {
     IKeyConflictHelper getInGameKeyConflictContext();
 
     /**
-     * Creates a new key mapping with the given properties.
-     * If the system supports it a conflict context is registered as well.
+     * Creates a key mapping, with a conflict context where the loader supports one.
      *
-     * @param translationKey      The translation key for the key mapping.
-     * @param keyConflictContext  The optional key conflict context to apply.
-     * @param inputType           The input type for the key mapping.
-     * @param key                 The default configured key.
-     * @param category            The id of the category the key sorts under. Its label is
-     *                            {@code key.category.<namespace>.<path>}, so whoever passes it has to
-     *                            ship that translation.
-     * @return The new key mapping.
+     * @param category the category id; its label {@code key.category.<namespace>.<path>} is the
+     *                 caller's to translate
      */
     KeyMapping createNew(String translationKey, IKeyConflictHelper keyConflictContext, InputConstants.Type inputType, int key, Identifier category);
 
     /**
-     * Creates a new key mapping with the given properties.
-     * If the system supports it a conflict context is registered as well.
+     * Creates a key mapping, with a conflict context where the loader supports one.
      *
-     * @param translationKey      The translation key for the key mapping.
-     * @param keyConflictContext  The optional key conflict context to apply.
-     * @param keyModifier         The key modifier for the default key.
-     * @param inputType           The input type for the key mapping.
-     * @param key                 The default configured key.
-     * @param category            The id of the category the key sorts under. Its label is
-     *                            {@code key.category.<namespace>.<path>}, so whoever passes it has to
-     *                            ship that translation.
-     * @return The new key mapping.
+     * @param category the category id; its label {@code key.category.<namespace>.<path>} is the
+     *                 caller's to translate
      */
     KeyMapping createNew(String translationKey, IKeyConflictHelper keyConflictContext, KeyModifier keyModifier, InputConstants.Type inputType, int key, Identifier category);
 
-    /**
-     * Checks if the key conflict context of the key mapping is active or not.
-     *
-     * @param keybinding The key mapping to check.
-     * @return True when the conflict context is active, false when not.
-     */
+    /** Whether the key mapping's conflict context is active. */
     boolean isKeyConflictOfActive(KeyMapping keybinding);
 
-    /**
-     * Checks if the key modifier of the key mapping is active or not.
-     *
-     * @param keybinding The key mapping to check.
-     * @return True when the modifier is active, false when not.
-     */
+    /** Whether the key mapping's modifier is active. */
     boolean isKeyModifierActive(KeyMapping keybinding);
 }

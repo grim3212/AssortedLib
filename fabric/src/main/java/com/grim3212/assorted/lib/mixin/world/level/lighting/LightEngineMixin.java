@@ -11,16 +11,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(LightEngine.class)
 public class LightEngineMixin {
 
-    // TODO(26.2): hasDifferentLightProperties lost its BlockGetter and BlockPos parameters - it is
-    //  now hasDifferentLightProperties(BlockState, BlockState), called from LevelChunk#setBlockState
-    //  and ProtoChunk#setBlockState with nothing but the two states. IBlockLightEmission asks for a
-    //  level and a position to compute an emission, so the real value cannot be worked out here
-    //  anymore. The check is answered conservatively instead: whenever either side of the change is
-    //  an IBlockLightEmission block the light properties are reported as different, which queues a
-    //  LightEngine#checkBlock for the position. The actual position dependent emission is then
-    //  supplied by BlockLightEngineMixin#assortedlib_onGetEmission, which does have a position. The
-    //  cost is a light re-check for some changes that would not have needed one; the previous
-    //  behaviour of skipping the re-check when the emission happened to be unchanged is lost.
+    // TODO(26.2): hasDifferentLightProperties only gets the two states, no level or position, so an
+    //  IBlockLightEmission block's real emission cannot be computed here. Any change involving one
+    //  is reported as different, queuing a light check that
+    //  BlockLightEngineMixin#assortedlib_onGetEmission answers with the position. Cost: some
+    //  changes with an unchanged emission are re-checked.
     @Inject(method = "hasDifferentLightProperties", at = @At("HEAD"), cancellable = true)
     private static void assortedlib_onHasDifferentLightProperties(BlockState oldState, BlockState newState, CallbackInfoReturnable<Boolean> cir) {
         if (oldState == newState) {

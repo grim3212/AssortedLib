@@ -35,12 +35,9 @@ import java.util.Map;
 /**
  * A model made up of several named child models drawn on top of each other.
  * <p>
- * Children are model references rather than inline json now. 26.2 loads json models as
- * {@link net.minecraft.client.resources.model.cuboid.CuboidModel} records through a private Gson whose
- * element and face adapters ({@code CuboidModelElement.Deserializer}, {@code CuboidFace.Deserializer})
- * are package private, so an inline child object cannot be parsed from a foreign deserialization
- * context; a model id resolved through {@link ModelBaker#getModel(Identifier)} can, and matches how
- * vanilla composites reference their parts.
+ * Children are model ids resolved through {@link ModelBaker#getModel(Identifier)}, not inline
+ * json: vanilla's element and face deserializers are package private, so an inline child cannot be
+ * parsed.
  */
 public class CombiningModel implements IModelSpecification<CombiningModel> {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -167,11 +164,8 @@ public class CombiningModel implements IModelSpecification<CombiningModel> {
         }
 
         /**
-         * Helper to get the data from a {@link IBlockModelData} instance.
-         *
-         * @param modelData The object to get data from
-         * @param name      The name of the part to get data for
-         * @return The data for the part, or the one passed in if not found
+         * The data {@code modelData} holds for the part {@code name}, or {@code modelData} itself
+         * if it has none.
          */
         public static IBlockModelData resolve(IBlockModelData modelData, String name) {
             var compositeData = modelData.getData(PROPERTY);

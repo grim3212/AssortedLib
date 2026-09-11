@@ -30,10 +30,8 @@ import java.util.stream.Stream;
 public class ForgeConditionHelper implements IConditionHelper {
 
     /**
-     * Nothing left to do at construction time: a condition type is a {@code MapCodec} in the
-     * {@code NeoForgeRegistries.CONDITION_SERIALIZERS} registry, which can only be written to from a
-     * {@code RegisterEvent}, so {@link LibConditions} collects them and the mod entrypoint flushes
-     * them when that event fires.
+     * Nothing to do at construction: condition codecs can only be registered from a
+     * {@code RegisterEvent}, so {@link LibConditions} collects them and flushes them then.
      */
     @Override
     public void init() {
@@ -117,11 +115,8 @@ public class ForgeConditionHelper implements IConditionHelper {
 
     /**
      * Attaches the conditions registered for a recipe id to that recipe as it is written.
-     * <p>
-     * {@code RecipeOutput#withConditions} only covers the "same conditions for everything" case, and
-     * recipes are no longer handed to the provider as a {@code JsonObject} it could edit, so this
-     * dispatches on the recipe key instead. The map is read on every accept so a provider may still
-     * fill it in after the output has been wrapped.
+     * {@code RecipeOutput#withConditions} applies one set to everything, so this dispatches on the
+     * recipe key. The map is read on every accept, so a provider may still fill it after wrapping.
      */
     private record ConditionalOutput(RecipeOutput delegate, Map<Identifier, List<LibConditionProvider>> conditions) implements RecipeOutput {
 

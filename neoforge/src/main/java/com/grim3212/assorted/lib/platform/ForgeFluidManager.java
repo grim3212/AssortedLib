@@ -25,10 +25,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 /**
- * {@code ForgeCapabilities.FLUID_HANDLER_ITEM} and {@code IFluidHandler} are gone. The fluid
- * capability of an item is a {@link ResourceHandler} of {@link FluidResource} now: slot indexed,
- * and transactional rather than taking a simulate flag, so a simulation is a {@link Transaction}
- * that is closed without being committed.
+ * An item's fluid capability is a {@link ResourceHandler} of {@link FluidResource}; a simulation is
+ * a {@link Transaction} closed without committing.
  */
 public class ForgeFluidManager implements IFluidManager {
 
@@ -131,12 +129,9 @@ public class ForgeFluidManager implements IFluidManager {
     }
 
     /**
-     * One item out of the stack, in a one-slot handler that its fluid capability can write to.
-     * <p>
-     * {@code ItemAccess.forStack} mutates the stack in place and can never change its item, so a
-     * water bucket - which empties by becoming a different item - reports nothing extractable
-     * through it. {@link ItemAccess#forHandlerIndexStrict} over a slot of our own can swap the item,
-     * and the slot is read back after the transaction.
+     * One item from the stack, in a one-slot handler its fluid capability can write to.
+     * {@code ItemAccess.forStack} can never change the item, so a bucket (which empties by becoming
+     * another item) reports nothing extractable; {@link ItemAccess#forHandlerIndexStrict} can.
      */
     private record SingleItem(ItemStacksResourceHandler slot, ResourceHandler<FluidResource> fluids) {
         @Nullable

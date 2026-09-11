@@ -12,16 +12,9 @@ public final class LightUtil {
         throw new IllegalStateException("Tried to construct a LightUtil instance, but this is a utility class!");
     }
 
-    // TODO(26.2): LightUtil#put(IVertexConsumer, BakedQuad) has no replacement and was dropped.
-    //  In 26.2 a BakedQuad is a record of four org.joml.Vector3fc positions, four packed UV longs
-    //  (unpack them with net.minecraft.client.model.geom.builders.UVPair#unpackU / #unpackV), a
-    //  Direction and a BakedQuad.MaterialInfo (sprite / tintIndex / shade / lightEmission). It no
-    //  longer carries an int[] of DefaultVertexFormat.BLOCK vertex data, and it never carries
-    //  per-vertex colour or lightmap coordinates - those are supplied at submit time instead, through
-    //  the tintLayers and lightCoords arguments of SubmitNodeCollector#submitBlockModel / #submitItem.
-    //  There is therefore nothing left to pipe into an element-indexed IVertexConsumer. Anything that
-    //  used to re-emit a quad should submit it through SubmitNodeCollector, or write it straight out
-    //  with VertexConsumer#putBakedQuad(PoseStack.Pose, BakedQuad, QuadInstance).
+    // TODO(26.2): put(IVertexConsumer, BakedQuad) was dropped: a BakedQuad has no vertex data array
+    //  and no per-vertex colour or light. Re-emit a quad through SubmitNodeCollector, or with
+    //  VertexConsumer#putBakedQuad(PoseStack.Pose, BakedQuad, QuadInstance).
 
     public static void pack(float[] from, int[] to, VertexFormat formatTo, int v, int e) {
         VertexFormatElement element = formatTo.getElements().get(e);

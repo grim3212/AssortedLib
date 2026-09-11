@@ -11,13 +11,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Presents somebody else's {@link ResourceHandler} as an {@link IItemStorageHandler}, so the rest
- * of the library can read foreign inventories through its own interface.
- * <p>
- * This is the inverse of {@link ForgeItemStorageHandler}. {@code IItemHandler} is deprecated for
- * removal and is not used. The {@code simulate} flag has no counterpart on a
- * {@link ResourceHandler}, so it is expressed the way the transfer API intends: open a transaction,
- * perform the operation, and commit it only when the caller actually wanted the change.
+ * Presents a foreign {@link ResourceHandler} as an {@link IItemStorageHandler}, the inverse of
+ * {@link ForgeItemStorageHandler}. A {@code simulate} call runs in a transaction that is only
+ * committed when the caller wants the change.
  */
 public class ForgeWrappedItemHandler implements IItemStorageHandler {
 

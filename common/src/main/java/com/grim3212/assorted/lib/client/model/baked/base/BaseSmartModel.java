@@ -13,13 +13,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 /**
- * A model that decides at render time which other model actually draws.
- * <p>
- * The block state a smart model varies on is no longer a render time parameter: 26.2 bakes one
- * {@link BlockStateModel} per {@link net.minecraft.world.level.block.state.BlockState} through
- * {@link BlockStateModel.UnbakedRoot#bake(net.minecraft.world.level.block.state.BlockState, net.minecraft.client.resources.model.ModelBaker)},
- * so a subclass should capture whatever it needs from the state while baking. What is still dynamic
- * is the random source and the block entity model data, which is what {@link #handleBlockState} gets.
+ * A model that decides at render time which other model draws, from the random source and the block
+ * entity model data ({@link #handleBlockState}). Each baked model has one block state, so capture
+ * what you need from it while baking.
  */
 public abstract class BaseSmartModel implements IDataAwareBakedModel {
 
@@ -32,12 +28,8 @@ public abstract class BaseSmartModel implements IDataAwareBakedModel {
     }
 
     /**
-     * Picks the model to draw for the given random source and model data.
-     *
-     * @param random    The random source, seeded from the block position.
-     * @param modelData The model data for the position, {@linkplain IBlockModelData#empty() empty} if
-     *                  the call site could not supply any.
-     * @return The model to draw.
+     * Picks the model to draw. {@code random} is seeded from the block position; {@code modelData}
+     * is {@linkplain IBlockModelData#empty() empty} if the call site could not supply any.
      */
     public BlockStateModel handleBlockState(final RandomSource random, final IBlockModelData modelData) {
         return NullBakedModel.instance;
@@ -55,14 +47,7 @@ public abstract class BaseSmartModel implements IDataAwareBakedModel {
         return handleBlockState(RandomSource.create(), IBlockModelData.empty()).materialFlags();
     }
 
-    // TODO(26.2): the item half of this class is gone. It used to install an ItemOverrides subclass
-    //  (OverrideHelper) whose resolve(BakedModel, ItemStack, ClientLevel, LivingEntity, int) called
-    //  back into BaseSmartModel#resolve, which let a smart model swap itself for a different model
-    //  depending on the stack. ItemOverrides and ItemOverride were deleted outright in 26.2 and there
-    //  is no code-registered override list to hook: item variation is data driven now through
-    //  net.minecraft.client.renderer.item.ItemModel and its SelectItemModel / ConditionalItemModel /
-    //  RangeSelectItemModel implementations, selected by codec-registered properties under
-    //  client.renderer.item.properties.**, and declared in the item's own model json. The equivalent
-    //  of the old resolve() is to register an ItemModel.Unbaked type and let the json choose it -
-    //  which is a resource pack change, not something this class can do on the model's behalf.
+    // TODO(26.2): the item half (an ItemOverrides hook that let a smart model swap itself per
+    //  stack) is gone. Per-stack variation is a registered ItemModel.Unbaked chosen by the item's
+    //  model json, a resource change this class cannot make for the model.
 }

@@ -35,12 +35,9 @@ public class AssortedLibFabric implements ModInitializer {
             return TriState.DEFAULT;
         });
 
-        // TODO(26.2): net.fabricmc.fabric.api.event.client.player.ClientPickBlockGatherCallback was
-        //  removed. Pick block is resolved on the server now, through PlayerPickItemEvents.BLOCK,
-        //  which hands over the ServerPlayer, the BlockPos and the BlockState but *not* the
-        //  HitResult the old client side callback carried. IBlockCloneStack still asks for one, so a
-        //  BlockHitResult pointing at the centre of the block is synthesised; the exact face and hit
-        //  vector the player was looking at are no longer available at this point.
+        // TODO(26.2): pick block is resolved on the server (PlayerPickItemEvents.BLOCK), which
+        //  gives no HitResult. IBlockCloneStack still asks for one, so a hit at the block centre is
+        //  synthesised; the real face and hit vector are unavailable.
         PlayerPickItemEvents.BLOCK.register((player, pos, state, includeData) -> {
             if (state.getBlock() instanceof IBlockCloneStack extraProperties) {
                 final BlockHitResult target = new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false);

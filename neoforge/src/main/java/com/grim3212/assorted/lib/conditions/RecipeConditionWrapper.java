@@ -6,13 +6,9 @@ import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.common.conditions.ICondition;
 
 /**
- * Wraps a loader agnostic {@link LibCondition} registered at runtime through
- * {@code IConditionHelper#register(Identifier, LibCondition)}.
- * <p>
- * The 1.20.1 version needed a separate {@code IConditionSerializer} which re-evaluated the condition
- * while reading a recipe's json. A {@link LibCondition} has no parameters any more, so a wrapper is
- * a singleton per name and its codec is a unit codec of itself; the test happens where every other
- * condition's does, in {@link #test(IContext)}.
+ * Wraps a loader agnostic {@link LibCondition} registered through
+ * {@code IConditionHelper#register(Identifier, LibCondition)}. A {@link LibCondition} has no
+ * parameters, so each wrapper is a singleton per name with a unit codec of itself.
  */
 public class RecipeConditionWrapper implements ICondition {
 

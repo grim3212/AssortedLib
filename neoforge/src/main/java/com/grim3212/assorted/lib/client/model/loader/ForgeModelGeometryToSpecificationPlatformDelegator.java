@@ -22,27 +22,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Adapts an {@link IModelSpecification} onto the 26.2 unbaked model pipeline.
- * <p>
- * {@code IUnbakedGeometry} is gone. A custom model json is read into an {@link
- * net.minecraft.client.resources.model.UnbakedModel} now (see
- * {@link ForgePlatformModelLoaderPlatformDelegate}), whose {@link #geometry()} bakes into a
- * {@link QuadCollection}; the standard top level model properties are carried by
- * {@link StandardModelParameters} through {@link AbstractUnbakedModel}.
- * <p>
- * TODO(26.2): a model json loader can no longer contribute a whole {@link BlockStateModel}. The old
- *  {@code IUnbakedGeometry#bake} returned a {@code BakedModel} - the complete model for the block -
- *  so a specification could return something dynamic. In 26.2 the model json layer only produces
- *  geometry: {@code UnbakedGeometry#bake} must hand back a {@link QuadCollection}, and the object
- *  that owns per-render-call behaviour ({@link BlockStateModel}) is chosen in the *blockstate* json
- *  and registered separately through {@code RegisterBlockStateModels} as a
- *  {@code CustomUnbakedBlockStateModel} with a {@code MapCodec}, which has no
- *  {@code JsonDeserializationContext} to hand an {@link com.grim3212.assorted.lib.client.model.loaders.IModelSpecificationLoader}.
- *  The specification is therefore baked once at bake time and its parts are flattened into a single
- *  quad collection here: a specification whose {@code collectParts} varies with the random source or
- *  with {@link com.grim3212.assorted.lib.client.model.data.IBlockModelData} collapses to the parts it
- *  produces for an unseeded random and empty data. Models that need that behaviour have to be wrapped
- *  with {@link ForgeBakedModelDelegate} from the blockstate side instead.
+ * Adapts an {@link IModelSpecification} onto NeoForge's unbaked model pipeline: an {@link
+ * AbstractUnbakedModel} carrying the json's {@link StandardModelParameters}, whose {@link
+ * #geometry()} bakes into a {@link QuadCollection}.
+ * <p> TODO(26.2): a model json loader can only contribute geometry, not a whole {@link
+ * BlockStateModel}, so the specification is baked once and its parts flattened: one that varies
+ * with the random source or {@link com.grim3212.assorted.lib.client.model.data.IBlockModelData}
+ * draws its empty-data parts. Such models must be baked from the blockstate side ({@link
+ * ForgeSpecificationBlockStateModel}, which wraps {@link ForgeBakedModelDelegate}).
  */
 public final class ForgeModelGeometryToSpecificationPlatformDelegator<T extends IModelSpecification<T>> extends AbstractUnbakedModel implements IModelSpecificationHolder {
 

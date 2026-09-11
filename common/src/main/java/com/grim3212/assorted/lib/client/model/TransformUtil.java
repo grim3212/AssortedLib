@@ -35,21 +35,15 @@ public class TransformUtil {
     }
 
     /**
-     * Converts and returns a new transformation based on this transformation from assuming a center-block system to an
-     * opposing-corner-block system.
-     *
-     * @return a new transformation using the opposing-corner-block system
+     * Converts a transformation from a block-centre origin to a block-corner origin, as a new one.
      */
     public static Transformation blockCenterToCorner(Transformation transform) {
         return applyOrigin(transform, new Vector3f(.5f, .5f, .5f));
     }
 
     /**
-     * Returns a new transformation with a changed origin by applying the given parameter (which is relative to the
-     * current origin). This can be used for switching between coordinate systems.
-     *
-     * @param origin the new origin as relative to the current origin
-     * @return a new transformation with a changed origin
+     * A copy of the transformation with its origin moved by {@code origin}, relative to the current
+     * origin. Used to switch between coordinate systems.
      */
     public static Transformation applyOrigin(Transformation transform, Vector3f origin) {
         if (transform.equals(Transformation.IDENTITY)) return Transformation.IDENTITY;

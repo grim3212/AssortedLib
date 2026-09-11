@@ -25,12 +25,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * {@code SimpleChannel}, {@code NetworkRegistry}, {@code NetworkEvent} and {@code NetworkDirection}
- * are all gone: a packet is a {@link CustomPacketPayload} with a {@link StreamCodec} and a typed id,
- * registered through {@link RegisterPayloadHandlersEvent}. Messages keep their loader agnostic shape
- * by being carried inside {@link LibPayload}, which builds that codec out of the encoder/decoder
- * pair {@link MessageHandler} already has - the Fabric side wraps them the same way, so the wire
- * format stays identical.
+ * Registers each message as a {@link LibPayload}, whose {@link StreamCodec} is built from the
+ * {@link MessageHandler}'s encoder/decoder pair; Fabric wraps them the same way, so the wire format
+ * matches.
  */
 public class ForgeNetworkHelper implements INetworkHelper {
 

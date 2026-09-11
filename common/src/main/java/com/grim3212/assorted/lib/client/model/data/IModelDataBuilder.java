@@ -7,12 +7,7 @@ import com.grim3212.assorted.lib.platform.ClientServices;
  */
 public interface IModelDataBuilder {
 
-    /**
-     * Creates a new instance of a builder.
-     * Always creates a builder without any value.
-     *
-     * @return The new data builder.
-     */
+    /** Creates a new, empty builder. */
     static IModelDataBuilder create() {
         return ClientServices.MODELS.createNewModelDataBuilder();
     }
@@ -24,13 +19,6 @@ public interface IModelDataBuilder {
      */
     IBlockModelData build();
 
-    /**
-     * Adds a new value and a key to the builder's configuration.
-     *
-     * @param key   The key for the property.
-     * @param value The value for the property.
-     * @param <T>   The type of the value.
-     * @return The current builder instance.
-     */
+    /** Sets the initial value for {@code key}, returning this builder. */
     <T> IModelDataBuilder withInitial(IModelDataKey<T> key, T value);
 }

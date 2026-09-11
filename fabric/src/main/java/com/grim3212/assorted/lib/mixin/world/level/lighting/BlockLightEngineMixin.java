@@ -63,9 +63,7 @@ public abstract class BlockLightEngineMixin<M extends DataLayerStorageMap<M>, S 
 
     /**
      * The block light source callback {@link BlockLightEngine#propagateLightSources(ChunkPos)}
-     * hands to {@code LightChunk#findBlockLightSources}. It used to be named by its Yarn
-     * intermediary name; 26.x dropped intermediary entirely, so it is named by its real
-     * (official) synthetic name {@code lambda$propagateLightSources$0} instead.
+     * hands to {@code LightChunk#findBlockLightSources}, named by its official synthetic name.
      */
     @Inject(method = "lambda$propagateLightSources$0(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V", at = @At("HEAD"), cancellable = true)
     private void assortedlib_onCallPropagateLightSourcesCallback(BlockPos blockPos, BlockState blockState, CallbackInfo ci) {

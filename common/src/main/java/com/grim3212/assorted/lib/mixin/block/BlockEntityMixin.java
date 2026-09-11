@@ -13,14 +13,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * Re-renders an {@link IBlockEntityWithModelData} block entity whenever the client loads new data
- * into it. A block entity sync packet and an update tag both end in {@code loadWithComponents}.
- * <p>
- * Neither loader does this. NeoForge's {@code onDataPacket} / {@code handleUpdateTag} only load the
- * data, and {@code ModelDataManager#requestRefresh} only takes effect at the section's next rebuild;
- * Fabric reads model data at rebuild time too. So a block whose look lives in its block entity - a
- * colorizer's stored block, a locked barrel's padlock - changed only for the player who changed it.
- * Doing it here covers every such block entity in every mod instead of each one remembering to.
- * Nothing happens for any other block entity, or on the server.
+ * into it (a sync packet and an update tag both end in {@code loadWithComponents}). Neither loader
+ * does this - both only read model data at the section's next rebuild - so a block whose look lives
+ * in its block entity changed only for the player who changed it.
  */
 @Mixin(BlockEntity.class)
 public abstract class BlockEntityMixin {

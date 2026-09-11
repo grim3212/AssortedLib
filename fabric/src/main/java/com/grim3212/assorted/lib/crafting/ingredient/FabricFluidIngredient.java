@@ -48,12 +48,8 @@ public class FabricFluidIngredient extends LibFluidIngredient implements CustomI
     }
 
     /**
-     * The items this ingredient may ever match, used to build the recipe book display and the
-     * ingredient index.
-     * <p>
-     * Added in 26.2: {@link CustomIngredient} no longer exposes matching {@linkplain ItemStack
-     * stacks}, it exposes {@linkplain Holder holders} of the items themselves - the stack specific
-     * part (the contained fluid) is what {@link #test(ItemStack)} is for.
+     * The items this ingredient may ever match, for the recipe book display and the ingredient
+     * index. The contained fluid is checked per stack in {@link #test(ItemStack)}.
      */
     @Override
     public Stream<Holder<Item>> items() {

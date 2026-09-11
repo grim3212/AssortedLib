@@ -13,14 +13,10 @@ import net.minecraft.world.level.block.state.BlockState;
 public class ItemUtil {
 
     /**
-     * Destroys a block
-     * If the Item in the main hand does not provide drops then the block
-     * will be broken without any drops
+     * Breaks a block as the player would. It drops nothing unless the main-hand item is the correct
+     * tool for it.
      *
-     * @param blockPos
-     * @param level
-     * @param player
-     * @return
+     * @return false if the player may not break it
      */
     public static boolean destroyBlock(BlockPos blockPos, Level level, Player player) {
         BlockState blockState = level.getBlockState(blockPos);

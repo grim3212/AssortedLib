@@ -19,14 +19,9 @@ import org.joml.Vector3fc;
 import java.util.List;
 
 /**
- * A full block cube generated from a single sprite, with every face using the whole texture.
- * <p>
- * 1.20.1 built this by hand: bake a quad per side, unpack the resulting {@code int[]} vertex data and
- * repack it with {@link com.grim3212.assorted.lib.client.util.LightUtil#diffuseLight(Direction)}
- * folded into the vertex colours. {@link BakedQuad} is an immutable record of four positions, four
- * packed uvs, a direction and a {@link BakedQuad.MaterialInfo} in 26.2 - there is no vertex colour to
- * write to - so the diffuse term is left to the renderer by baking the quads with {@code shade = true},
- * which is what it is for.
+ * A full block cube generated from one sprite, with every face using the whole texture. The quads
+ * are baked with {@code shade = true} so the renderer applies diffuse light; a {@link BakedQuad}
+ * has no vertex colour to bake it into.
  */
 public class SimpleGeneratedModel extends BaseBakedBlockModel {
 

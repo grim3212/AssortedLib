@@ -11,15 +11,10 @@ import net.minecraft.resources.Identifier;
 import java.util.Optional;
 
 /**
- * An {@link IModelBakingContext} answered from a {@link ResolvedModel}.
- * <p>
- * The loader specific contexts read the model's own top level properties, which is right when a
- * specification is baked from inside its own model json. This one is for the other direction - a
- * blockstate baking a specification model it only knows by location - and answers from the
- * {@code getTop*} accessors instead, so ambient occlusion, gui light and the transforms come from
- * wherever they were actually declared in the parent chain rather than only from the leaf json.
- * <p>
- * Nothing here is loader specific: {@link ResolvedModel} and {@link ModelBaker} are both vanilla.
+ * An {@link IModelBakingContext} answered from a {@link ResolvedModel}, for a blockstate baking a
+ * specification model it only knows by location. It reads the {@code getTop*} accessors, so ambient
+ * occlusion, gui light and transforms come from wherever the parent chain declared them, not only
+ * from the leaf json.
  */
 public final class ResolvedModelBakingContext implements IModelBakingContext {
 

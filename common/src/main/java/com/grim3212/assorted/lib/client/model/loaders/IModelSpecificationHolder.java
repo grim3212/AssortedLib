@@ -5,16 +5,11 @@ import net.minecraft.client.resources.model.ResolvedModel;
 import net.minecraft.client.resources.model.UnbakedModel;
 
 /**
- * Implemented by the loader specific {@link UnbakedModel} that a model json's {@code loader} key
- * produces, so the specification inside it can be reached again from a {@link ModelBaker}.
- * <p>
- * Needed because a specification is only half useful through the model json pipeline. That path can
- * hand back geometry and nothing else, so a specification whose output varies with block entity data
- * collapses to its empty-data output there (see
- * {@code ForgeModelGeometryToSpecificationPlatformDelegator}). Reaching the specification through
- * {@link ResolvedModel#wrapped()} instead lets the <em>blockstate</em> side bake it into a whole
- * {@code BlockStateModel}, which is the only layer in 26.2 that still sees the level and the
- * position.
+ * Implemented by the loader specific {@link UnbakedModel} a model json's {@code loader} produces,
+ * so its specification can be reached from a {@link ModelBaker} via {@link
+ * ResolvedModel#wrapped()}. The model json path yields only geometry baked with empty data; the
+ * blockstate side uses this to bake the specification into a whole {@code BlockStateModel}, which
+ * still sees level and position.
  */
 public interface IModelSpecificationHolder {
 

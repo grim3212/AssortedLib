@@ -15,13 +15,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 /**
- * The part of {@link IEventHelper} both loaders share. Each library event type maps to the hook that
- * makes this loader raise it, and that hook is installed once - the first time any mod registers a
- * handler for the type, however many mods do.
- * <p>
- * Registration happens in mod constructors, which NeoForge runs on parallel worker threads, and
- * dispatch can happen on the client and server threads at once; hence the synchronized registration
- * and the copy-on-write handler lists.
+ * The part of {@link IEventHelper} both loaders share. Each event type's hook is installed once,
+ * the first time any mod registers a handler for it. Registration runs on NeoForge's parallel mod
+ * constructor threads and dispatch on client and server threads at once, hence the synchronized
+ * registration and copy-on-write handler lists.
  */
 public abstract class EventHelperBase implements IEventHelper {
     private final Map<Class<?>, Runnable> hooks = new ConcurrentHashMap<>();

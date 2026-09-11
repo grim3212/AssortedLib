@@ -49,12 +49,7 @@ public interface IPlatformHelper {
 
     void openMenu(ServerPlayer player, MenuProvider provider, Consumer<FriendlyByteBuf> extraDataWriter);
 
-    /**
-     * Checks if a mod with the given id is loaded.
-     *
-     * @param modId The mod to check if it is loaded.
-     * @return True if the mod is loaded, false otherwise.
-     */
+    /** Whether a mod with the given id is loaded. */
     boolean isModLoaded(String modId);
 
     boolean isFakePlayer(Player player);
@@ -82,12 +77,10 @@ public interface IPlatformHelper {
     void modifyCreativeTab(final ResourceKey<CreativeModeTab> key, Supplier<List<ItemStack>> displayStacks);
 
     /**
-     * Shows a mod data component's {@link TooltipProvider} lines on every stack that carries it, just
-     * ahead of vanilla's own component lines - where the now deprecated {@code Item#appendHoverText}
-     * put them. Without this vanilla only asks the components on its own fixed list.
-     * <p>
-     * Call once from common init, after the type is registered. Fabric only adds these lines on the
-     * client; NeoForge adds them on both sides.
+     * Shows a data component's {@link TooltipProvider} lines on every stack carrying it, ahead of
+     * vanilla's own component lines; otherwise vanilla only asks the components on its fixed list.
+     * Call once from common init, after the type is registered. Fabric adds these lines on the
+     * client only, NeoForge on both sides.
      */
     <T extends TooltipProvider> void showComponentTooltip(Supplier<DataComponentType<T>> type);
 
@@ -107,13 +100,9 @@ public interface IPlatformHelper {
     }
 
     /**
-     * Burn times are data-driven in 26.x and resolved per level, so this needs a level to look
-     * against. Both loaders now feed the vanilla fuel registry, so there is no platform-specific
-     * behaviour left here.
-     * <p>
-     * NeoForge deprecates {@code FuelValues#burnDuration} in favour of an {@code ItemStack} extension
-     * that also takes the recipe type; that extension only exists in its patched jar, while this module
-     * builds against vanilla, so the vanilla lookup is the only one available here.
+     * Burn times are data-driven and resolved per level. NeoForge deprecates
+     * {@code FuelValues#burnDuration} for an {@code ItemStack} extension that only exists in its
+     * patched jar, so the vanilla lookup is the only one common can call.
      */
     @SuppressWarnings("deprecation")
     default int getFuelTime(Level level, ItemStack stack) {
@@ -138,10 +127,8 @@ public interface IPlatformHelper {
     }
 
     /**
-     * Vanilla no longer exposes a scalar tool tier. {@code Tiers} and {@code TieredItem} were
-     * removed, and mining capability now lives in the {@link DataComponents#TOOL} component as a
-     * list of per-block rules. What is still testable is whether a tool can correctly harvest the
-     * blocks vanilla gates behind a given tier, so a tier is expressed as that harvest level.
+     * A tool tier expressed as the vanilla harvest level it reaches, since tools only carry
+     * per-block rules in {@link DataComponents#TOOL}.
      */
     enum ToolTier {
         WOOD(0),
@@ -180,11 +167,10 @@ public interface IPlatformHelper {
     }
 
     /**
-     * Probes a tool against one representative block per vanilla harvest tier: the blocks behind
-     * NEEDS_DIAMOND_TOOL, NEEDS_IRON_TOOL and NEEDS_STONE_TOOL. Only the rules that deny drops are
-     * asked. Those carry the tool material whatever the tool type, so a shovel, axe or hoe reads the
-     * same tier as a pickaxe of the same material. Whether it can mine the block at all is not the
-     * question here; probing that is what used to leave every non-pickaxe at wood.
+     * Probes one representative block per vanilla harvest tier (NEEDS_DIAMOND/IRON/STONE_TOOL),
+     * asking only the rules that deny drops. Those carry the material whatever the tool type, so a
+     * shovel reads the same tier as a pickaxe of its material; asking whether it can mine the block
+     * would not.
      */
     private static int harvestLevelOf(Tool tool) {
         if (!deniesDrops(tool, Blocks.OBSIDIAN.defaultBlockState())) {

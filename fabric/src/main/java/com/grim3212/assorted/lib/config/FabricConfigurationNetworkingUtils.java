@@ -19,13 +19,8 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 /**
- * Client bound configuration syncing.
- * <p>
- * 1.20.1 registered a raw {@code FriendlyByteBuf} channel and wrote the serialised config into it.
- * Raw channels are gone in 26.x: every packet is a {@link CustomPacketPayload} with a
- * {@link StreamCodec}, registered up front through Fabric's {@link PayloadTypeRegistry} so both ends
- * agree on the wire format. The payload itself still carries exactly what it used to - the whole
- * config tree as one json string.
+ * Client bound config syncing: the whole config tree as one json string, in a
+ * {@link CustomPacketPayload} registered through {@link PayloadTypeRegistry}.
  */
 public class FabricConfigurationNetworkingUtils {
 
@@ -64,12 +59,8 @@ public class FabricConfigurationNetworkingUtils {
     }
 
     /**
-     * Registers the client side receiver which applies the synced configs.
-     *
-     * @param channelName           The channel to listen on, only used to validate the caller agrees
-     *                              with {@link #CONFIG_SYNC_CHANNEL_ID}.
-     * @param gson                  The gson instance to parse the payload with.
-     * @param syncedSourcesProvider The specs to load the synced values into.
+     * Registers the client side receiver that applies the synced configs. {@code channelName} is
+     * only checked against {@link #CONFIG_SYNC_CHANNEL_ID}.
      */
     public static void registerNetworkingChannel(final Identifier channelName, final Gson gson, Supplier<Map<String, FabricConfigurationSpec>> syncedSourcesProvider) {
         if (!CONFIG_SYNC_CHANNEL_ID.equals(channelName))
@@ -95,12 +86,7 @@ public class FabricConfigurationNetworkingUtils {
         });
     }
 
-    /**
-     * Sends the serialised configs to a single player.
-     *
-     * @param serverPlayer The player to send to.
-     * @param payload      The serialised config tree.
-     */
+    /** Sends the serialised config tree to one player. */
     public static void sendTo(final ServerPlayer serverPlayer, final String payload) {
         ServerPlayNetworking.send(serverPlayer, new ConfigSyncPayload(payload));
     }

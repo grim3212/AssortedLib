@@ -12,11 +12,9 @@ import net.neoforged.neoforge.client.model.StandardModelParameters;
 import java.util.Optional;
 
 /**
- * {@code IGeometryBakingContext} has no NeoForge equivalent. The information it carried is split in
- * 26.2: the resolved texture references are a {@link TextureSlots} handed to
- * {@link net.minecraft.client.resources.model.geometry.UnbakedGeometry#bake} and the remaining top
- * level model properties are the {@link StandardModelParameters} the loader parsed out of the model
- * json, so this context is built from both.
+ * An {@link IModelBakingContext} built from the {@link TextureSlots} handed to
+ * {@link net.minecraft.client.resources.model.geometry.UnbakedGeometry#bake} and the
+ * {@link StandardModelParameters} the loader parsed from the model json.
  */
 public class ForgeModelBakingContextDelegate implements IModelBakingContext {
 

@@ -38,36 +38,15 @@ public interface IFluidVariantHandler {
      */
     int getViscosity(FluidInformation variant);
 
-    /**
-     * Returns the density of this fluid.
-     * If the fluid is lighter than air, then it's density is less or equal to 0
-     *
-     * @param variant The fluid variant
-     * @return The density of the fluid
-     */
+    /** The fluid's density; 0 or less means it is lighter than air. */
     int getDensity(FluidInformation variant);
 
-    /**
-     * Returns the color of the fluid.
-     *
-     * @param variant The fluid variant
-     * @return The color of the fluid
-     */
+    /** The fluid's tint colour. */
     int getTintColor(FluidInformation variant);
 
-    /**
-     * Returns the resource location of the still texture of the fluid.
-     *
-     * @param variant The fluid variant
-     * @return The resource location of the still texture of the fluid
-     */
+    /** The fluid's still texture, if it has one. */
     Optional<Identifier> getStillTexture(FluidInformation variant);
 
-    /**
-     * Returns the resource location of the flowing texture of the fluid.
-     *
-     * @param variant The fluid variant
-     * @return The resource location of the flowing texture of the fluid
-     */
+    /** The fluid's flowing texture, if it has one. */
     Optional<Identifier> getFlowingTexture(FluidInformation variant);
 }

@@ -10,19 +10,10 @@ import net.minecraft.client.resources.model.cuboid.CuboidModel;
 import net.minecraft.resources.Identifier;
 
 /**
- * Parses a model json into a {@link FabricExtendedBlockModel}.
- * <p>
- * The 1.20.1 version had to sniff the {@code "loader"} field itself and decide whether to hand back a
- * plain model or an extended one. Fabric does that dispatch now: a json names its loader with
- * {@code "fabric:type": "<namespace:path>"} and
- * {@link net.fabricmc.fabric.api.client.model.loading.v1.UnbakedModelDeserializer} routes it to the
- * deserializer registered under that id, so by the time this runs the loader is already known and
- * the whole object belongs to it.
- * <p>
- * The vanilla half of the json - {@code parent}, {@code textures}, {@code display},
- * {@code gui_light}, {@code ambientocclusion} - is parsed by the vanilla deserializer, which is
- * invoked directly rather than through {@code context.deserialize} because the model gson dispatches
- * {@link UnbakedModel} back into Fabric's deserializer and would recurse.
+ * Parses a model json into a {@link FabricExtendedBlockModel}. Fabric has already dispatched on
+ * {@code "fabric:type"}, so the whole object belongs to this loader. The vanilla half
+ * ({@code parent}, {@code textures}, {@code display}, ...) goes to the vanilla deserializer
+ * directly: {@code context.deserialize} would dispatch back into Fabric's deserializer and recurse.
  */
 public class FabricExtendedBlockModelDeserializer extends CuboidModel.Deserializer {
 

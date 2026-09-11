@@ -7,13 +7,9 @@ import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 /**
- * An opaque handle on one {@link ICondition}.
- * <p>
- * The 1.20.1 version reflected {@code CraftingHelper}'s serializer map so it could write the
- * condition into a recipe's json itself. Conditions are attached by wrapping the {@code RecipeOutput}
- * now (see {@code IConditionHelper#conditionalOutput}) and serialised by their registered
- * {@link com.mojang.serialization.MapCodec}, so all this has to do is carry the condition and be
- * able to name it.
+ * An opaque handle on one {@link ICondition}. Conditions are attached by wrapping the
+ * {@code RecipeOutput} ({@code IConditionHelper#conditionalOutput}) and serialised by their
+ * registered codec, so this only carries the condition and names it.
  */
 public class ForgeConditionProvider implements LibConditionProvider {
 

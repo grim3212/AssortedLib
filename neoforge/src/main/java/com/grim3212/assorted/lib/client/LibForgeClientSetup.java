@@ -10,12 +10,9 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.RegisterBlockStateModels;
 
 /**
- * The library's own client side registrations, as opposed to the per consuming mod ones
- * {@code ForgeClientHelper.Registrations} collects.
- * <p>
- * A second {@code @Mod} class for the same mod id, with {@code dist = Dist.CLIENT}, is how a
- * client-only entry point is written in 26.2 - the constructor runs only on the client, so client
- * only types like {@link RegisterBlockStateModels} are never loaded on a dedicated server.
+ * The library's own client side registrations (per-mod ones go through
+ * {@code ForgeClientHelper.Registrations}). A second {@code @Mod} with {@code dist = Dist.CLIENT},
+ * so client-only types like {@link RegisterBlockStateModels} never load on a dedicated server.
  */
 @Mod(value = LibConstants.MOD_ID, dist = Dist.CLIENT)
 public class LibForgeClientSetup {

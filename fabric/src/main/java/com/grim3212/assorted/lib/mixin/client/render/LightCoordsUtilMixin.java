@@ -10,14 +10,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 /**
- * Feeds the position dependent {@link IBlockLightEmission} value into the packed light coordinates a
- * block is drawn with.
- * <p>
- * The 1.20.1 hook was {@code LevelRenderer#getLightColor(BlockAndTintGetter, BlockState, BlockPos)}.
- * {@link net.minecraft.client.renderer.LevelRenderer} does not compute light at all in 26.2 - the
- * whole packing lives in {@link LightCoordsUtil#getLightCoords(LightCoordsUtil.BrightnessGetter,
- * BlockAndLightGetter, BlockState, BlockPos)}, which is what {@code BlockModelLighter} and every
- * other call site goes through - so the same redirect is applied there instead.
+ * Feeds the position dependent {@link IBlockLightEmission} value into the packed light coordinates
+ * a block is drawn with. {@link LightCoordsUtil#getLightCoords(LightCoordsUtil.BrightnessGetter,
+ * BlockAndLightGetter, BlockState, BlockPos)} is where every call site packs block light.
  */
 @Mixin(LightCoordsUtil.class)
 public abstract class LightCoordsUtilMixin {

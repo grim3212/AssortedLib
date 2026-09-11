@@ -3,10 +3,9 @@ package com.grim3212.assorted.lib.client.model;
 import net.minecraft.client.renderer.rendertype.RenderType;
 
 /**
- * A set of functionally equivalent shaders. One using {@link com.mojang.blaze3d.vertex.DefaultVertexFormat#BLOCK},
- * and the other two using {@link com.mojang.blaze3d.vertex.DefaultVertexFormat#NEW_ENTITY}.
- * {@code entityFabulous} may support custom render targets and other aspects of the fabulous pipeline, or can otherwise
- * be the same as {@code entity}.
+ * Equivalent render types: one on {@link com.mojang.blaze3d.vertex.DefaultVertexFormat#BLOCK}, two
+ * on {@code NEW_ENTITY}. {@code entityFabulous} may use fabulous render targets, or equal
+ * {@code entity}.
  */
 public record RenderTypeGroup(RenderType block, RenderType entity, RenderType entityFabulous) {
     public static RenderTypeGroup EMPTY = new RenderTypeGroup(null, null, null);

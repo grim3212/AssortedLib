@@ -9,15 +9,10 @@ import net.neoforged.neoforge.client.model.generators.blockstate.CustomBlockStat
 import net.neoforged.neoforge.client.model.generators.blockstate.UnbakedMutator;
 
 /**
- * Datagen side of {@link ForgeSpecificationBlockStateModel}: emits a blockstate variant that names
- * the specification model type instead of the vanilla one.
- * <p>
- * NeoForge ships {@link CustomBlockStateModelBuilder.Simple}, but it drops every
- * {@link VariantMutator} on the floor - its {@code with} returns {@code this} - which would silently
- * throw away the {@code x} / {@code y} / {@code uvlock} that a rotated blockstate is built from. This
- * builder keeps a real {@link Variant} and applies mutators to it, so
- * {@code plainVariant(...).with(yRot(90))} means the same thing here as it does for a vanilla
- * variant.
+ * Datagen side of {@link ForgeSpecificationBlockStateModel}: a blockstate variant naming the
+ * specification model type. NeoForge's {@link CustomBlockStateModelBuilder.Simple} ignores every
+ * {@link VariantMutator}, dropping {@code x} / {@code y} / {@code uvlock}; this one applies them to
+ * a real {@link Variant}.
  */
 public final class SpecificationBlockStateModelBuilder extends CustomBlockStateModelBuilder {
 

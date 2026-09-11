@@ -75,13 +75,9 @@ final class InventoryTests {
     }
 
     /**
-     * A block entity's inventory reached the way a hopper reaches it - through the level, per face -
-     * and seen from both directions: what goes in through the abstraction is visible to vanilla, and
-     * what vanilla puts in is visible through the abstraction.
-     * <p>
-     * This is the sided-inventory bridge ({@code ResourceHandler} on NeoForge, the transfer API on
-     * Fabric) over a block entity the library knows nothing about, which is the part most likely to
-     * diverge between the two loaders.
+     * A block entity's inventory reached the way a hopper reaches it, per face through the level:
+     * what goes in through the abstraction is visible to vanilla and vice versa. This sided bridge
+     * over an unknown block entity is the part most likely to diverge between the loaders.
      */
     private static void blockEntityHandlerFromLevel(GameTestHelper helper) {
         helper.setBlock(WORK, Blocks.CHEST);

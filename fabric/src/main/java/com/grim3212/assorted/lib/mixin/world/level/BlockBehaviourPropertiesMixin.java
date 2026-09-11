@@ -13,13 +13,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * Makes the default {@code isValidSpawn} predicate consult {@link IBlockLightEmission} so a block
- * whose light level depends on its position still blocks mob spawns correctly.
- * <p>
- * The target is the lambda that initialises {@link BlockBehaviour.Properties#isValidSpawn}, i.e.
- * only blocks that did not set their own predicate. It used to be named by its Yarn intermediary
- * name; 26.x dropped intermediary entirely, so it is named by its real (official) synthetic name
- * {@code lambda$new$4} instead.
+ * Makes the default {@code isValidSpawn} predicate consult {@link IBlockLightEmission}, so a block
+ * whose light depends on its position still blocks mob spawns. Targets the lambda initialising
+ * {@link BlockBehaviour.Properties#isValidSpawn} (official synthetic name {@code lambda$new$4}), so
+ * only blocks that did not set their own predicate are affected.
  */
 @Mixin(BlockBehaviour.Properties.class)
 public class BlockBehaviourPropertiesMixin {

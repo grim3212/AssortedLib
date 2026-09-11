@@ -12,13 +12,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Lets an {@link IBlockEffectSupplier} block draw its own hit and break particles.
- * <p>
- * The 1.20.1 hooks were {@code ParticleEngine#crack(BlockPos, Direction)} and
- * {@code ParticleEngine#destroy(BlockPos, BlockState)}. 26.2 moved both out of
- * {@link net.minecraft.client.particle.ParticleEngine} - which now only owns the particle lists -
- * onto {@link ClientLevel} as {@code addBreakingBlockEffect} and {@code addDestroyBlockEffect},
- * so the injections follow them there.
+ * Lets an {@link IBlockEffectSupplier} block draw its own hit and break particles, through
+ * {@link ClientLevel}'s {@code addBreakingBlockEffect} and {@code addDestroyBlockEffect}.
  */
 @Mixin(ClientLevel.class)
 public abstract class ClientLevelMixin {

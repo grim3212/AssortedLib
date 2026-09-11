@@ -100,10 +100,9 @@ final class LibTestSupport {
     }
 
     /**
-     * A handler for each library event, answering only for a {@link #probe} stack and each with an
-     * outcome vanilla would never produce, so a test can see from a real interaction that the event
-     * reached it. Registered on first use rather than at load, because nothing in {@code main} may
-     * reference the gametest source set.
+     * A handler for each library event that answers only for a {@link #probe} stack, with an
+     * outcome vanilla never produces, so a test can see the event reached it. Registered on first
+     * use because nothing in {@code main} may reference the gametest source set.
      */
     static synchronized void registerProbes() {
         if (probesRegistered) {

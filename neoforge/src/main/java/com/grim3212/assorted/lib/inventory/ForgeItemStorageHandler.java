@@ -13,18 +13,9 @@ import java.util.List;
 
 /**
  * Exposes an {@link IItemStorageHandler} as NeoForge's {@link ResourceHandler}, the type behind
- * {@code Capabilities.Item.*}.
- * <p>
- * {@code IItemHandler} is deprecated for removal and is deliberately not used anywhere here. The
- * two models differ in more than naming: a {@link ResourceHandler} works in terms of an
- * {@link ItemResource} (an item plus its component patch, with no count) and an explicit amount,
- * and every mutation takes part in a {@link TransactionContext} that may later be rolled back,
- * where the old interface used a {@code simulate} flag.
- * <p>
- * Rollback is provided by snapshotting the backing slots through a {@link SnapshotJournal}. The
- * whole slot list is copied per transaction rather than tracking individual slots; the handlers
- * this wraps are machine inventories of a few slots, so the simplicity is worth more than the
- * saved copies.
+ * {@code Capabilities.Item.*}. Rollback snapshots the whole slot list per
+ * {@link TransactionContext} through a {@link SnapshotJournal}; the wrapped inventories are a few
+ * slots, so simplicity wins over tracking single slots.
  */
 public class ForgeItemStorageHandler implements ResourceHandler<ItemResource> {
 

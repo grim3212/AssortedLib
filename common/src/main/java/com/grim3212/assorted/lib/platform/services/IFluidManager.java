@@ -9,12 +9,7 @@ import net.minecraft.world.level.material.Fluid;
 import java.util.Optional;
 
 public interface IFluidManager {
-    /**
-     * Returns the fluid, and the amount of fluid stored in the given itemstack.
-     *
-     * @param stack The item stack to get the fluid from.
-     * @return An optional possibly containing the fluid and the amount of fluid in the stack.
-     */
+    /** The fluid and amount stored in the stack, if any. */
     Optional<FluidInformation> get(final ItemStack stack);
 
     /**
@@ -27,15 +22,10 @@ public interface IFluidManager {
     }
 
     /**
-     * Extracts up to the given amount of fluid from one item of the given stack.
-     * <p>
-     * Works on a copy of a single item and never modifies {@code stack} itself; the caller decides
-     * what to do with the result, e.g. shrink the stack by one and give the result back.
+     * Extracts up to {@code amount} of fluid from one item of the stack, working on a copy.
+     * {@code stack} is never modified; the caller decides what to do with the result.
      *
-     * @param stack  The stack to extract from.
-     * @param amount The amount to extract.
-     * @return What that one item became, e.g. an empty bucket. An unchanged copy of it when nothing
-     * could be extracted.
+     * @return what the item became (e.g. an empty bucket), or an unchanged copy if nothing moved
      */
     ItemStack extractFrom(final ItemStack stack, final long amount);
 
@@ -45,14 +35,9 @@ public interface IFluidManager {
     long simulateExtract(final ItemStack stack, final long amount);
 
     /**
-     * Inserts the given fluid into one item of the given stack.
-     * <p>
-     * Works on a copy of a single item and never modifies {@code stack} itself.
+     * Inserts the fluid into one item of the stack, working on a copy; {@code stack} is untouched.
      *
-     * @param stack            The stack to insert into.
-     * @param fluidInformation The fluid to insert.
-     * @return What that one item became, e.g. a water bucket. An unchanged copy of it when nothing
-     * could be inserted.
+     * @return what the item became (e.g. a water bucket), or an unchanged copy if nothing moved
      */
     ItemStack insertInto(ItemStack stack, FluidInformation fluidInformation);
 
@@ -61,40 +46,18 @@ public interface IFluidManager {
      */
     long simulateInsert(ItemStack stack, FluidInformation fluidInformation);
 
-    /**
-     * The amount of a fluid in a single bucket on a given platform.
-     * In general this is 1000 mB, which is equal to one block.
-     *
-     * @return The amount of fluid in one bucket.
-     */
+    /** The amount of fluid in one bucket on this loader. */
     default long getBucketAmount() {
         return 1000;
     }
 
-    /**
-     * Gets the display name of the fluid.
-     *
-     * @param fluid The fluid to get the display name from.
-     * @return The display name of the fluid.
-     */
+    /** The fluid's display name. */
     Component getDisplayName(final Fluid fluid);
 
-    /**
-     * Returns the fluid variant handler for the given fluid.
-     * This might be empty or filled with a default handler depending on the platform.
-     *
-     * @param fluid The fluid to get the handler for.
-     * @return The fluid variant handler for the given fluid.
-     */
+    /** The fluid's variant handler: empty, or a default handler, depending on the loader. */
     Optional<IFluidVariantHandler> getVariantHandlerFor(final Fluid fluid);
 
-    /**
-     * Returns the fluid variant handler for the given fluid information.
-     * This might be empty or filled with a default handler depending on the platform.
-     *
-     * @param fluid The fluid information to get the handler for.
-     * @return The fluid variant handler for the given fluid information.
-     */
+    /** The fluid's variant handler: empty, or a default handler, depending on the loader. */
     default Optional<IFluidVariantHandler> getVariantHandlerFor(FluidInformation fluid) {
         return getVariantHandlerFor(fluid.fluid());
     }

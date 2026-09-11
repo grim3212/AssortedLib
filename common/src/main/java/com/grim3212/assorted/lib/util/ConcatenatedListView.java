@@ -13,10 +13,8 @@ import java.util.*;
 import java.util.function.Supplier;
 
 /**
- * A list that concatenates multiple other lists for efficient iteration.
- * You may use this in place of creating a new list and calling {@link List#addAll(Collection)}
- * for each of your collections.
- * This list does not support modification operations, but the underlying lists may be mutated safely externally.
+ * A read-only view concatenating several lists, instead of copying them into a new one. The
+ * underlying lists may still be mutated.
  */
 public class ConcatenatedListView<T> implements List<T> {
     @SafeVarargs

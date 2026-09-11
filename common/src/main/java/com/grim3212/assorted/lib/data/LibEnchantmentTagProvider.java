@@ -14,13 +14,10 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Enchantment tags for a mod's own enchantments.
- * <p>
- * Whether an enchantment is offered at the enchanting table, sold by librarians or rolled into loot
- * is only these vanilla tags in 26.2 - the 1.20.1 {@code isDiscoverable()} / {@code isTradeable()}
- * overrides went with the enchantment classes. Every entry written through {@link #obtainable} is
- * optional, so an enchantment switched off by a condition on its definition (see
- * {@link LibDatapackRegistryProvider#conditions()}) drops out of the tag instead of failing vanilla's tag with it.
+ * Enchantment tags for a mod's own enchantments, which decide whether one is offered at the table,
+ * traded or looted. Entries from {@link #obtainable} are optional, so an enchantment disabled by a
+ * condition on its definition ({@link LibDatapackRegistryProvider#conditions()}) drops out of the
+ * tag instead of breaking it.
  */
 public abstract class LibEnchantmentTagProvider extends TagsProvider<Enchantment> {
 

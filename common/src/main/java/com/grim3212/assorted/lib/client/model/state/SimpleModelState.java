@@ -16,13 +16,9 @@ import java.util.EnumMap;
 import java.util.Map;
 
 /**
- * Simple implementation of {@link ModelState}.
- * <p>
- * In 26.2 uv locking is no longer a boolean the baker reads back off the state; instead a uv locked
- * state reports a per face transformation which {@link net.minecraft.client.resources.model.cuboid.FaceBakery}
- * applies to the uvs. This class keeps the old {@code uvLocked} constructor flag and derives those
- * face transformations the same way {@link net.minecraft.client.renderer.block.dispatch.BlockModelRotation}
- * does.
+ * Simple {@link ModelState}. A uv locked state reports per face uv transformations for
+ * {@link net.minecraft.client.resources.model.cuboid.FaceBakery} rather than a flag; they are
+ * derived the way {@link net.minecraft.client.renderer.block.dispatch.BlockModelRotation} does.
  */
 public final class SimpleModelState implements ModelState {
     private final Transformation transformation;

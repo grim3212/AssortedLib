@@ -22,10 +22,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 26.x removed raw {@code FriendlyByteBuf} channels: every packet is a {@link CustomPacketPayload}
- * with a {@link StreamCodec}, declared up front through Fabric's {@link PayloadTypeRegistry}.
- * {@link LibPayload} keeps {@code INetworkHelper.MessageHandler} usable as it is by wrapping the
- * message and building the codec from the encoder/decoder pair the handler already carries.
+ * Every packet is a {@link CustomPacketPayload} registered through {@link PayloadTypeRegistry};
+ * {@link LibPayload} wraps each message, building its {@link StreamCodec} from the handler's
+ * encoder/decoder pair, so the wire format matches NeoForge's.
  */
 public class FabricNetworkHelper implements INetworkHelper {
 

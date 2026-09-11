@@ -21,19 +21,11 @@ public class DistExecutor {
     }
 
     /**
-     * Run the callable in the supplier only on the specified {@link com.grim3212.assorted.lib.dist.Dist}.
-     * This method is NOT sided-safe and special care needs to be taken in code using this method that implicit class
-     * loading is not triggered by the Callable.
-     * <p>
-     * This method can cause unexpected ClassNotFound exceptions.
-     * <p>
-     * Use {@link #safeCallWhenOn(Dist, Supplier)} where possible.
+     * Calls the callable only on {@code dist}. Not side-safe: the callable must not trigger loading
+     * of classes missing on the other side.
      *
-     * @param dist  The dist to run on
-     * @param toRun A supplier of the callable to run (Supplier wrapper to ensure classloading only on the appropriate dist)
-     * @param <T>   The return type from the callable
-     * @return The callable's result
-     * @deprecated use {@link #safeCallWhenOn(Dist, Supplier)} instead. This remains for advanced use cases.
+     * @return the callable's result, or null on the other side
+     * @deprecated use {@link #safeCallWhenOn(Dist, Supplier)}; this is for advanced use only
      */
     @Deprecated
     public static <T> T callWhenOn(Dist dist, Supplier<Callable<T>> toRun) {
@@ -52,15 +44,10 @@ public class DistExecutor {
     }
 
     /**
-     * Call the SafeCallable when on the correct {@link Dist}.
+     * Calls the SafeCallable only on {@code dist}. {@code toRun} must supply a method reference to
+     * a method in another class, or it fails the {@link SafeReferent} check.
      *
-     * <strong>The lambda supplied here is required to be a method reference to a method defined in
-     * another class, otherwise an invalid SafeReferent error will be thrown</strong>
-     *
-     * @param dist  the dist which this will run on
-     * @param toRun the SafeCallable to run and return the result from
-     * @param <T>   The type of the SafeCallable
-     * @return the result of the SafeCallable or null if on the wrong side
+     * @return the result, or null on the other side
      */
     public static <T> T safeCallWhenOn(Dist dist, Supplier<SafeCallable<T>> toRun) {
         validateSafeReferent(toRun);
@@ -68,14 +55,10 @@ public class DistExecutor {
     }
 
     /**
-     * Runs the supplied Runnable on the speicified side. Same warnings apply as {@link #callWhenOn(Dist, Supplier)}.
-     * <p>
-     * This method can cause unexpected ClassNotFound exceptions.
+     * Runs the runnable only on {@code dist}; not side-safe, like
+     * {@link #callWhenOn(Dist, Supplier)}.
      *
-     * @param dist  Dist to run this code on
-     * @param toRun The code to run
-     * @see #callWhenOn(Dist, Supplier)
-     * @deprecated use {@link #safeRunWhenOn(Dist, Supplier)} where possible. Advanced uses only.
+     * @deprecated use {@link #safeRunWhenOn(Dist, Supplier)}; this is for advanced use only
      */
     @Deprecated
     public static void runWhenOn(Dist dist, Supplier<Runnable> toRun) {
@@ -83,16 +66,8 @@ public class DistExecutor {
     }
 
     /**
-     * Runs the supplied Runnable on the speicified side. Same warnings apply as {@link #unsafeCallWhenOn(Dist, Supplier)}.
-     * <p>
-     * This method can cause unexpected ClassNotFoundException problems in common scenarios. Understand the pitfalls of
-     * the way the class verifier works to load classes before using this.
-     * <p>
-     * Use {@link #safeRunWhenOn(Dist, Supplier)} if you can.
-     *
-     * @param dist  Dist to run this code on
-     * @param toRun The code to run
-     * @see #unsafeCallWhenOn(Dist, Supplier)
+     * Runs the runnable only on {@code dist}. Not side-safe: the class verifier can load classes
+     * the other side lacks. Prefer {@link #safeRunWhenOn(Dist, Supplier)}.
      */
     public static void unsafeRunWhenOn(Dist dist, Supplier<Runnable> toRun) {
         if (dist == Dist.current()) {
@@ -100,12 +75,7 @@ public class DistExecutor {
         }
     }
 
-    /**
-     * Call the supplied SafeRunnable when on the correct Dist.
-     *
-     * @param dist  The dist to run on
-     * @param toRun The code to run
-     */
+    /** Runs the SafeRunnable only on {@code dist}; see {@link SafeReferent}. */
     public static void safeRunWhenOn(Dist dist, Supplier<SafeRunnable> toRun) {
         validateSafeReferent(toRun);
         if (dist == Dist.current()) {
@@ -114,19 +84,11 @@ public class DistExecutor {
     }
 
     /**
-     * Executes one of the two suppliers, based on which side is active.
+     * Runs whichever supplier matches the active side, e.g.
+     * {@code DistExecutor.runForDist(() -> ClientProxy::new, () -> ServerProxy::new)}. The double
+     * supplier keeps the other side's target from being class-loaded.
      *
-     * <p>
-     * Example (replacement for old SidedProxy):<br/>
-     * {@code Proxy p = DistExecutor.runForDist(()->ClientProxy::new, ()->ServerProxy::new);}
-     * <p>
-     * NOTE: the double supplier is required to avoid classloading the secondary target.
-     *
-     * @param clientTarget The supplier supplier to run when on the {@link Dist#CLIENT}
-     * @param serverTarget The supplier supplier to run when on the {@link Dist#DEDICATED_SERVER}
-     * @param <T>          The common type to return
-     * @return The returned instance
-     * @deprecated Use {@link #safeRunForDist(Supplier, Supplier)}
+     * @deprecated use {@link #safeRunForDist(Supplier, Supplier)}
      */
     @Deprecated
     public static <T> T runForDist(Supplier<Supplier<T>> clientTarget, Supplier<Supplier<T>> serverTarget) {
@@ -134,14 +96,8 @@ public class DistExecutor {
     }
 
     /**
-     * Unsafe version of {@link #safeRunForDist(Supplier, Supplier)}. Use only when you know what you're doing
-     * and understand why the verifier can cause unexpected ClassNotFoundException crashes even when code is apparently
-     * not sided. Ensure you test both sides fully to be confident in using this.
-     *
-     * @param clientTarget The supplier supplier to run when on the {@link Dist#CLIENT}
-     * @param serverTarget The supplier supplier to run when on the {@link Dist#DEDICATED_SERVER}
-     * @param <T>          The common type to return
-     * @return The returned instance
+     * Unsafe version of {@link #safeRunForDist(Supplier, Supplier)}: the verifier can still throw
+     * ClassNotFoundException for code that looks unsided, so test both sides.
      */
     public static <T> T unsafeRunForDist(Supplier<Supplier<T>> clientTarget, Supplier<Supplier<T>> serverTarget) {
         switch (Dist.current()) {
@@ -155,18 +111,9 @@ public class DistExecutor {
     }
 
     /**
-     * Executes one of the two suppliers, based on which side is active.
-     *
-     * <p>
-     * Example (replacement for old SidedProxy):<br/>
-     * {@code Proxy p = DistExecutor.safeRunForDist(()->ClientProxy::new, ()->ServerProxy::new);}
-     * <p>
-     * NOTE: the double supplier is required to avoid classloading the secondary target.
-     *
-     * @param clientTarget The supplier supplier to run when on the {@link Dist#CLIENT}
-     * @param serverTarget The supplier supplier to run when on the {@link Dist#DEDICATED_SERVER}
-     * @param <T>          The common type to return
-     * @return The returned instance
+     * Runs whichever supplier matches the active side, e.g.
+     * {@code DistExecutor.safeRunForDist(() -> ClientProxy::new, () -> ServerProxy::new)}. The
+     * double supplier keeps the other side's target from being class-loaded.
      */
     public static <T> T safeRunForDist(Supplier<SafeSupplier<T>> clientTarget, Supplier<SafeSupplier<T>> serverTarget) {
         validateSafeReferent(clientTarget);
@@ -182,33 +129,15 @@ public class DistExecutor {
     }
 
     /**
-     * A safe referent. This will assert that it is being called via a separated class method reference. This will
-     * avoid the common pitfalls of {@link #callWhenOn(Dist, Supplier)} above.
-     * <p>
-     * SafeReferents assert that they are defined as a separate method outside the scope of the calling class.
-     *
-     * <strong>Implementations need to be defined in a separate class to the referring site, with appropriate
-     * visibility to be accessible at the callsite (generally, avoid private methods).</strong>
-     *
-     * <p>
-     * Valid:<br/>
-     * <p>
-     * {@code DistExecutor.safeCallWhenOn(Dist.CLIENT, ()->AnotherClass::clientOnlyMethod);}
-     *
-     * <p>
-     * Invalid:<br/>
-     * <p>
-     * {@code DistExecutor.safeCallWhenOn(Dist.CLIENT, ()->()->Minecraft.getInstance().world);}
+     * Marks a lambda that must be a method reference to a non-private method in another class,
+     * checked at the call, so the caller never class-loads side-only code. Valid:
+     * {@code safeCallWhenOn(Dist.CLIENT, () -> AnotherClass::clientOnlyMethod)}; invalid:
+     * {@code safeCallWhenOn(Dist.CLIENT, () -> () -> Minecraft.getInstance().level)}.
      */
     public interface SafeReferent {
     }
 
-    /**
-     * SafeCallable version of {@link SafeReferent}.
-     *
-     * @param <T> The return type of the Callable
-     * @see SafeReferent
-     */
+    /** The {@link SafeReferent} form of a {@link Callable}. */
     public interface SafeCallable<T> extends SafeReferent, Callable<T>, Serializable {
     }
 

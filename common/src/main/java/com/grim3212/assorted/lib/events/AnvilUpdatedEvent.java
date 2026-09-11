@@ -39,10 +39,8 @@ public class AnvilUpdatedEvent extends GenericEvent {
     }
 
     /**
-     * This is the name as sent by the client.  It may be null if none has been sent. <br>
-     * If empty, it indicates the user wishes to clear the custom name from the item.
-     *
-     * @return The name that the output item will be set to, if applicable.
+     * The name the client sent, or null if none was sent. Empty means the player wants the custom
+     * name cleared.
      */
     @Nullable
     public String getName() {
@@ -50,12 +48,8 @@ public class AnvilUpdatedEvent extends GenericEvent {
     }
 
     /**
-     * This is the output as determined by the event, not by the vanilla behavior between these two items. <br>
-     * If you are the first receiver of this event, it is guaranteed to be empty. <br>
-     * It will only be non-empty if changed by an event handler. <br>
-     * If this event is cancelled, this output stack is discarded.
-     *
-     * @return The item to set in the output (rightmost) anvil slot.
+     * The output set by handlers, not vanilla's result for these inputs: empty unless a handler
+     * changed it, and discarded if the event is cancelled.
      */
     public ItemStack getOutput() {
         return output;
@@ -70,23 +64,12 @@ public class AnvilUpdatedEvent extends GenericEvent {
         this.output = output;
     }
 
-    /**
-     * This is the level cost of this anvil operation. <br>
-     * When unchanged, it is guaranteed to be left.getRepairCost() + right.getRepairCost().
-     *
-     * @return The level cost of this anvil operation.
-     */
+    /** The level cost; unless changed, the sum of both inputs' repair costs. */
     public int getCost() {
         return cost;
     }
 
-    /**
-     * Changes the level cost of this operation. <br>
-     * The level cost does prevent the output from being available.  <br>
-     * That is, a player without enough experience may not take the output.
-     *
-     * @param cost The new level cost.
-     */
+    /** Sets the level cost. A player without enough levels cannot take the output. */
     public void setCost(int cost) {
         this.cost = cost;
     }
@@ -101,13 +84,8 @@ public class AnvilUpdatedEvent extends GenericEvent {
     }
 
     /**
-     * Sets how many right inputs are consumed. <br>
-     * A material cost of zero consumes the entire stack. <br>
-     * A material cost higher than the count of the right stack
-     * consumes the entire stack. <br>
-     * The material cost does not prevent the output from being available.
-     *
-     * @param materialCost The new material cost.
+     * Sets how many of the right input are consumed. Zero, or more than the stack holds, consumes
+     * the whole stack. It does not stop the output being taken.
      */
     public void setMaterialCost(int materialCost) {
         this.materialCost = materialCost;

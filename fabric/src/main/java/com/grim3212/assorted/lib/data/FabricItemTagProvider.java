@@ -18,14 +18,9 @@ public class FabricItemTagProvider extends VanillaItemTagsProvider {
     private final CompletableFuture<TagLookup<Block>> blockTags;
 
     /**
-     * Block tag to item tag copies collected while {@link #addTags(HolderLookup.Provider)} runs.
-     * <p>
-     * The vanilla {@code ItemTagsProvider} that used to own {@code copy(blockTag, itemTag)} is gone
-     * in 26.2 - block and item tags that are meant to mirror each other are declared once now, as
-     * {@code BlockItemTagId}s handled by {@code BlockItemTagsProvider}. The common providers still
-     * hand us loose block/item tag pairs, so the copy is done here the way the old provider did it:
-     * remember the pairs while the tags are being added, then splice the block builders' entries
-     * into the item builders once the block provider has published its contents.
+     * Block tag to item tag copies collected during {@link #addTags(HolderLookup.Provider)}.
+     * Vanilla has no {@code copy(blockTag, itemTag)} any more, so the block builders' entries are
+     * spliced into the item builders once the block provider has published its contents.
      */
     private final Map<TagKey<Block>, TagKey<Item>> copies = Maps.newLinkedHashMap();
 

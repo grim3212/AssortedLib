@@ -72,13 +72,9 @@ public class ForgeFluidVariantHandlerDelegate implements IFluidVariantHandler {
         return Optional.of(fluidModel(variant).flowingMaterial().sprite().contents().name());
     }
 
-    // TODO(26.2): the still/flowing textures and the tint colour no longer live on the FluidType.
-    //  IClientFluidTypeExtensions#getStillTexture / #getFlowingTexture / #getTintColor are gone; a
-    //  fluid's appearance is a baked FluidModel registered per Fluid through
-    //  RegisterFluidModelsEvent, so it is only reachable through the client model manager and only
-    //  after the models have been baked. The delegate therefore looks the model up by the fluid of
-    //  the variant instead of asking the FluidType, and the extra fluid data (FluidInformation#data)
-    //  can no longer influence the result the way a FluidStack aware extension could.
+    // TODO(26.2): a fluid's textures and tint are a baked FluidModel per Fluid, not on the
+    //  FluidType, so this looks the model up by fluid, only works once models have baked, and
+    //  FluidInformation#data can no longer change the result.
     private static FluidModel fluidModel(final FluidInformation variant) {
         return Minecraft.getInstance().getModelManager().getFluidStateModelSet().get(variant.fluid().defaultFluidState());
     }

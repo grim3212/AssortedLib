@@ -7,13 +7,7 @@ import com.grim3212.assorted.lib.platform.ClientServices;
  */
 public interface IModelDataKey<T> {
 
-    /**
-     * Creates a new model data key for the given type.
-     * Each returned instance is unique.
-     *
-     * @param <T> The type of the key.
-     * @return The unique model data key.
-     */
+    /** Creates a new model data key; every call returns a unique instance. */
     static <T> IModelDataKey<T> create() {
         return ClientServices.MODELS.createNewModelDataKey();
     }

@@ -5,11 +5,8 @@ import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 
 /**
- * A fluid, an amount of it, and whatever extra data rides along with it.
- * <p>
- * That extra data is a {@link DataComponentPatch} in 26.2 - the same thing a fluid stack carries on
- * both loaders - rather than the loose {@code CompoundTag} it used to be, so no loader has to
- * serialise components through NBT to hand one over.
+ * A fluid, an amount of it, and its component patch - the same data a fluid stack carries on both
+ * loaders.
  */
 public record FluidInformation(Fluid fluid, long amount, DataComponentPatch data) {
     public FluidInformation(Fluid fluid) {

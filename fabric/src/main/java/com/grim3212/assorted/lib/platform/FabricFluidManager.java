@@ -117,12 +117,9 @@ public class FabricFluidManager implements IFluidManager {
             return makeVariant(fluid.withSource());
         }
 
-        // TODO(26.2): FluidInformation still carries a CompoundTag, but a FluidVariant is keyed by a
-        //  DataComponentPatch now - TransferVariant#copyNbt was replaced by #getComponentsPatch - and
-        //  there is no conversion between the two that can be done here: a patch is only readable
-        //  through DataComponentPatch.CODEC against a registry aware DynamicOps, which this static
-        //  helper has no access to. The extra data is dropped in both directions until
-        //  FluidInformation itself moves over to components in common.
+        // TODO(26.2): FluidInformation carries a CompoundTag but a FluidVariant a
+        //  DataComponentPatch, and converting needs registry aware DynamicOps this static helper
+        //  lacks. The extra data is dropped both ways until FluidInformation moves to components.
         return FluidVariant.of(fluid.fluid());
     }
 
@@ -149,13 +146,10 @@ public class FabricFluidManager implements IFluidManager {
     }
 
     /**
-     * One item out of the stack, in a slot of its own that a fluid storage can write to.
-     * <p>
-     * {@code ContainerItemContext.withConstant} is read only by contract, so a water bucket emptied
-     * through it stays a water bucket. Transfers go through this slot instead: the item's storage
-     * swaps what the slot holds (a water bucket for an empty one) inside the transaction, and the
-     * slot is read back afterwards. It is a {@link SingleStackStorage}, so an aborted transaction
-     * restores it.
+     * One item from the stack, in a slot of its own a fluid storage can write to.
+     * {@code ContainerItemContext.withConstant} is read only, so a bucket emptied through it stays
+     * full; here the storage swaps the item inside the transaction, and an aborted one restores the
+     * slot.
      */
     private static final class SingleItem extends SingleStackStorage {
         private ItemStack stack;

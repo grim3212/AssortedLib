@@ -9,21 +9,17 @@ import net.minecraft.world.level.block.Block;
 public class ColorHandlers {
 
     /**
-     * {@code BlockColor} became {@link BlockTintSource} in 26.2. It is still a runtime registration,
-     * held by {@code BlockColors}, but a block now registers a whole list of tint layers rather than a
-     * single handler; this consumer registers the given source as the block's only layer.
+     * Registers the source as each block's only tint layer; {@code BlockColors} holds a list of
+     * {@link BlockTintSource} layers per block.
      */
     public interface BlockHandlerConsumer {
         void register(BlockTintSource handler, Block... blocks);
     }
 
-    // TODO(26.2): item tinting is no longer registered per item. ItemColor / ItemColors are gone;
-    //  an item's tints now live in its item model JSON as a list of ItemTintSource entries, and the
-    //  only thing code registers is the MapCodec that deserialises a custom source type, keyed by
-    //  Identifier into net.minecraft.client.color.item.ItemTintSources (whose id mapper is private, so
-    //  each loader has to expose its own hook into it). That is what this consumer now takes. Callers
-    //  that used to attach an ItemColor to a set of items must instead emit a "tints" entry referencing
-    //  that id from the items' model JSON - there is no runtime equivalent.
+    // TODO(26.2): item tints are not registered per item any more: they live in the item model json
+    //  as ItemTintSource entries, and code only registers a source type's MapCodec by id, which
+    //  this consumer takes. Callers must add a "tints" entry naming that id to the items' model
+    //  json.
     public interface ItemHandlerConsumer {
         void register(Identifier id, MapCodec<? extends ItemTintSource> handler);
     }

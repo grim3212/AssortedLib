@@ -10,13 +10,10 @@ import net.minecraft.data.recipes.RecipeProvider;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Runs a mod's common {@link ConditionalRecipeProvider.Runner} through Fabric's own recipe provider.
- * <p>
- * Fabric only writes a recipe's load conditions - into the recipe json and its unlock advancement -
- * when the recipe goes through {@link FabricRecipeProvider}'s output. A plain
- * {@code RecipeProvider.Runner} serialises the recipe without them, so every conditional recipe
- * loaded unconditionally on Fabric and failed to parse wherever its tags were missing. Register this
- * in a mod's Fabric datagen instead of the common runner.
+ * Runs a mod's common {@link ConditionalRecipeProvider.Runner} through {@link
+ * FabricRecipeProvider}, the only output that writes load conditions into the recipe and its
+ * advancement. Without it every conditional recipe loads unconditionally on Fabric. Use it in
+ * Fabric datagen instead of the common runner.
  */
 public class FabricConditionalRecipeProvider extends FabricRecipeProvider {
 

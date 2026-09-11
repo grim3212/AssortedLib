@@ -12,11 +12,9 @@ import java.util.Map;
 import java.util.function.Function;
 
 /**
- * {@code LazyOptional} is gone. Capabilities are plain nullable values now - a lookup through
- * {@code Capabilities.Item.BLOCK} either hands back a {@link ResourceHandler} or {@code null} - and
- * the "invalidate the token so every holder drops it" contract went with it. Cached handlers are
- * simply dropped here instead; a block entity that changes what it exposes tells the game itself
- * with {@code level.invalidateCapabilities(pos)}.
+ * A capability lookup returns a {@link ResourceHandler} or {@code null}, with no invalidation
+ * token, so {@link #invalidate()} just clears the cache; a block entity that changes what it
+ * exposes calls {@code level.invalidateCapabilities(pos)} itself.
  */
 public class ForgePlatformInventoryStorageHandlerSided implements IPlatformInventoryStorageHandler {
 

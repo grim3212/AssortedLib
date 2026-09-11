@@ -9,18 +9,9 @@ import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.Identifier;
 
 /**
- * Bridges an {@link IModelSpecificationLoader} onto Fabric's model deserializer registry.
- * <p>
- * 1.20.1 had to implement {@code ModelResourceProvider}, open the model file itself, build a private
- * gson with the whole vanilla model type adapter set and re-parse everything just to find out
- * whether the json's {@code "loader"} was this one. All of that is handled upstream now: a loader is
- * registered against an {@link Identifier} with
- * {@link UnbakedModelDeserializer#register(Identifier, UnbakedModelDeserializer)}, a model json opts
- * in with {@code "fabric:type": "<that id>"}, and the deserializer is called with the already parsed
- * object and the model gson's own deserialization context.
- * <p>
- * Note for resource packs: the field a model declares its loader with is {@code fabric:type}, not
- * {@code loader}.
+ * Registers an {@link IModelSpecificationLoader} with Fabric's {@link UnbakedModelDeserializer}
+ * under an {@link Identifier}. A model json selects it with {@code "fabric:type"}, not
+ * {@code "loader"}.
  */
 public final class FabricPlatformModelLoaderPlatformDelegate<L extends IModelSpecificationLoader<S>, S extends IModelSpecification<S>> implements UnbakedModelDeserializer {
 

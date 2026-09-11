@@ -9,11 +9,8 @@ public interface IBlockModelData {
     }
 
     /**
-     * Check if this data has a property, even if the value is {@code null}. Can be
-     * used by code that intends to fill in data for a render pipeline.
-     *
-     * @param prop The property to check for inclusion in this model data
-     * @return {@code true} if this data has the given property, even if no value is present
+     * Whether this data has {@code prop}, even with a {@code null} value. Useful for code that
+     * fills in data for a render pipeline.
      */
     boolean hasProperty(IModelDataKey<?> prop);
 

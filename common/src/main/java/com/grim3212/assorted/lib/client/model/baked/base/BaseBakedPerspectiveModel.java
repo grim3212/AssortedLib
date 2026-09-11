@@ -8,17 +8,9 @@ import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
 
 /**
- * Supplies the classic hard coded "held item" perspective set for models that do not ship a
- * {@code display} block of their own.
- * <p>
- * In 1.20.1 this was done by handing the item renderer a custom {@link ItemTransforms} subclass whose
- * {@code getTransform} returned an {@link ItemTransform} that pushed a {@code Transformation} onto the
- * pose stack. Both classes are records in 26.2 and cannot be subclassed, and the renderer no longer
- * calls back into the model, so the same numbers are now expressed as plain {@link ItemTransform}
- * records - which is what {@code ItemStackRenderState.LayerRenderState#setItemTransform} wants anyway.
- * <p>
- * Translations are in block units (the vanilla deserializer multiplies the json values by 1/16),
- * rotations are euler angles in degrees.
+ * Supplies the classic hard coded "held item" transforms, as plain {@link ItemTransform} records,
+ * for models that ship no {@code display} block. Translations are in block units (vanilla scales
+ * the json values by 1/16); rotations are euler angles in degrees.
  */
 public abstract class BaseBakedPerspectiveModel implements ITransformAwareBakedModel {
     private static final ItemTransform GROUND = transform(0.0F, 3.0F / 16.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.25F);

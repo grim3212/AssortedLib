@@ -9,13 +9,7 @@ import net.minecraft.world.level.block.Block;
 
 public class LibCommonTags {
 
-    /**
-     * The namespace shared, cross-loader convention tags live under.
-     * <p>
-     * This used to be a platform service, because Forge used "forge" and Fabric used "c". NeoForge
-     * has since unified on Fabric's namespace - the 26.2 jar ships only {@code data/c/tags} - so
-     * there is no longer a platform difference to abstract over.
-     */
+    /** The namespace of cross-loader convention tags; both loaders use {@code c}. */
     public static final String COMMON_NAMESPACE = "c";
 
     public static class Blocks {

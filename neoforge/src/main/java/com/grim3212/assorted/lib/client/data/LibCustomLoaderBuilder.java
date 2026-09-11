@@ -6,13 +6,10 @@ import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.model.generators.template.CustomLoaderBuilder;
 
 /**
- * A {@link CustomLoaderBuilder} whose model json is read by both loaders.
- * <p>
- * The generated model jsons are written once, by NeoForge datagen, and read by both loaders. NeoForge
- * reads a model's loader from {@code "loader"}; Fabric's model loading API reads it from
- * {@code "fabric:type"} and ignores {@code "loader"} entirely - so a json carrying only NeoForge's key
- * loads on Fabric as a plain, static model, with nothing in the log. Every custom loader model an
- * Assorted mod generates goes through this, which writes both.
+ * A {@link CustomLoaderBuilder} whose model json is read by both loaders: it writes Fabric's {@code
+ * "fabric:type"} beside NeoForge's {@code "loader"}. With only {@code "loader"}, Fabric loads a
+ * plain static model and logs nothing. Every custom loader model an Assorted mod generates goes
+ * through this.
  */
 public abstract class LibCustomLoaderBuilder extends CustomLoaderBuilder {
 

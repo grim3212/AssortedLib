@@ -13,11 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * Lets an {@link IPlantSustainable} soil block decide whether a plant may be placed on it.
- * <p>
- * The 1.20.1 hook was {@code BushBlock#mayPlaceOn}, which every plant inherited. 26.2 split the
- * class: {@link net.minecraft.world.level.block.BushBlock} is now a concrete flower-pot style block
- * and the shared plant behaviour - {@code mayPlaceOn} included - lives on
- * {@link VegetationBlock}, so the injection follows it there and still covers every plant.
+ * {@code mayPlaceOn} lives on {@link VegetationBlock}, which every plant extends.
  */
 @Mixin(VegetationBlock.class)
 public class VegetationBlockMixin {

@@ -23,10 +23,9 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
- * {@code AbstractIngredient} and {@code IIngredientSerializer} are gone. A custom ingredient is an
- * {@link ICustomIngredient} now - a separate object that a vanilla {@link Ingredient} wraps through
- * {@link ICustomIngredient#toVanilla()} - and it is serialised by a {@link MapCodec} carried by an
- * {@link IngredientType} registered against {@code NeoForgeRegistries.INGREDIENT_TYPES}.
+ * An {@link ICustomIngredient}, wrapped by a vanilla {@link Ingredient} via
+ * {@link ICustomIngredient#toVanilla()} and serialised through its registered
+ * {@link IngredientType}.
  */
 public class ForgeFluidIngredient implements ICustomIngredient {
 
@@ -78,11 +77,9 @@ public class ForgeFluidIngredient implements ICustomIngredient {
     }
 
     /**
-     * TODO(26.2): the old {@code getItems()} handed back whole {@link ItemStack}s, filled buckets
-     * included. An ingredient only reports the {@linkplain Item items} it can accept now - the stack
-     * shown to the client comes from {@link #display()} - so the fluid contents of the matching
-     * stacks are lost here. The default {@code display()} is kept rather than hand-rolling a
-     * {@code SlotDisplay} out of {@code ItemStackTemplate}s.
+     * TODO(26.2): an ingredient reports only the {@linkplain Item items} it accepts, so the fluid
+     *  contents of matching stacks (filled buckets) are lost from display. The default
+     *  {@code display()} is kept rather than hand-rolling a {@code SlotDisplay}.
      */
     @Override
     public Stream<Holder<Item>> items() {

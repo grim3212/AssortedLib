@@ -5,20 +5,10 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
- * Automated in-world checks for AssortedLib.
- * <p>
- * Everything downstream sits on this module, so what these pin down is not a feature but a
- * <em>parity</em> claim: that the NeoForge and Fabric implementations of each
- * {@code lib/platform/services} interface answer the same way about the same world. The bodies live
- * in common and are byte-identical on both loaders; only the {@code Registries.TEST_FUNCTION}
- * registration differs, and {@code data/assortedlib/test_instance/*.json} pairs each one with the
- * shared {@code test_box} structure.
- * <p>
- * Client-only services ({@code ClientServices}) are deliberately untested here - a gametest run is a
- * dedicated server, where loading them would fail by design.
- * <p>
- * The tests themselves are split by feature into the {@code *Tests} classes in this package,
- * with shared helpers in {@code LibTestSupport}; this only lists them.
+ * Automated in-world checks for AssortedLib: the NeoForge and Fabric implementations of each
+ * {@code lib/platform/services} interface answer the same way about the same world. Client-only
+ * services are not covered, since a gametest run is a dedicated server. The tests live in the
+ * {@code *Tests} classes; this only lists them.
  */
 public final class LibGameTests {
 

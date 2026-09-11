@@ -5,11 +5,8 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import org.joml.Matrix4f;
 
 /**
- * As with {@link FluidCuboidUtils}, the {@link VertexConsumer} comes from
- * {@code SubmitNodeCollector#submitCustomGeometry} in 26.2. This is world-space geometry that happens to
- * be laid out like a blit; it is not GUI drawing, which went fully retained-mode
- * ({@code GuiGraphicsExtractor} records elements, {@code GuiRenderer} draws them) and carries no
- * lightmap coordinate at all.
+ * World-space geometry laid out like a blit, not GUI drawing. As with {@link FluidCuboidUtils}, the
+ * {@link VertexConsumer} comes from {@code SubmitNodeCollector#submitCustomGeometry}.
  */
 public class RenderHelper {
 

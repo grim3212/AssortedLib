@@ -14,16 +14,10 @@ import org.joml.Vector3fc;
 import java.util.function.Consumer;
 
 /**
- * A {@link VertexConsumer} that assembles the vertices it is fed into {@linkplain BakedQuad baked quads}.
- * <p>
- * A 26.2 quad is a record of four positions, four packed uvs, a direction and a
- * {@link BakedQuad.MaterialInfo}, so only {@link #addVertex(float, float, float)} and
- * {@link #setUv(float, float)} carry data this can use; colour, overlay, light and normal are supplied
- * when the geometry is submitted and are accepted and ignored here.
- * <p>
- * {@code VertexConsumer} lost {@code endVertex()} in 26.x - a vertex ends when the next one begins - so
- * the quad for the last four vertices is only emitted once a fifth vertex arrives or {@link #flush()}
- * is called.
+ * A {@link VertexConsumer} that assembles its vertices into {@linkplain BakedQuad baked quads}.
+ * Only position and uv are kept; colour, overlay, light and normal are accepted and ignored, as a
+ * quad carries none. A vertex ends when the next begins, so the last quad is only emitted on the
+ * fifth vertex or {@link #flush()}.
  */
 public class QuadBakingVertexConsumer implements VertexConsumer {
 

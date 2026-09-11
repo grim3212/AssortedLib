@@ -15,11 +15,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * Lets an {@link IBlockMapColor} block pick its map colour from its position.
- * <p>
- * {@code BlockStateBase} is nested in {@link BlockBehaviour}, not in {@link Block} - the old
- * {@code Block.BlockStateBase} spelling only compiled because {@code Block} inherits the nested
- * type - so it is named through its real owner here.
+ * Lets an {@link IBlockMapColor} block pick its map colour from its position. {@code
+ * BlockStateBase} is nested in {@link BlockBehaviour}, not {@code Block}, so it is named through
+ * its real owner.
  */
 @Mixin(BlockBehaviour.BlockStateBase.class)
 public abstract class BlockStateBaseMixin {

@@ -16,17 +16,12 @@ public interface IConditionHelper {
     void init();
 
     /**
-     * Wraps a {@link RecipeOutput} so that any recipe written through it carries the conditions
-     * registered for its id.
-     * <p>
-     * This replaces the old {@code write(JsonObject, ...)}. Recipes are no longer serialised to a
-     * {@code JsonObject} by the provider - {@code RecipeProvider.Runner} writes them via
-     * {@code Recipe.CODEC} - so the only place left to attach conditions is the output itself
-     * (NeoForge exposes {@code RecipeOutput#withConditions}, Fabric its own equivalent).
+     * Wraps a {@link RecipeOutput} so every recipe written through it carries the conditions
+     * registered for its id. Recipes are serialised by codec, so the output is the only place to
+     * attach them.
      *
-     * @param output     The output to wrap.
-     * @param conditions Conditions per recipe id. Read lazily on each accept, so it may still be
-     *                   populated after this call.
+     * @param conditions conditions per recipe id. Read on each accept, so it may still be filled
+     *                   after this call.
      */
     RecipeOutput conditionalOutput(RecipeOutput output, Map<Identifier, List<LibConditionProvider>> conditions);
 

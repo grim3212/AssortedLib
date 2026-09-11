@@ -23,19 +23,10 @@ public enum ConfigurationType {
     SYNCED,
 
     /**
-     * Indicates that the configuration is common to both distributions and has to be readable
-     * before the registries are populated, because its values decide what gets registered or what
-     * the registered objects are built from.
-     * <p>
-     * This exists because item statistics stopped being questions an item answers on demand and
-     * became data components fixed when the item is constructed. A mod that drives those from
-     * configuration has to have the file in hand during registration, and an ordinary
-     * {@link #NOT_SYNCED} configuration is not loaded until well after that - reading one during
-     * {@code RegisterEvent} throws outright on NeoForge.
-     * <p>
-     * The trade is that these values cannot be reloaded while the game runs and are never synced,
-     * which is inherent: they have already been baked into the registered objects by the time
-     * anything could reload them.
+     * Common to both sides and loaded before registration, for values that decide what gets
+     * registered or what it is built from (item stats are data components fixed at construction). A
+     * {@link #NOT_SYNCED} read during registration throws on NeoForge. Never synced and not
+     * reloadable, since the values are already baked into the registered objects.
      */
     NEEDED_AT_REGISTRATION;
 }

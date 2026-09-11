@@ -20,23 +20,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 /**
- * Bridges the loader agnostic {@link IDataAwareBakedModel} onto NeoForge's own position aware model
- * hook.
+ * Bridges {@link IDataAwareBakedModel} onto NeoForge's position aware
+ * {@link DynamicBlockStateModel}, reading the model data from {@code level.getModelData(pos)}.
  * <p>
- * {@code BakedModel} is gone; a block model is a {@link BlockStateModel} which is baked per block
- * state and hands its geometry over as {@linkplain BlockStateModelPart parts}. NeoForge re-adds the
- * level/position context on {@link DynamicBlockStateModel}, which is where the model data is read
- * from ({@code level.getModelData(pos)}), so this delegate translates that into the
- * {@link IBlockModelData} the common side works with.
- * <p>
- * TODO(26.2): the item side of this delegate is gone. It used to also implement
- *  {@code ICompoundItemBakedModel} and forward {@code getRenderPasses} / {@code getQuads(ItemStack,
- *  ...)} / {@code getRenderTypes(ItemStack, boolean)} / {@code applyTransform}. Item rendering is
- *  push-only now - an {@code ItemModel} mutates an {@code ItemStackRenderState} and hands nothing
- *  back - and {@code BlockStateModel} and {@code ItemModel} are unrelated types, so a single wrapper
- *  can no longer cover both. Per render type filtering ({@code ChunkRenderTypeSet}, which has no
- *  NeoForge equivalent) is gone too: every {@link BakedQuad} carries its own material info and the
- *  section compiler buckets quads by it.
+ * TODO(26.2): the item side of this delegate (item render passes and transforms) is gone: an
+ *  {@code ItemModel} is unrelated to {@code BlockStateModel}, so one wrapper cannot cover both.
  */
 public final class ForgeBakedModelDelegate implements DynamicBlockStateModel, IDelegatingBakedModel, IDataAwareBakedModel {
 

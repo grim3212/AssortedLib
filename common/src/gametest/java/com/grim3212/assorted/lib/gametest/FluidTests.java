@@ -49,11 +49,9 @@ final class FluidTests {
     }
 
     /**
-     * Fluid moved in and out of vanilla buckets, whose containers empty and fill by becoming a
-     * different item - the case both loaders got wrong: NeoForge's in-place stack access cannot swap
-     * the item, so it reported nothing extractable, and Fabric's never committed its transaction
-     * over a read-only context, so nothing it did stuck. Both directions, simulated and real, plus
-     * the contract that the stack handed in is never touched and only one item of it is worked.
+     * Fluid moved in and out of vanilla buckets, which fill and empty by becoming another item -
+     * the case a slot that cannot change the item silently gets wrong. Both directions, simulated
+     * and real; the stack handed in is never touched and only one item of it is worked.
      */
     private static void fluidManagerMovesFluid(GameTestHelper helper) {
         long oneBucket = Services.FLUIDS.getBucketAmount();

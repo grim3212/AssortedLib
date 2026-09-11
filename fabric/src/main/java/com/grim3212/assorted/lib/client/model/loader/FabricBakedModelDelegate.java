@@ -24,15 +24,9 @@ import java.util.function.Predicate;
 
 /**
  * Routes the block entity model data of an {@link IDataAwareBakedModel} into the Fabric renderer.
- * <p>
- * The 1.20.1 version of this class had to re-implement the whole emit path: ask the model for its
- * render types, pull the quads out per face and per type, look up a {@code RenderMaterial} for the
- * blend mode and push each quad through a freshly built mesh. None of that is needed - or possible -
- * on 26.2. A model is a {@link BlockStateModel} that collects
- * {@linkplain BlockStateModelPart parts}, the render layer is a property of each quad, and FRAPI's
- * {@code FabricBlockStateModel#emitQuads} is the one hook that receives the level and the position.
- * All this class does, therefore, is fetch the model data for the position and forward the collect
- * call; {@link WrapperBlockStateModel} handles every other method by delegation.
+ * FRAPI's {@code FabricBlockStateModel#emitQuads} is the one hook with the level and position, so
+ * this fetches the data there and forwards the collect call; {@link WrapperBlockStateModel}
+ * delegates the rest.
  */
 public class FabricBakedModelDelegate extends WrapperBlockStateModel implements IDelegatingBakedModel {
 
@@ -76,12 +70,9 @@ public class FabricBakedModelDelegate extends WrapperBlockStateModel implements 
     }
 
     /**
-     * The model data for the position.
-     * <p>
-     * {@code RenderAttachedBlockView} is now {@link FabricBlockGetter}, which is injected into
-     * {@code BlockGetter} and reads the attachment a {@code RenderDataBlockEntity} published for the
-     * chunk being built. Outside of a chunk build there is no attachment, so the block entity is asked
-     * directly, exactly as before.
+     * The model data for the position: during a chunk build, the attachment a {@code
+     * RenderDataBlockEntity} published, read through {@link FabricBlockGetter}; otherwise the block
+     * entity is asked directly.
      */
     private static IBlockModelData getBlockModelData(final BlockAndTintGetter blockView, final BlockPos pos) {
         final Object attachmentData = blockView instanceof final FabricBlockGetter fabricBlockGetter ? fabricBlockGetter.getBlockEntityRenderData(pos) : null;

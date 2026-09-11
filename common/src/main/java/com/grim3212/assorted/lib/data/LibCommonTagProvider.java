@@ -120,10 +120,9 @@ public class LibCommonTagProvider {
         }
 
         /**
-         * @param constantPrefix the {@link LibCommonTags.Blocks} constant name the per-colour tags are
-         *                       named after. Passed in rather than derived from the tag path: since 26.2
-         *                       the conventional path ({@code c:glass_blocks}) no longer matches the
-         *                       constant name ({@code GLASS}).
+         * @param constantPrefix the {@link LibCommonTags.Blocks} constant the per-colour tags are
+         *                       named after; the tag path ({@code c:glass_blocks}) does not always
+         *                       match it ({@code GLASS}).
          */
         private void addColored(Consumer<ResourceKey<Block>> consumer, String constantPrefix, String pattern, Function<TagKey<Block>, TagAppender<Block>> tagger) {
             String prefix = constantPrefix + '_';

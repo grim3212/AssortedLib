@@ -30,18 +30,11 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * The item form of a block whose look comes from model data - a colorizer's stored block, a bridge's
- * projected one - drawn from what the stack carries rather than from the block's empty state.
- * <p>
- * {@code ItemOverrides} is gone, and the stock {@code minecraft:model} bakes one quad collection at
- * load time, which for these blocks is their empty state. An {@link ItemModel}'s {@code update} is
- * handed the stack, so this builds the model data from it and asks the block's own
- * {@link IDataAwareBakedModel} for the parts and the particle, reaching the same lazily baked cache
- * the placed block uses. It cannot bake on demand from {@code update}, which is why it goes through
- * that cache at all.
- * <p>
- * A mod registers its own {@code ItemModel.Unbaked} codec type and bakes one of these from it,
- * supplying how to read model data off a stack.
+ * The item form of a block whose look comes from model data (a colorizer's stored block, a bridge's
+ * projected one), drawn from what the stack carries rather than the block's empty state. It builds
+ * the model data from the stack and asks the block's own {@link IDataAwareBakedModel} for parts and
+ * particle through the lazily baked cache the placed block uses, since {@code update} cannot bake.
+ * A mod registers its own {@code ItemModel.Unbaked} codec type and bakes one of these from it.
  */
 public final class DataAwareItemModel implements ItemModel {
 
@@ -64,13 +57,12 @@ public final class DataAwareItemModel implements ItemModel {
     }
 
     /**
-     * @param model     The <em>block</em> model to draw - the json carrying the block's model loader,
-     *                  the same model its blockstate points at. The Unbaked calling this has to mark
-     *                  it as a dependency, or it is not discovered and bakes to the missing model.
-     * @param tints     Item tint sources, as on a vanilla {@code minecraft:model}.
+     * @param model The <em>block</em> model, the json carrying the block's loader that its
+     * blockstate points at. The calling Unbaked must mark it as a dependency, or it bakes to the
+     * missing model.
      * @param modelData The model data a stack stands for, as its block entity would supply it.
-     * @param identity  What distinguishes one stack's look from another's; the render state is cached
-     *                  under it, so two stacks that draw differently must answer differently.
+     * @param identity The render state is cached under this, so stacks that draw differently must
+     * answer differently.
      */
     public static DataAwareItemModel bake(ItemModel.BakingContext context, Identifier model, List<ItemTintSource> tints,
                                           Function<ItemStack, IBlockModelData> modelData, Function<ItemStack, ?> identity) {

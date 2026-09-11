@@ -17,12 +17,9 @@ import java.util.Set;
 import java.util.function.Function;
 
 /**
- * The en_us.json of a mod, generated with the rest of its client assets.
- * <p>
- * {@link #addNames()} adds every key that is not a block, item or entity name, and every name that
- * is not simply the id in title case. Every block, item and entity the mod registers that is still
- * unnamed afterwards is given its id in title case, so {@code deepslate_tin_ore} becomes
- * "Deepslate Tin Ore": a new block needs no line here unless its name reads differently.
+ * A mod's en_us.json, generated with its client assets. {@link #addNames()} adds every other key
+ * and every name that is not the id in title case; anything registered and still unnamed afterwards
+ * gets its id in title case ({@code deepslate_tin_ore} becomes "Deepslate Tin Ore").
  */
 public abstract class LibLanguageProvider extends LanguageProvider {
 

@@ -32,7 +32,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -60,11 +59,9 @@ public interface IClientHelper {
 
     void registerBlockColor(BlockTintSource color, Supplier<List<Block>> blocks);
 
-    // TODO(26.2): item tinting is no longer a runtime, per-item registration. ItemColor and
-    //  ItemColors are gone; an item's tints live in its item model JSON as ItemTintSource entries and
-    //  code only registers the MapCodec that deserialises a custom source type, keyed by id. Callers
-    //  that attached an ItemColor to a set of items must emit a "tints" entry referencing this id from
-    //  those items' model JSON instead.
+    // TODO(26.2): an item's tints live in its model json as ItemTintSource entries; code only
+    //  registers the codec for a custom source type. Callers that tinted items from code must emit
+    //  a "tints" entry naming this id in those items' model json instead.
     void registerItemTintSource(Identifier id, MapCodec<? extends ItemTintSource> source);
 
     BlockColors getBlockColors();
@@ -72,44 +69,27 @@ public interface IClientHelper {
     void registerModelLoader(Identifier name, IModelSpecificationLoader<?> modelLoader);
 
     /**
-     * Registers the {@link MapCodec} that reads a custom {@code ItemModel.Unbaked} type, so an item
-     * model json can name it under {@code "model": {"type": "<id>"}}.
-     * <p>
-     * The 1.20.1 way of varying an item's model per stack - an {@code ItemOverrides} on the baked
-     * model - is gone; an item model is a codec-registered {@link ItemModel} whose {@code update} is
-     * handed the stack, and this is the only registration point for one.
+     * Registers the codec for a custom {@code ItemModel.Unbaked} type, which an item model json
+     * names as {@code "model": {"type": "<id>"}}. This is how an item's model varies per stack.
      */
     void registerItemModelType(Identifier id, MapCodec<? extends ItemModel.Unbaked> codec);
 
     /**
-     * Registers the {@link MapCodec} that reads a custom {@link ConditionalItemModelProperty}, so a
-     * {@code minecraft:condition} item model can branch on it.
-     * <p>
-     * This is the replacement for {@code ItemProperties.register} plus a model {@code overrides} list:
-     * the branch is chosen before baking, from the item json, and only the predicate is code. Vanilla's
-     * own conditionals cannot read an arbitrary value out of {@code CUSTOM_DATA} - the nearest,
-     * {@code minecraft:component_matches}, needs an exact {@code NbtPredicate} - so a mod-owned tag
-     * needs its own property here.
+     * Registers the codec for a custom {@link ConditionalItemModelProperty}, which a
+     * {@code minecraft:condition} item model can branch on. Needed to read a mod-owned value, since
+     * vanilla's {@code component_matches} only takes an exact {@code NbtPredicate}.
      */
     void registerConditionalItemModelProperty(Identifier id, MapCodec<? extends ConditionalItemModelProperty> codec);
 
     /**
-     * Bakes the model at {@code modelLocation} into a whole {@link BlockStateModel}, keeping it
-     * dynamic when the model json behind it was produced by a
-     * {@link com.grim3212.assorted.lib.client.model.loaders.IModelSpecification}.
-     * <p>
-     * The model json pipeline can only carry geometry, so a specification reached that way is baked
-     * once with empty model data and flattened. Reached through here the specification's own
-     * {@code BlockStateModel} survives, wrapped in the loader's level-aware bridge, so a model whose
-     * geometry depends on a block entity - a colorizer, say - draws what the block entity actually
-     * holds. Models that are not specification backed fall through to an ordinary baked variant, so
-     * this is safe to point at any model.
+     * Bakes the model at {@code modelLocation}, keeping it dynamic when it is backed by a
+     * {@link com.grim3212.assorted.lib.client.model.loaders.IModelSpecification}. Through a model
+     * json a specification is baked once with empty model data; this keeps its own model, so one
+     * that depends on a block entity draws what it holds. Any other model bakes as a plain variant.
      *
-     * @param baker         The bakery to bake with. Note that a data aware model keeps this past the
-     *                      bake, because the states it has to bake for are only known while rendering.
-     * @param modelLocation The model to bake. It must have been marked as a dependency during
-     *                      discovery, or the bakery will not have it.
-     * @param modelState    The rotation and uv lock to bake with.
+     * @param baker         kept past the bake by a data aware model, which bakes states while
+     *                      rendering
+     * @param modelLocation must have been marked as a dependency during discovery
      */
     BlockStateModel bakeSpecificationModel(ModelBaker baker, Identifier modelLocation, ModelState modelState);
 

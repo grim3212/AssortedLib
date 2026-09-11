@@ -52,12 +52,9 @@ final class PlatformServiceTests {
     }
 
     /**
-     * Every server-safe service resolves, and resolves to <em>this</em> loader's implementation.
-     * <p>
-     * A missing {@code META-INF/services} entry is silent until the first caller touches the
-     * service, which in practice means a crash deep inside some downstream mod. This is the cheapest
-     * possible tripwire for it, and the class-name check additionally catches the case where the
-     * wrong loader's jar won the ServiceLoader lookup.
+     * Every server-safe service resolves to this loader's implementation. A missing
+     * {@code META-INF/services} entry is silent until the first caller crashes; the class-name
+     * check also catches the wrong loader's jar winning the lookup.
      */
     private static void servicesAllResolve(GameTestHelper helper) {
         String platform = Services.PLATFORM.getPlatformName();
@@ -207,12 +204,9 @@ final class PlatformServiceTests {
     }
 
     /**
-     * The conventional tag names {@link LibCommonTags} declares resolve to real, populated tags.
-     * <p>
-     * Every entry here is a name that was wrong at some point in the port and broke recipes
-     * downstream, and the break was NeoForge-only both times: on Fabric the library provides these
-     * tags itself, so a rename only surfaces where NeoForge is the provider. Asserting membership
-     * rather than mere existence is what makes that visible.
+     * The conventional tag names {@link LibCommonTags} declares resolve to populated tags. Asserts
+     * membership, not existence: on Fabric the library declares these tags itself, so a wrong name
+     * only shows where NeoForge provides them.
      */
     private static void commonTagsAreBound(GameTestHelper helper) {
         assertItemTagHolds(helper, LibCommonTags.Items.GUNPOWDER, Items.GUNPOWDER);
@@ -235,11 +229,9 @@ final class PlatformServiceTests {
     }
 
     /**
-     * Every item tag outside minecraft has a name. Recipe viewers show it in place of the raw id,
-     * and it is the check Fabric API runs at dev startup ("Untranslated Item Tags detected"), made
-     * to fail here: the key is {@code tag.item.<namespace>.<path>} with each '/' in the path turned
-     * into '.'. Both loaders load every mod's lang file on a dedicated server and name the standard
-     * c: tags themselves, so whatever is still missing is one of ours.
+     * Every item tag outside minecraft has a {@code tag.item.<namespace>.<path>} name ('/' becomes
+     * '.'), the check behind Fabric API's "Untranslated Item Tags detected". Both loaders name the
+     * standard c: tags, so anything missing is one of ours.
      */
     private static void everyItemTagHasAName(GameTestHelper helper) {
         Language language = Language.getInstance();

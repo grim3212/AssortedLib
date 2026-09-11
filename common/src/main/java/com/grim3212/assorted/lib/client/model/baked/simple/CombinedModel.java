@@ -10,12 +10,8 @@ import net.minecraft.util.RandomSource;
 import java.util.List;
 
 /**
- * Draws several models on top of each other.
- * <p>
- * 1.20.1 had to flatten this by pulling every child's quads out per face at construction time, since
- * a {@code BakedModel} could only return one quad list. A {@link BlockStateModel} collects a list of
- * {@link BlockStateModelPart parts} instead, so combining models is simply forwarding the collect
- * call - which also keeps each child's own ambient occlusion flag and material flags intact.
+ * Draws several models on top of each other by forwarding the collect call to each, which keeps
+ * every child's own ambient occlusion and material flags.
  */
 public class CombinedModel implements BlockStateModel {
 

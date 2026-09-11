@@ -15,99 +15,46 @@ public interface IItemStorageHandler {
     int getSlots();
 
     /**
-     * Returns the ItemStack in a given slot.
-     * <p>
-     * The result's stack size may be greater than the itemstack's max size.
-     * <p>
-     * If the result is empty, then the slot is empty.
-     *
-     * <p>
-     * <strong>IMPORTANT:</strong> This ItemStack <em>MUST NOT</em> be modified. This method is not for
-     * altering an inventory's contents. Any implementers who are able to detect
-     * modification through this method should throw an exception.
-     * </p>
-     * <p>
-     * <strong><em>SERIOUSLY: DO NOT MODIFY THE RETURNED ITEMSTACK</em></strong>
-     * </p>
-     *
-     * @param slot Slot to query
-     * @return ItemStack in given slot. Empty Itemstack if the slot is empty.
-     **/
+     * The stack in a slot, empty if the slot is empty; its count may exceed its max stack size.
+     * <strong>Never modify the returned stack</strong>: this is not a way to change the inventory.
+     */
     @NotNull
     ItemStack getStackInSlot(int slot);
 
     /**
-     * <p>
-     * Inserts an ItemStack into the given slot and return the remainder.
-     * The ItemStack <em>should not</em> be modified in this function!
-     * </p>
+     * Inserts a stack into a slot without modifying it.
      *
-     * @param slot     Slot to insert into.
-     * @param stack    ItemStack to insert. This must not be modified by the item handler.
-     * @param simulate If true, the insertion is only simulated
-     * @return The remaining ItemStack that was not inserted (if the entire stack is accepted, then return an empty ItemStack).
-     * May be the same as the input ItemStack if unchanged, otherwise a new ItemStack.
-     * The returned ItemStack can be safely modified after.
-     **/
+     * @param simulate if true, only simulates the insertion
+     * @return the remainder not inserted: empty if all of it was, possibly the input itself if
+     * nothing changed. Safe for the caller to modify.
+     */
     @NotNull
     ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate);
 
     /**
-     * Extracts an ItemStack from the given slot.
-     * <p>
-     * The returned value must be empty if nothing is extracted,
-     * otherwise its stack size must be less than or equal to {@code amount} and {@link ItemStack#getMaxStackSize()}.
-     * </p>
+     * Extracts up to {@code amount} from a slot; {@code amount} may exceed the max stack size.
      *
-     * @param slot     Slot to extract from.
-     * @param amount   Amount to extract (may be greater than the current stack's max limit)
-     * @param simulate If true, the extraction is only simulated
-     * @return ItemStack extracted from the slot, must be empty if nothing can be extracted.
-     * The returned ItemStack can be safely modified after, so item handlers should return a new or copied stack.
-     **/
+     * @param simulate if true, only simulates the extraction
+     * @return a new stack of at most {@code amount} and its max stack size, empty if nothing could
+     * be extracted. Safe for the caller to modify.
+     */
     @NotNull
     ItemStack extractItem(int slot, int amount, boolean simulate);
 
-    /**
-     * Retrieves the maximum stack size allowed to exist in the given slot.
-     *
-     * @param slot Slot to query.
-     * @return The maximum stack size allowed in the slot.
-     */
+    /** The largest stack allowed in the slot. */
     int getSlotLimit(int slot);
 
     /**
-     * <p>
-     * This function re-implements the vanilla function {@link Container#canPlaceItem(int, ItemStack)}.
-     * It should be used instead of simulated insertions in cases where the contents and state of the inventory are
-     * irrelevant, mainly for the purpose of automation and logic (for instance, testing if a minecart can wait
-     * to deposit its items into a full inventory, or if the items in the minecart can never be placed into the
-     * inventory and should move on).
-     * </p>
-     * <ul>
-     * <li>isItemValid is false when insertion of the item is never valid.</li>
-     * <li>When isItemValid is true, no assumptions can be made and insertion must be simulated case-by-case.</li>
-     * <li>The actual items in the inventory, its fullness, or any other state are <strong>not</strong> considered by isItemValid.</li>
-     * </ul>
-     *
-     * @param slot  Slot to query for validity
-     * @param stack Stack to test with for validity
-     * @return true if the slot can insert the ItemStack, not considering the current state of the inventory.
-     * false if the slot can never insert the ItemStack in any situation.
+     * The equivalent of {@link Container#canPlaceItem(int, ItemStack)}: false if the stack can
+     * never go in this slot. Ignores the current contents and fullness, so true still needs a
+     * simulated insert.
      */
     boolean isItemValid(int slot, @NotNull ItemStack stack);
 
     /**
-     * Overrides the stack in the given slot. This method is used by the
-     * standard Forge helper methods and classes. It is not intended for
-     * general use by other mods, and the handler may throw an error if it
-     * is called unexpectedly.
-     *
-     * @param slot  Slot to modify
-     * @param stack ItemStack to set slot to (may be empty).
-     * @throws RuntimeException if the handler is called in a way that the handler
-     *                          was not expecting.
-     **/
+     * Overwrites the stack in a slot. For the library's own helpers, not general use; a handler may
+     * throw if it is called unexpectedly.
+     */
     void setStackInSlot(int slot, @NotNull ItemStack stack);
 
     default void startOpen(Player player) {

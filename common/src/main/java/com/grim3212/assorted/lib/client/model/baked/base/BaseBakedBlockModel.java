@@ -11,12 +11,9 @@ import net.minecraft.util.RandomSource;
 import java.util.List;
 
 /**
- * Base for a hand built block model that draws a single set of quads.
- * <p>
- * 26.2 splits the old {@code BakedModel} in two: a {@link BlockStateModel} answers "which parts do I
- * draw for this random seed" and a {@link BlockStateModelPart} answers "which quads are on this face".
- * A model of this shape is exactly one part, so it implements both and hands itself out of
- * {@link #collectParts(RandomSource, List)}; subclasses only have to implement
+ * Base for a hand built block model that draws one set of quads: it is both the
+ * {@link BlockStateModel} and its single {@link BlockStateModelPart}, handing itself out of
+ * {@link #collectParts(RandomSource, List)}. Subclasses implement
  * {@link BlockStateModelPart#getQuads(Direction)}.
  */
 public abstract class BaseBakedBlockModel implements BlockStateModel, BlockStateModelPart {

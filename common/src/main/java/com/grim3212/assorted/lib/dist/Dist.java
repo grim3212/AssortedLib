@@ -2,17 +2,7 @@ package com.grim3212.assorted.lib.dist;
 
 import com.grim3212.assorted.lib.platform.Services;
 
-/**
- * A distribution of the minecraft game. There are two common distributions, and though
- * much code is common between them, there are some specific pieces that are only present
- * in one or the other.
- * <ul>
- *     <li>{@link #CLIENT} is the <em>client</em> distribution, it contains
- *     the game client, and has code to render a viewport into a game world.</li>
- *     <li>{@link #DEDICATED_SERVER} is the <em>dedicated server</em> distribution,
- *     it contains a server, which can simulate the world and communicates via network.</li>
- * </ul>
- */
+/** A distribution of the game: the {@link #CLIENT} or the {@link #DEDICATED_SERVER}. */
 public enum Dist {
 
 

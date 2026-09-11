@@ -13,13 +13,9 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 /**
- * Owns the registration of this mod's {@link ICondition} codecs.
- * <p>
- * {@code CraftingHelper.register(IConditionSerializer)} is gone; a condition type is a
- * {@link com.mojang.serialization.MapCodec} in the {@code NeoForgeRegistries.CONDITION_SERIALIZERS}
- * registry, which can only be written to from a {@link RegisterEvent}. Conditions registered at mod
- * construction time through {@code IConditionHelper#register} are therefore collected here first and
- * flushed when that event fires.
+ * Registers this mod's {@link ICondition} codecs. {@code NeoForgeRegistries.CONDITION_SERIALIZERS}
+ * can only be written from a {@link RegisterEvent}, so conditions registered at construction
+ * through {@code IConditionHelper#register} are collected here and flushed then.
  */
 public final class LibConditions {
 

@@ -14,7 +14,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.animal.cow.Cow;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
@@ -46,11 +45,8 @@ final class EventTests {
     }
 
     /**
-     * A {@code UseBlockEvent} handler that answers with a result ends the click on both loaders:
-     * vanilla's own use of the block must not run after it. A lever is the witness - a stick right
-     * clicked on it flips it, unless a handler has already taken the click. Driven through
-     * {@code ServerPlayerGameMode#useItemOn}, where NeoForge fires {@code RightClickBlock} and Fabric
-     * fires {@code UseBlockCallback}.
+     * A {@code UseBlockEvent} handler that answers with a result ends the click on both loaders, so
+     * vanilla's use of the block never runs: a stick used on a lever leaves it unflipped.
      */
     private static void useBlockResultStopsVanilla(GameTestHelper helper) {
         registerProbes();
@@ -75,11 +71,8 @@ final class EventTests {
     }
 
     /**
-     * An {@code EntityInteractEvent} handler that cancels with a result ends the interaction on both
-     * loaders, the way Tools' milking handler relies on. A cow is the witness: an empty bucket used
-     * on it is filled with milk, unless a handler took the interaction first. Driven through
-     * {@code Player#interactOn}, where NeoForge fires {@code EntityInteract} and Fabric's
-     * {@code PlayerMixin} raises the event.
+     * An {@code EntityInteractEvent} handler that cancels with a result ends the interaction on
+     * both loaders, as Tools' milking relies on: an empty bucket used on a cow stays empty.
      */
     private static void entityInteractResultStopsVanilla(GameTestHelper helper) {
         registerProbes();

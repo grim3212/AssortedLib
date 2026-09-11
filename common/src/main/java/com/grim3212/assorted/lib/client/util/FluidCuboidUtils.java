@@ -15,10 +15,8 @@ import org.joml.Matrix4f;
 import static net.minecraft.core.Direction.*;
 
 /**
- * In 26.2 a {@link VertexConsumer} is no longer something you pull out of a buffer source. Callers get
- * one by submitting a node instead, i.e. from inside
- * {@code SubmitNodeCollector#submitCustomGeometry(PoseStack, RenderType, CustomGeometryRenderer)},
- * which hands back the {@link PoseStack.Pose} and the {@link VertexConsumer} these methods want.
+ * The {@link VertexConsumer} and {@link PoseStack.Pose} these take come from
+ * {@code SubmitNodeCollector#submitCustomGeometry}.
  */
 public class FluidCuboidUtils {
 
@@ -152,8 +150,8 @@ public class FluidCuboidUtils {
         float minV;
         float maxV;
 
-        // getU/getV take a 0-1 offset now, where they used to take a 0-16 model coordinate,
-        // so a full span is 1 and the flowing texture's half span is 0.5
+        // getU/getV take a 0-1 offset, so a full span is 1 and the flowing texture's half span
+        // is 0.5
         double size = 1d;
         if (flowing) {
             size = 0.5d;

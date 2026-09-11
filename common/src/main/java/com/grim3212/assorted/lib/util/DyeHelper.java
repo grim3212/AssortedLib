@@ -49,13 +49,7 @@ public class DyeHelper {
         return names;
     }
 
-    /**
-     * Vanilla no longer declares one static field per dyed block, they are grouped
-     * into a {@link ColorCollection}. This flattens one back out into the
-     * {@link DyeColor} keyed map shape the rest of Assorted expects.
-     *
-     * @param blocks The vanilla collection to flatten
-     */
+    /** Flattens a vanilla {@link ColorCollection} into a {@link DyeColor}-keyed map. */
     private static Map<DyeColor, Block> byDye(ColorCollection<Block> blocks) {
         return Util.make(Maps.newEnumMap(DyeColor.class), (map) -> {
             for (DyeColor color : DyeColor.values()) {

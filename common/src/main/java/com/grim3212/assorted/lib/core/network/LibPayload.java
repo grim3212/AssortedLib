@@ -10,18 +10,11 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 /**
- * Carries an arbitrary message object as a vanilla {@link CustomPacketPayload}.
- * <p>
- * 26.x removed the ability to register a raw encoder/decoder pair against a channel: every packet
- * is now a {@code CustomPacketPayload} with a {@link StreamCodec} and a typed id. Rather than
- * force every downstream mod to make its messages implement {@code CustomPacketPayload}, this
- * wraps the message and builds the codec from the {@code BiConsumer}/{@code Function} pair that
- * {@code INetworkHelper.MessageHandler} already carries, so that interface keeps its shape.
- * <p>
- * Both loaders use this same wrapper, so the wire format stays identical across them.
+ * Carries an arbitrary message object as a {@link CustomPacketPayload}, with the codec built from
+ * the encoder/decoder pair {@code INetworkHelper.MessageHandler} carries, so messages need not
+ * implement it themselves. Both loaders use this wrapper, so the wire format matches.
  *
- * @param type    The payload type this message was registered under.
- * @param message The wrapped message.
+ * @param type the payload type this message was registered under
  */
 public record LibPayload<MSG>(CustomPacketPayload.Type<LibPayload<MSG>> type, MSG message) implements CustomPacketPayload {
 
@@ -30,10 +23,8 @@ public record LibPayload<MSG>(CustomPacketPayload.Type<LibPayload<MSG>> type, MS
     }
 
     /**
-     * Builds the stream codec for a message type from its existing encoder and decoder.
-     * <p>
-     * {@link RegistryFriendlyByteBuf} extends {@link FriendlyByteBuf}, so encoders and decoders
-     * written against the plain buffer keep working while gaining registry access.
+     * Builds the stream codec from a message's encoder and decoder. Encoders written against
+     * {@link FriendlyByteBuf} keep working, since {@link RegistryFriendlyByteBuf} extends it.
      */
     public static <MSG> StreamCodec<RegistryFriendlyByteBuf, LibPayload<MSG>> codec(
             CustomPacketPayload.Type<LibPayload<MSG>> type,

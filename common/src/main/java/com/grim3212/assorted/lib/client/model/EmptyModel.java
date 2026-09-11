@@ -13,10 +13,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 /**
- * A completely empty model with no quads or texture dependencies.
- * <p>
- * You can access it as a {@link BlockStateModel} through {@link #BAKED}, or as a single
- * {@link BlockStateModelPart} through {@link #PART}.
+ * A model with no quads or texture dependencies, as a {@link BlockStateModel} ({@link #BAKED}) or a
+ * single {@link BlockStateModelPart} ({@link #PART}).
  */
 public class EmptyModel {
     public static final BlockStateModel BAKED = new Baked();

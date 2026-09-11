@@ -9,12 +9,7 @@ import net.minecraft.resources.Identifier;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-/**
- * NeoForge no longer keeps a parallel registry system: {@code ForgeRegistry} and
- * {@code RegistryManager.ACTIVE} are gone and everything, modded registries included, lives in the
- * vanilla registry of registries. This is therefore a thin wrapper over a plain {@link Registry},
- * exactly like the Fabric side.
- */
+/** A thin wrapper over a vanilla {@link Registry}, where NeoForge keeps modded registries too. */
 public class ForgeRegistryWrapper<T> implements ILoaderRegistry<T> {
 
     private final Registry<T> registry;

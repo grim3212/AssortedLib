@@ -12,15 +12,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 /**
- * Makes a block whose light emission is position dependent still get ambient occlusion when it is
- * emitting nothing at this position.
- * <p>
- * 1.20.1 had to inject before the {@code tesselateWithoutAO} call and re-dispatch to
- * {@code tesselateWithAO} by hand. Both of those are private in 26.2 and the choice between them is
- * a single expression inside {@code tesselateBlock}
- * ({@code this.ambientOcclusion && blockState.getLightEmission() == 0 &&
- * parts.getFirst().useAmbientOcclusion()}), so redirecting the light emission lookup is enough - and
- * it keeps the rest of vanilla's decision intact.
+ * Gives a block whose light emission is position dependent ambient occlusion where it emits
+ * nothing. {@code tesselateBlock} picks AO on {@code blockState.getLightEmission() == 0}, so
+ * redirecting that lookup is enough and keeps the rest of vanilla's decision.
  */
 @Mixin(ModelBlockRenderer.class)
 public abstract class ModelBlockRendererWorldlyBlockMixin {

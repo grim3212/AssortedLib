@@ -5,18 +5,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 /**
- * Lets an item decide for itself which enchantments it accepts, beyond what the enchantments'
- * {@code supported_items} / {@code primary_items} tags say.
- * <p>
- * Both methods deliberately have exactly the signatures of NeoForge's
- * {@code IItemExtension#supportsEnchantment} and {@code IItemExtension#isPrimaryItemFor}. Common
- * compiles against vanilla, where they are only this interface's methods; when the NeoForge module
- * recompiles common, an implementing item's methods override NeoForge's defaults as well, so
- * NeoForge's own anvil, enchanting table, loot and {@code /enchant} checks consult them with no
- * further wiring. Fabric reaches them through {@code EnchantmentEvents.ALLOW_ENCHANTING}.
- * <p>
- * An implementation gives the whole answer, not just an override of it; {@link #supportedByDefault}
- * and {@link #primaryByDefault} are the answer the item would have had otherwise.
+ * Lets an item decide which enchantments it accepts, beyond the enchantments'
+ * {@code supported_items} / {@code primary_items} tags. The methods match NeoForge's
+ * {@code IItemExtension} signatures, so on NeoForge they override its defaults and every check
+ * consults them; Fabric reaches them through {@code EnchantmentEvents.ALLOW_ENCHANTING}.
+ * An implementation gives the whole answer; {@link #supportedByDefault} and
+ * {@link #primaryByDefault} are what the item would have answered otherwise.
  */
 public interface IItemEnchantmentCondition {
 

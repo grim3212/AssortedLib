@@ -25,16 +25,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An {@link UnbakedModel} whose geometry is produced by an {@link IModelSpecification} instead of by
- * a list of json elements.
- * <p>
- * 1.20.1 did this by subclassing {@code BlockModel} and overriding its two {@code bake} methods, so
- * a specification could return an entire {@code BakedModel}. In 26.2 an {@code UnbakedModel} is a
- * plain data carrier - textures, parent, display, ambient occlusion, gui light and one
- * {@link UnbakedGeometry} - and the model json is only ever half of a model: the blockstate json
- * picks a {@link BlockStateModel.UnbakedRoot} which then bakes the referenced model's geometry. The
- * specification is therefore hooked in as the geometry, and everything else is answered from the
- * vanilla half of the same json.
+ * An {@link UnbakedModel} whose geometry comes from an {@link IModelSpecification} instead of json
+ * elements. A model json only supplies geometry (the blockstate picks the
+ * {@link BlockStateModel.UnbakedRoot}), so the specification is hooked in as the
+ * {@link UnbakedGeometry} and the rest is read from the vanilla half of the same json.
  */
 public class FabricExtendedBlockModel implements UnbakedModel, IModelSpecificationHolder {
 
@@ -90,28 +84,20 @@ public class FabricExtendedBlockModel implements UnbakedModel, IModelSpecificati
     }
 
     /**
-     * Marks the models the specification resolves through the baker while baking, so discovery picks
-     * them up. The vanilla {@code parent} of the json is walked separately, off {@link #parent()}.
-     * <p>
-     * This is not an override: {@code UnbakedModel} only carries {@code resolveDependencies} on
-     * NeoForge, where it is an extension interface. On Fabric nothing calls it, so
-     * {@link com.grim3212.assorted.lib.client.model.FabricUnbakedModelTracker} collects these models
-     * as they load and drives them from an extra model instead.
+     * Marks the models the specification resolves through the baker, so discovery finds them; the
+     * json's {@code parent} is walked separately. Not an override: only NeoForge declares this on
+     * {@code UnbakedModel}, so on Fabric
+     * {@link com.grim3212.assorted.lib.client.model.FabricUnbakedModelTracker} calls it from an
+     * extra model.
      */
     public void resolveDependencies(ResolvableModel.Resolver resolver) {
         specification.resolveDependencies(resolver);
     }
 
-    // TODO(26.2): the specification's BlockStateModel is flattened into a QuadCollection here.
-    //  What is lost: a BlockStateModel can hand out several BlockStateModelParts, each with its own
-    //  ambient occlusion flag and particle material, and an IDataAwareBakedModel can pick different
-    //  parts per render pass. Model json geometry cannot express any of that - UnbakedGeometry#bake
-    //  returns one QuadCollection - so the parts are merged and only their quads survive.
-    //  How to get it back: a model that genuinely needs to stay a BlockStateModel has to be declared
-    //  in the *blockstate* json instead, as a
-    //  net.fabricmc.fabric.api.client.model.loading.v1.CustomUnbakedBlockStateModel registered by
-    //  MapCodec. That is a codec based registration, so it cannot be driven by the gson based
-    //  IModelSpecificationLoader this class is wired to.
+    // TODO(26.2): the specification's BlockStateModel is flattened into one QuadCollection here,
+    //  losing per-part ambient occlusion and particles and any parts chosen per render. Model json
+    //  geometry cannot express more; a model that needs them must go through the blockstate json
+    //  instead (the assortedlib:specification type, FabricSpecificationBlockStateModel).
     private QuadCollection bakeGeometry(final TextureSlots textureSlots, final ModelBaker baker, final ModelState modelState, final ModelDebugName debugName) {
         final Identifier modelLocation = resolveModelLocation(debugName);
         final FabricModelBakingContextDelegate context = new FabricModelBakingContextDelegate(this, textureSlots);

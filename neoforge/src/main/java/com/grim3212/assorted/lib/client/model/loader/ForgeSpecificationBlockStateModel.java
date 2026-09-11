@@ -15,25 +15,18 @@ import java.util.Optional;
 
 /**
  * The blockstate side entry point for an
- * {@link com.grim3212.assorted.lib.client.model.loaders.IModelSpecification}.
- * <p>
- * A model json loader can only contribute geometry in 26.2, so a specification reached that way is
- * baked once, with empty model data, and flattened into a {@code QuadCollection} - which for a model
- * that varies with a block entity means it draws its "nothing stored" state everywhere. The object
- * that still sees the level and the position is the {@code BlockStateModel} the <em>blockstate</em>
- * json picks, and this is that object: it bakes the specification itself and hands back
- * {@link ForgeBakedModelDelegate} so {@code DynamicBlockStateModel} can route the model data in.
- * <p>
- * It carries a plain vanilla {@link Variant}, so the json is the same {@code model} / {@code x} /
- * {@code y} / {@code uvlock} shape a normal variant has and only the {@code type} distinguishes it.
+ * {@link com.grim3212.assorted.lib.client.model.loaders.IModelSpecification}. Through a model json
+ * loader a specification is baked once with empty data, so a block entity driven model draws its
+ * empty state everywhere. The blockstate's model still sees level and position, so this bakes the
+ * specification itself and returns a {@link ForgeBakedModelDelegate}. Its json is a vanilla
+ * {@link Variant} plus the {@code type}.
  */
 public record ForgeSpecificationBlockStateModel(Variant variant) implements CustomUnbakedBlockStateModel {
 
     /**
-     * A vanilla variant's fields, plus Fabric's {@code "fabric:type"} naming this same type. NeoForge
-     * dispatches on {@code "type"} and ignores the extra key; Fabric dispatches on {@code "fabric:type"}
-     * and ignores {@code "type"}. The blockstates are generated here and read by both, so both keys are
-     * written - without the second, Fabric read every specification variant as a plain one.
+     * A vanilla variant's fields plus {@code "fabric:type"} naming this same type: NeoForge
+     * dispatches on {@code "type"}, Fabric only on {@code "fabric:type"}, and both read these
+     * blockstates.
      */
     public static final MapCodec<ForgeSpecificationBlockStateModel> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Variant.MAP_CODEC.forGetter(ForgeSpecificationBlockStateModel::variant),

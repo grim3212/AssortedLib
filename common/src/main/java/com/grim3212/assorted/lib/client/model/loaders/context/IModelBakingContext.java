@@ -13,23 +13,12 @@ import java.util.Optional;
 public interface IModelBakingContext {
 
     /**
-     * Retrieves an unbaked model from the context.
-     * This can be used to get a parent context.
-     * <p>
-     * Note the game keeps track of all unbaked models that are requested to be loaded, and will throw
-     * an exception if a circular dependency is detected.
-     *
-     * @param unbakedModel The name of the unbaked model to load.
-     * @return The unbaked model, or null if it could not be found.
+     * The unbaked model named {@code unbakedModel}, or null if not found; can be used to get a
+     * parent. The game tracks requested models and throws on a circular dependency.
      */
     UnbakedModel getUnbakedModel(final Identifier unbakedModel);
 
-    /**
-     * Retries a material from a supported super model or context.
-     *
-     * @param name The name of the material.
-     * @return The material, or empty if it could not be found.
-     */
+    /** A material from a supported super model or the context, or empty if not found. */
     Optional<Material> getMaterial(final String name);
 
     /**
@@ -60,9 +49,6 @@ public interface IModelBakingContext {
      */
     ItemTransforms getTransforms();
 
-    // TODO(26.2): getItemOverrides(ModelBaker) was removed along with ItemOverrides itself. A baking
-    //  context has nothing left to hand back: item variants are picked by data driven ItemModel types
-    //  (SelectItemModel / ConditionalItemModel / RangeSelectItemModel and the codec registered
-    //  properties under client.renderer.item.properties.**) declared in the item's own model json,
-    //  not by a list of overrides a model loader could assemble while baking.
+    // TODO(26.2): no getItemOverrides any more: item variants are picked by data driven ItemModel
+    //  types declared in the item's model json, not assembled by a model loader while baking.
 }

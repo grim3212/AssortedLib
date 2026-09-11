@@ -9,41 +9,19 @@ import net.minecraft.world.item.component.CustomData;
 import java.util.function.Consumer;
 
 /**
- * Helpers for the free form NBT that used to live directly on an ItemStack.
- * <p>
- * Stack NBT no longer exists, so every ItemStack based method here now reads and
- * writes the {@link DataComponents#CUSTOM_DATA} component instead, which is the
- * data component that carries arbitrary modded NBT.
- * <p>
- * Two behaviours had to change:
- * <ul>
- * <li>{@link CustomData} is immutable, so every read hands back a detached copy.
- * Mutating a CompoundTag returned from here no longer writes through to the
- * stack, it has to be handed back through the matching put method.</li>
- * <li>The getters no longer persist their fallback onto the stack when the key
- * is missing, they only return it. Writing a component changes stack equality
- * and would stop otherwise identical stacks from stacking together.</li>
- * </ul>
+ * Helpers for free-form modded NBT, stored in the {@link DataComponents#CUSTOM_DATA} component.
+ * {@link CustomData} is immutable, so every read returns a detached copy that has to be written
+ * back through the matching put. Getters return their fallback without storing it, since writing a
+ * component would stop otherwise identical stacks from stacking.
  */
 public class NBTHelper {
 
-    /**
-     * Reads the custom data component off the given ItemStack as a detached
-     * CompoundTag, an empty one if the stack carries no custom data at all
-     *
-     * @param itemStack The ItemStack to read the custom data of
-     */
+    /** The stack's custom data as a detached tag; empty if it has none. */
     private static CompoundTag customData(ItemStack itemStack) {
         return itemStack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
     }
 
-    /**
-     * Applies the given change to a copy of the ItemStack's custom data and
-     * stores the result back onto the stack
-     *
-     * @param itemStack The ItemStack whose custom data is being modified
-     * @param modifier  The change to apply
-     */
+    /** Applies {@code modifier} to a copy of the stack's custom data and stores the result back. */
     private static void updateCustomData(ItemStack itemStack, Consumer<CompoundTag> modifier) {
         CustomData.update(DataComponents.CUSTOM_DATA, itemStack, modifier);
     }

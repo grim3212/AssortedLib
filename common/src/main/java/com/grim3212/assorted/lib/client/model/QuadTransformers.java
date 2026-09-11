@@ -91,29 +91,15 @@ public final class QuadTransformers {
         };
     }
 
-    /**
-     * Converts an ARGB color to an ABGR color, as the commonly used color format is not the format colors end up packed into.
-     * This function doubles as its own inverse.
-     *
-     * @param argb ARGB color
-     * @return ABGR color
-     */
+    /** Converts ARGB to the ABGR order colours are packed in. It is its own inverse. */
     public static int toABGR(int argb) {
         return (argb & 0xFF00FF00) // alpha and green same spot
                 | ((argb >> 16) & 0x000000FF) // red moves to blue
                 | ((argb << 16) & 0x00FF0000); // blue moves to red
     }
 
-    // TODO(26.2): applyingLightmap(int) / applyingLightmap(int, int) and applyingColor(int) /
-    //  applyingColor(int, int, int) / applyingColor(int, int, int, int) are gone.
-    //  What they used to do: overwrite the UV2 (lightmap) or COLOR element of all four vertices in a
-    //  quad's int[] vertex data, so a model could bake fixed lighting or a fixed tint into geometry.
-    //  Why they cannot be expressed: a 26.2 BakedQuad carries no per vertex colour and no per vertex
-    //  lightmap - only positions, uvs, a direction and a MaterialInfo. Colour and light are supplied
-    //  by the caller when the geometry is submitted (the tintLayers / lightCoords / overlayCoords
-    //  arguments of SubmitNodeCollector#submitBlockModel and #submitItem, and QuadInstance for the
-    //  submitCustomGeometry escape hatch), and net.minecraft.client.renderer.LightTexture - the source
-    //  of the packed light value these methods took - was removed as well. The only lighting a quad
-    //  itself still carries is MaterialInfo#lightEmission, which is what settingEmissivity above sets;
-    //  a fixed tint has to be applied at the submit call, not baked in here.
+    // TODO(26.2): applyingLightmap and applyingColor are gone: a BakedQuad carries no per-vertex
+    //  colour or lightmap. Colour and light are passed at submit time
+    //  (SubmitNodeCollector#submitBlockModel / #submitItem); the only light a quad keeps is
+    //  MaterialInfo#lightEmission (settingEmissivity).
 }

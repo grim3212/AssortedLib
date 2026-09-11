@@ -4,22 +4,15 @@ import com.grim3212.assorted.lib.LibConstants;
 import net.minecraft.resources.Identifier;
 
 /**
- * The ids the library's own blockstate model types are registered under.
- * <p>
- * These are shared across loaders on purpose: the blockstate jsons are generated once (by the
- * NeoForge datagen) and read by both, so the {@code "type"} they name has to mean the same thing on
- * each side even though the interface it implements is loader specific.
+ * Ids of the library's own blockstate model types. The blockstate jsons are generated once and read
+ * by both loaders, so each id must mean the same thing on both, though the interface is per loader.
  */
 public final class LibBlockStateModels {
 
     /**
-     * A blockstate model that bakes a model json's
-     * {@link com.grim3212.assorted.lib.client.model.loaders.IModelSpecification} into a whole
-     * {@code BlockStateModel} rather than flattening it to geometry.
-     * <p>
-     * Its json shape is exactly a vanilla variant - {@code model} plus the optional {@code x},
-     * {@code y}, {@code z} and {@code uvlock} - so switching a blockstate over to it is only a
-     * question of the {@code type} key.
+     * A blockstate model that bakes a model json's {@code IModelSpecification} into a whole
+     * {@code BlockStateModel} rather than flattening it to geometry. Its json is a vanilla variant
+     * ({@code model}, {@code x}, {@code y}, {@code z}, {@code uvlock}) with this {@code type}.
      */
     public static final Identifier SPECIFICATION = Identifier.fromNamespaceAndPath(LibConstants.MOD_ID, "specification");
 
