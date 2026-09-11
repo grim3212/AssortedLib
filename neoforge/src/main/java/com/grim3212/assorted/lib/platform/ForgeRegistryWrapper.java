@@ -43,7 +43,9 @@ public class ForgeRegistryWrapper<T> implements ILoaderRegistry<T> {
 
     @Override
     public Optional<T> getValue(Identifier resourceLocation) {
-        return Optional.ofNullable(this.registry.getValue(resourceLocation));
+        // Registry#getValue answers a defaulted registry's default (air, for blocks and items) for an
+        // unknown id; getOptional answers empty, which is what Fabric returns and what callers expect.
+        return this.registry.getOptional(resourceLocation);
     }
 
     @Override

@@ -19,10 +19,12 @@ public class FabricIngredientHelper implements IIngredientHelper {
 
     @Override
     public Ingredient and(Ingredient... ingredients) {
-        if (ingredients.length > 1)
-            throw new IllegalArgumentException("You must supply at least 2 ingredients for an AND!");
+        // Same shape as or() and as NeoForge: an Ingredient may not be empty, and a single branch
+        // is handed back as is rather than wrapped.
+        if (ingredients.length == 0)
+            throw new IllegalArgumentException("You must supply at least 1 ingredient for an AND!");
 
-        return DefaultCustomIngredients.all(ingredients);
+        return ingredients.length == 1 ? ingredients[0] : DefaultCustomIngredients.all(ingredients);
     }
 
     @Override
