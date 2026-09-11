@@ -1,5 +1,8 @@
 package com.grim3212.assorted.lib.platform;
 
+import java.util.ArrayList;
+import net.minecraft.world.item.component.TooltipProvider;
+import net.minecraft.core.component.DataComponentType;
 import com.grim3212.assorted.lib.dist.Dist;
 import com.grim3212.assorted.lib.platform.services.IPlatformHelper;
 import com.grim3212.assorted.lib.registry.ILoaderRegistry;
@@ -95,6 +98,14 @@ public class ForgePlatformHelper implements IPlatformHelper {
     @Override
     public void modifyCreativeTab(ResourceKey<CreativeModeTab> key, Supplier<List<ItemStack>> displayStacks) {
         tabsToRegister.put(key, displayStacks);
+    }
+
+    public static final List<Supplier<? extends DataComponentType<? extends TooltipProvider>>> componentTooltips = new ArrayList<>();
+
+    // Registered from AssortedLibForge's RegisterTooltipAppendersEvent listener, once the types exist.
+    @Override
+    public <T extends TooltipProvider> void showComponentTooltip(Supplier<DataComponentType<T>> type) {
+        componentTooltips.add(type);
     }
 
     @Override

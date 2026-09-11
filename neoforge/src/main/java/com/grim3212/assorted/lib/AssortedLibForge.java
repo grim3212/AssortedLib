@@ -1,5 +1,9 @@
 package com.grim3212.assorted.lib;
 
+import net.minecraft.world.item.component.TooltipProvider;
+import net.minecraft.core.component.DataComponentType;
+import net.neoforged.neoforge.common.tooltip.TooltipAppender;
+import net.neoforged.neoforge.event.RegisterTooltipAppendersEvent;
 import com.grim3212.assorted.lib.conditions.LibConditions;
 import com.grim3212.assorted.lib.data.ForgeBiomeTagProvider;
 import com.grim3212.assorted.lib.data.ForgeBlockTagProvider;
@@ -40,6 +44,7 @@ public class AssortedLibForge {
         modBus.addListener(this::registerIngredientTypes);
         modBus.addListener(this::registerConditionCodecs);
         modBus.addListener(this::modifyCreativeTabs);
+        modBus.addListener(this::registerComponentTooltips);
 
         Services.EVENTS.registerEventType(UseBlockEvent.class, () -> {
             NeoForge.EVENT_BUS.addListener(EventPriority.NORMAL, (final PlayerInteractEvent.RightClickBlock event) -> {
@@ -128,5 +133,17 @@ public class AssortedLibForge {
         ForgeBlockTagProvider blockTagProvider = event.addProvider(new ForgeBlockTagProvider(packOutput, lookupProvider, LibConstants.MOD_ID, new LibCommonTagProvider.BlockTagProvider(packOutput, lookupProvider)));
         event.addProvider(new ForgeItemTagProvider(packOutput, lookupProvider, blockTagProvider.contentsGetter(), LibConstants.MOD_ID, new LibCommonTagProvider.ItemTagProvider(packOutput, lookupProvider, blockTagProvider.contentsGetter())));
         event.addProvider(new ForgeBiomeTagProvider(packOutput, lookupProvider, LibConstants.MOD_ID, new LibCommonTagProvider.BiomeTagProvider(packOutput, lookupProvider)));
+    }
+
+    /**
+     * Vanilla only draws the tooltips of its own components; a mod's are added here, ahead of
+     * vanilla's lines, so they land where {@code Item#appendHoverText} used to put them.
+     */
+    private void registerComponentTooltips(final RegisterTooltipAppendersEvent event) {
+        ForgePlatformHelper.componentTooltips.forEach(type -> addComponentTooltip(event, type.get()));
+    }
+
+    private static <T extends TooltipProvider> void addComponentTooltip(RegisterTooltipAppendersEvent event, DataComponentType<T> type) {
+        event.registerComponentAppenderBeforeAll(type, TooltipAppender.createComponentAppender(type));
     }
 }

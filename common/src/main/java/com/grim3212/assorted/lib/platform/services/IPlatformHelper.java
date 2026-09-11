@@ -1,5 +1,7 @@
 package com.grim3212.assorted.lib.platform.services;
 
+import net.minecraft.world.item.component.TooltipProvider;
+import net.minecraft.core.component.DataComponentType;
 import com.grim3212.assorted.lib.dist.Dist;
 import com.grim3212.assorted.lib.mixin.world.level.MonsterRoomFeatureAccessor;
 import com.grim3212.assorted.lib.registry.ILoaderRegistry;
@@ -78,6 +80,16 @@ public interface IPlatformHelper {
     <T> ILoaderRegistry<T> getRegistry(ResourceKey<? extends Registry<T>> key);
 
     void modifyCreativeTab(final ResourceKey<CreativeModeTab> key, Supplier<List<ItemStack>> displayStacks);
+
+    /**
+     * Shows a mod data component's {@link TooltipProvider} lines on every stack that carries it, just
+     * ahead of vanilla's own component lines - where the now deprecated {@code Item#appendHoverText}
+     * put them. Without this vanilla only asks the components on its own fixed list.
+     * <p>
+     * Call once from common init, after the type is registered. Fabric only adds these lines on the
+     * client; NeoForge adds them on both sides.
+     */
+    <T extends TooltipProvider> void showComponentTooltip(Supplier<DataComponentType<T>> type);
 
     void addReloadListener(Identifier identifier, PreparableReloadListener reloadListener);
 

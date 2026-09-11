@@ -1,5 +1,6 @@
 package com.grim3212.assorted.lib.core.inventory.locking;
 
+import net.minecraft.core.component.DataComponentGetter;
 import com.grim3212.assorted.lib.core.inventory.IItemStorageHandler;
 import com.grim3212.assorted.lib.core.inventory.impl.ItemStackStorageHandler;
 import net.minecraft.core.BlockPos;
@@ -76,7 +77,12 @@ public class StorageUtil {
     }
 
     public static String getCode(ItemStack stack) {
-        return readLock(stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag());
+        return getCode((DataComponentGetter) stack);
+    }
+
+    /** The lock on anything with components: a stack, or the getter a {@code TooltipProvider} is handed. */
+    public static String getCode(DataComponentGetter components) {
+        return readLock(components.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag());
     }
 
     public static boolean hasCodeWithMatch(ItemStack stack, String testCode) {

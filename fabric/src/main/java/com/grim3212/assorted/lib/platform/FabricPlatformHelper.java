@@ -1,5 +1,8 @@
 package com.grim3212.assorted.lib.platform;
 
+import net.minecraft.world.item.component.TooltipProvider;
+import net.minecraft.core.component.DataComponentType;
+import net.fabricmc.fabric.api.item.v1.ItemComponentTooltipProviderRegistry;
 import com.grim3212.assorted.lib.dist.Dist;
 import com.grim3212.assorted.lib.platform.services.IPlatformHelper;
 import com.grim3212.assorted.lib.registry.ILoaderRegistry;
@@ -109,6 +112,11 @@ public class FabricPlatformHelper implements IPlatformHelper {
         CreativeModeTabEvents.modifyOutputEvent(key).register(output -> {
             output.acceptAll(displayStacks.get());
         });
+    }
+
+    @Override
+    public <T extends TooltipProvider> void showComponentTooltip(Supplier<DataComponentType<T>> type) {
+        ItemComponentTooltipProviderRegistry.addFirst(type.get());
     }
 
     @Override
