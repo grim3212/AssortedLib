@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:function",
+  "environment": "minecraft:default",
+  "function": "assortedlib:fabric_fluid_variant_keeps_components",
+  "structure": "assortedlib:test_box",
+  "max_ticks": 1,
+  "setup_ticks": 0,
+  "required": true
+}

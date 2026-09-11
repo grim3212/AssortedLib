@@ -18,5 +18,8 @@ public class LibFabricGameTests implements ModInitializer {
     public void onInitialize() {
         LibGameTests.forEach((name, function) ->
                 Registry.register(BuiltInRegistries.TEST_FUNCTION, Identifier.fromNamespaceAndPath(LibConstants.MOD_ID, name), function));
+        // Fabric-only: its test instance json lives in this source set, not the shared one.
+        FabricFluidTests.register((name, function) ->
+                Registry.register(BuiltInRegistries.TEST_FUNCTION, Identifier.fromNamespaceAndPath(LibConstants.MOD_ID, name), function));
     }
 }

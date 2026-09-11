@@ -117,10 +117,7 @@ public class FabricFluidManager implements IFluidManager {
             return makeVariant(fluid.withSource());
         }
 
-        // TODO(26.2): FluidInformation carries a CompoundTag but a FluidVariant a
-        //  DataComponentPatch, and converting needs registry aware DynamicOps this static helper
-        //  lacks. The extra data is dropped both ways until FluidInformation moves to components.
-        return FluidVariant.of(fluid.fluid());
+        return FluidVariant.of(fluid.fluid(), fluid.data());
     }
 
     public static FluidInformation makeInformation(final FluidVariant fluid, final long count) {
@@ -132,8 +129,7 @@ public class FabricFluidManager implements IFluidManager {
             }
         }
 
-        // See makeVariant: the variant's component patch has no CompoundTag to hand back.
-        return new FluidInformation(fluid.getFluid(), count);
+        return new FluidInformation(fluid.getFluid(), count, fluid.getComponentsPatch());
     }
 
     public static FluidInformation makeInformation(final FluidVariant fluid) {
