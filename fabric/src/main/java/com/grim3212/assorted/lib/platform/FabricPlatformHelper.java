@@ -3,10 +3,11 @@ package com.grim3212.assorted.lib.platform;
 import net.minecraft.world.item.component.TooltipProvider;
 import net.minecraft.core.component.DataComponentType;
 import net.fabricmc.fabric.api.item.v1.ItemComponentTooltipProviderRegistry;
+import com.grim3212.assorted.lib.core.inventory.IMenuDataProvider;
+import com.grim3212.assorted.lib.core.inventory.MenuData;
 import com.grim3212.assorted.lib.dist.Dist;
 import com.grim3212.assorted.lib.platform.services.IPlatformHelper;
 import com.grim3212.assorted.lib.registry.ILoaderRegistry;
-import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.menu.v1.ExtendedMenuProvider;
 import net.fabricmc.fabric.api.menu.v1.ExtendedMenuType;
@@ -15,7 +16,6 @@ import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
@@ -28,6 +28,7 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
@@ -38,22 +39,9 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class FabricPlatformHelper implements IPlatformHelper {
-
-    // TODO(26.2): IPlatformHelper still passes extra menu data as a raw FriendlyByteBuf, while both
-    //  loaders want a typed value plus a StreamCodec. Until it does, the bytes travel as a byte
-    //  array and are handed back as a RegistryFriendlyByteBuf so registry aware reads still work.
-    private static final StreamCodec<RegistryFriendlyByteBuf, FriendlyByteBuf> EXTRA_DATA_CODEC = StreamCodec.of(
-            (buf, data) -> {
-                final byte[] bytes = new byte[data.readableBytes()];
-                data.getBytes(data.readerIndex(), bytes);
-                buf.writeByteArray(bytes);
-            },
-            buf -> new RegistryFriendlyByteBuf(Unpooled.wrappedBuffer(buf.readByteArray()), buf.registryAccess())
-    );
 
     @Override
     public String getPlatformName() {
@@ -62,8 +50,12 @@ public class FabricPlatformHelper implements IPlatformHelper {
 
 
     @Override
-    public void openMenu(ServerPlayer player, MenuProvider provider, Consumer<FriendlyByteBuf> extraDataWriter) {
-        player.openMenu(new ExtendedScreenHandlerImpl(provider, extraDataWriter));
+    public void openMenu(ServerPlayer player, MenuProvider provider) {
+        if (provider instanceof IMenuDataProvider<?> withData) {
+            player.openMenu(new DataMenuProvider<>(withData));
+        } else {
+            player.openMenu(provider);
+        }
     }
 
     @Override
@@ -127,24 +119,22 @@ public class FabricPlatformHelper implements IPlatformHelper {
     }
 
     @Override
-    public <T extends AbstractContainerMenu> MenuType<T> createMenuType(MenuFactory<T> factory) {
-        return new ExtendedMenuType<>(factory::create, EXTRA_DATA_CODEC);
+    public <T extends AbstractContainerMenu, D> MenuType<T> createMenuType(MenuFactory<T, D> factory, StreamCodec<? super RegistryFriendlyByteBuf, D> codec) {
+        MenuType<T> type = new ExtendedMenuType<>(factory::create, codec);
+        MenuData.register(type, factory, codec);
+        return type;
     }
 
-    public static class ExtendedScreenHandlerImpl implements ExtendedMenuProvider<FriendlyByteBuf> {
-        private final MenuProvider provider;
-        private final Consumer<FriendlyByteBuf> extraDataWriter;
+    @Override
+    public <T extends AbstractContainerMenu> MenuType<T> createMenuType(SimpleMenuFactory<T> factory) {
+        return new MenuType<>(factory::create, FeatureFlags.VANILLA_SET);
+    }
 
-        public ExtendedScreenHandlerImpl(MenuProvider provider, Consumer<FriendlyByteBuf> extraDataWriter) {
-            this.provider = provider;
-            this.extraDataWriter = extraDataWriter;
-        }
-
+    /** Fabric writes the data with the codec its {@link ExtendedMenuType} carries. */
+    private record DataMenuProvider<D>(IMenuDataProvider<D> provider) implements ExtendedMenuProvider<D> {
         @Override
-        public FriendlyByteBuf getScreenOpeningData(ServerPlayer player) {
-            final FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-            extraDataWriter.accept(buf);
-            return buf;
+        public D getScreenOpeningData(ServerPlayer player) {
+            return provider.getMenuData(player);
         }
 
         @Override

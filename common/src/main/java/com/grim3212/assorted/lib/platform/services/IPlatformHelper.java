@@ -8,7 +8,9 @@ import com.grim3212.assorted.lib.registry.ILoaderRegistry;
 import net.minecraft.util.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.network.FriendlyByteBuf;
+import com.grim3212.assorted.lib.core.inventory.IMenuDataProvider;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
@@ -34,7 +36,6 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public interface IPlatformHelper {
@@ -47,7 +48,12 @@ public interface IPlatformHelper {
     String getPlatformName();
 
 
-    void openMenu(ServerPlayer player, MenuProvider provider, Consumer<FriendlyByteBuf> extraDataWriter);
+    /**
+     * Opens a menu. When the provider is an {@link IMenuDataProvider}, its data is sent to the
+     * client with the codec of the menu's type, which must come from
+     * {@link #createMenuType(MenuFactory, StreamCodec)}. Any other provider opens as vanilla does.
+     */
+    void openMenu(ServerPlayer player, MenuProvider provider);
 
     /** Whether a mod with the given id is loaded. */
     boolean isModLoaded(String modId);
@@ -92,11 +98,27 @@ public interface IPlatformHelper {
 
     <T extends BlockEntity> BlockEntityType<T> createBlockEntityType(BiFunction<BlockPos, BlockState, T> builder, Block... blocks);
 
-    <T extends AbstractContainerMenu> MenuType<T> createMenuType(MenuFactory<T> factory);
+    /**
+     * A menu type whose client-side menu is built from data the server sends, encoded with
+     * {@code codec}; open it from an {@link IMenuDataProvider}.
+     */
+    <T extends AbstractContainerMenu, D> MenuType<T> createMenuType(MenuFactory<T, D> factory, StreamCodec<? super RegistryFriendlyByteBuf, D> codec);
+
+    /**
+     * A menu type whose client-side menu needs nothing from the server; it opens as vanilla menus
+     * do. Common code cannot build one itself: the {@code MenuType} constructor is only public once a
+     * loader has widened it.
+     */
+    <T extends AbstractContainerMenu> MenuType<T> createMenuType(SimpleMenuFactory<T> factory);
 
     @FunctionalInterface
-    interface MenuFactory<T extends AbstractContainerMenu> {
-        T create(int syncId, Inventory inventory, FriendlyByteBuf buf);
+    interface MenuFactory<T extends AbstractContainerMenu, D> {
+        T create(int syncId, Inventory inventory, D data);
+    }
+
+    @FunctionalInterface
+    interface SimpleMenuFactory<T extends AbstractContainerMenu> {
+        T create(int syncId, Inventory inventory);
     }
 
     /**

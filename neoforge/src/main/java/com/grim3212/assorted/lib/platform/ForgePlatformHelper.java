@@ -3,19 +3,25 @@ package com.grim3212.assorted.lib.platform;
 import java.util.ArrayList;
 import net.minecraft.world.item.component.TooltipProvider;
 import net.minecraft.core.component.DataComponentType;
+import com.grim3212.assorted.lib.core.inventory.IMenuDataProvider;
+import com.grim3212.assorted.lib.core.inventory.MenuData;
 import com.grim3212.assorted.lib.dist.Dist;
 import com.grim3212.assorted.lib.platform.services.IPlatformHelper;
 import com.grim3212.assorted.lib.registry.ILoaderRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
@@ -34,7 +40,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class ForgePlatformHelper implements IPlatformHelper {
@@ -46,10 +51,12 @@ public class ForgePlatformHelper implements IPlatformHelper {
 
 
     @Override
-    public void openMenu(ServerPlayer player, MenuProvider provider, Consumer<FriendlyByteBuf> extraDataWriter) {
-        // NetworkHooks is gone; opening a menu with extra data is a player extension now. The buffer
-        // it hands over is a RegistryFriendlyByteBuf, which is a FriendlyByteBuf.
-        player.openMenu(provider, buf -> extraDataWriter.accept(buf));
+    public void openMenu(ServerPlayer player, MenuProvider provider) {
+        if (provider instanceof IMenuDataProvider<?> withData) {
+            player.openMenu(new DataMenuProvider(withData, player));
+        } else {
+            player.openMenu(provider);
+        }
     }
 
     @Override
@@ -126,15 +133,40 @@ public class ForgePlatformHelper implements IPlatformHelper {
     }
 
     @Override
-    public <T extends AbstractContainerMenu> MenuType<T> createMenuType(MenuFactory<T> factory) {
-        return IMenuTypeExtension.create(factory::create);
+    public <T extends AbstractContainerMenu, D> MenuType<T> createMenuType(MenuFactory<T, D> factory, StreamCodec<? super RegistryFriendlyByteBuf, D> codec) {
+        MenuType<T> type = IMenuTypeExtension.create((containerId, inventory, buf) -> factory.create(containerId, inventory, codec.decode(buf)));
+        MenuData.register(type, factory, codec);
+        return type;
     }
 
-    // isTieredTool is no longer overridden here. Forge's ToolActions and TierSortingRegistry are
-    // both gone, and 26.2 expresses tool type and mining tier entirely through vanilla item tags and
-    // the TOOL data component, so the default implementation in IPlatformHelper is correct on both
-    // loaders.
+    @Override
+    public <T extends AbstractContainerMenu> MenuType<T> createMenuType(SimpleMenuFactory<T> factory) {
+        return new MenuType<>(factory::create, FeatureFlags.VANILLA_SET);
+    }
 
-    // getFuelTime is no longer overridden here either. Burn times are data driven and resolved
-    // through Level#fuelValues(), which both loaders share.
+    /**
+     * NeoForge hands {@code writeClientSideData} the menu it just built, so the data is written with
+     * that menu type's codec.
+     */
+    private record DataMenuProvider(IMenuDataProvider<?> provider, ServerPlayer player) implements MenuProvider {
+        @Override
+        public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
+            return provider.createMenu(containerId, inventory, player);
+        }
+
+        @Override
+        public Component getDisplayName() {
+            return provider.getDisplayName();
+        }
+
+        @Override
+        public boolean shouldTriggerClientSideContainerClosingOnOpen() {
+            return provider.shouldTriggerClientSideContainerClosingOnOpen();
+        }
+
+        @Override
+        public void writeClientSideData(AbstractContainerMenu menu, RegistryFriendlyByteBuf buf) {
+            MenuData.write(menu.getType(), provider.getMenuData(player), buf);
+        }
+    }
 }
