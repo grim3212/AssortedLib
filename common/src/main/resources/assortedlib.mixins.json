@@ -20,6 +20,7 @@
     "world.level.MonsterRoomFeatureAccessor"
   ],
   "client": [
+    "client.gui.GuiGraphicsExtractorAccessor",
     "client.multiplayer.ClientLevelMixin"
   ],
   "injectors": {
