@@ -23,6 +23,13 @@ public final class LibBlockStateModels {
      */
     public static final Identifier SPECIFICATION = Identifier.fromNamespaceAndPath(LibConstants.MOD_ID, "specification");
 
+    /**
+     * The key Fabric reads a custom model type from - a blockstate variant type and a model json loader
+     * alike - where NeoForge reads {@code "type"} and {@code "loader"}. Each loader ignores the other key,
+     * so a json both loaders read has to carry both.
+     */
+    public static final String FABRIC_TYPE_KEY = "fabric:type";
+
     private LibBlockStateModels() {
     }
 }
