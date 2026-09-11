@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_21",
   "package": "com.grim3212.assorted.lib.mixin",
   "mixins": [
+    "block.BlockEntityMixin",
     "block.BlockMixin",
     "block.CactusBlockMixin",
     "block.CropBlockMixin",
