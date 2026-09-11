@@ -4,21 +4,39 @@ import com.grim3212.assorted.lib.core.fluid.FluidInformation;
 import com.grim3212.assorted.lib.core.inventory.IItemStorageHandler;
 import com.grim3212.assorted.lib.core.inventory.impl.ItemStackStorageHandler;
 import com.grim3212.assorted.lib.dist.Dist;
+import com.grim3212.assorted.lib.events.AnvilUpdatedEvent;
+import com.grim3212.assorted.lib.events.CorrectToolForDropEvent;
+import com.grim3212.assorted.lib.events.EntityInteractEvent;
+import com.grim3212.assorted.lib.events.OnDropStacksEvent;
+import com.grim3212.assorted.lib.events.UseBlockEvent;
 import com.grim3212.assorted.lib.platform.Services;
 import com.grim3212.assorted.lib.platform.services.IPlatformHelper;
 import com.grim3212.assorted.lib.registry.ILoaderRegistry;
 import com.grim3212.assorted.lib.util.LibCommonTags;
+import com.mojang.authlib.GameProfile;
+import io.netty.channel.embedded.EmbeddedChannel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.Connection;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.animal.cow.Cow;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -28,11 +46,16 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.AttachFace;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -63,8 +86,13 @@ public final class LibGameTests {
         out.accept("block_entity_handler_from_level", LibGameTests::blockEntityHandlerFromLevel);
         out.accept("level_properties_match_level", LibGameTests::levelPropertiesMatchLevel);
         out.accept("fluid_manager_reads_bucket", LibGameTests::fluidManagerReadsBucket);
+        out.accept("fluid_manager_moves_fluid", LibGameTests::fluidManagerMovesFluid);
         out.accept("ingredients_combine", LibGameTests::ingredientsCombine);
         out.accept("common_tags_are_bound", LibGameTests::commonTagsAreBound);
+        out.accept("use_block_result_stops_vanilla", LibGameTests::useBlockResultStopsVanilla);
+        out.accept("entity_interact_result_stops_vanilla", LibGameTests::entityInteractResultStopsVanilla);
+        out.accept("anvil_event_sets_the_result", LibGameTests::anvilEventSetsTheResult);
+        out.accept("drop_and_harvest_events_apply", LibGameTests::dropAndHarvestEventsApply);
     }
 
     /** Somewhere central in the 9x9x9 test box, one block above the floor. */
@@ -132,17 +160,21 @@ public final class LibGameTests {
         helper.assertTrue(blocks.containsKey(stoneId), "the block registry does not contain minecraft:stone");
         helper.assertTrue(blocks.contains(Blocks.STONE), "the block registry does not contain Blocks.STONE");
 
-        // Only containsKey is asserted for an unknown id. getValue disagrees across the loaders on a
-        // DEFAULTED registry - NeoForge's Registry#getValue hands back minecraft:air, Fabric's
-        // #getOptional hands back empty - and that divergence is reported rather than papered over.
-        Identifier missing = Identifier.fromNamespaceAndPath("assortedlib", "not_a_real_block");
-        helper.assertFalse(blocks.containsKey(missing), "the block registry claims to contain " + missing);
-
         ILoaderRegistry<Item> items = Services.PLATFORM.getRegistry(Registries.ITEM);
         helper.assertTrue(items.getValue(Identifier.withDefaultNamespace("stick")).orElse(null) == Items.STICK,
                 "the item registry did not hand back the same Items.STICK instance");
         helper.assertTrue(items.getValues().count() == BuiltInRegistries.ITEM.keySet().size(),
                 "the wrapped item registry and the vanilla one disagree on size");
+
+        // An unknown id is empty on both loaders, including in DEFAULTED registries. Blocks, items and
+        // fluids each have a default (air, air, empty) that vanilla's Registry#getValue answers for an
+        // id nobody registered; NeoForge used to pass that through, so a lookup of an absent optional
+        // item quietly got air there and nothing on Fabric.
+        Identifier missing = Identifier.fromNamespaceAndPath("assortedlib", "not_a_real_entry");
+        helper.assertFalse(blocks.containsKey(missing), "the block registry claims to contain " + missing);
+        helper.assertTrue(blocks.getValue(missing).isEmpty(), "the block registry answered " + missing + " with " + blocks.getValue(missing).orElse(null));
+        helper.assertTrue(items.getValue(missing).isEmpty(), "the item registry answered " + missing + " with " + items.getValue(missing).orElse(null));
+        helper.assertTrue(Services.PLATFORM.getRegistry(Registries.FLUID).getValue(missing).isEmpty(), "the fluid registry answered " + missing + " with a fluid");
 
         helper.succeed();
     }
@@ -339,8 +371,6 @@ public final class LibGameTests {
         helper.assertTrue(contained.fluid() == Fluids.WATER, "a water bucket reported fluid " + contained.fluid());
         helper.assertValueEqual(contained.amount(), oneBucket, "water bucket contents");
 
-        // simulateExtract is deliberately not asserted: Fabric reports a full bucket, NeoForge reports
-        // 0 for the same stack it just read the water out of. Reported rather than papered over.
         helper.assertTrue(bucket.is(Items.WATER_BUCKET), "reading a bucket's fluid consumed the bucket");
         helper.assertValueEqual(bucket.getCount(), 1, "reading a bucket's fluid changed the stack size");
 
@@ -351,13 +381,51 @@ public final class LibGameTests {
     }
 
     /**
+     * Fluid moved in and out of vanilla buckets, whose containers empty and fill by becoming a
+     * different item - the case both loaders got wrong: NeoForge's in-place stack access cannot swap
+     * the item, so it reported nothing extractable, and Fabric's never committed its transaction
+     * over a read-only context, so nothing it did stuck. Both directions, simulated and real, plus
+     * the contract that the stack handed in is never touched and only one item of it is worked.
+     */
+    private static void fluidManagerMovesFluid(GameTestHelper helper) {
+        long oneBucket = Services.FLUIDS.getBucketAmount();
+        FluidInformation oneWater = new FluidInformation(Fluids.WATER, oneBucket);
+
+        ItemStack water = new ItemStack(Items.WATER_BUCKET);
+        helper.assertValueEqual(Services.FLUIDS.simulateExtract(water, oneBucket), oneBucket, "simulated extraction from a water bucket");
+        helper.assertTrue(water.is(Items.WATER_BUCKET), "simulateExtract emptied the bucket");
+
+        ItemStack drained = Services.FLUIDS.extractFrom(water, oneBucket);
+        helper.assertTrue(drained.is(Items.BUCKET), "draining a water bucket gave back " + drained);
+        helper.assertTrue(water.is(Items.WATER_BUCKET), "extractFrom changed the stack it was handed");
+
+        ItemStack empty = new ItemStack(Items.BUCKET);
+        helper.assertValueEqual(Services.FLUIDS.simulateExtract(empty, oneBucket), 0L, "simulated extraction from an empty bucket");
+        helper.assertTrue(Services.FLUIDS.extractFrom(empty, oneBucket).is(Items.BUCKET), "draining an empty bucket did not give it back unchanged");
+
+        helper.assertValueEqual(Services.FLUIDS.simulateInsert(empty, oneWater), oneBucket, "simulated insertion into an empty bucket");
+        helper.assertTrue(empty.is(Items.BUCKET), "simulateInsert filled the bucket");
+
+        ItemStack filled = Services.FLUIDS.insertInto(empty, oneWater);
+        helper.assertTrue(filled.is(Items.WATER_BUCKET), "filling an empty bucket gave back " + filled);
+        helper.assertTrue(empty.is(Items.BUCKET), "insertInto changed the stack it was handed");
+
+        ItemStack threeEmpty = new ItemStack(Items.BUCKET, 3);
+        ItemStack oneFilled = Services.FLUIDS.insertInto(threeEmpty, oneWater);
+        helper.assertTrue(oneFilled.is(Items.WATER_BUCKET), "filling one of a stack of buckets gave back " + oneFilled);
+        helper.assertValueEqual(oneFilled.getCount(), 1, "buckets filled out of a stack of three");
+        helper.assertValueEqual(threeEmpty.getCount(), 3, "the stack of empty buckets after insertInto");
+
+        helper.succeed();
+    }
+
+    /**
      * Ingredients built through the abstraction match what they should and reject what they should not.
      * <p>
      * Nothing about this is shared code - NeoForge composes {@code CompoundIngredient} /
      * {@code DifferenceIngredient} and Fabric {@code DefaultCustomIngredients} - so agreeing on what
-     * a composed ingredient accepts is the whole point.
-     * <p>
-     * {@code and()} is deliberately absent: see the note in {@code REVIEW-BEHAVIOUR-CHANGES.md}.
+     * a composed ingredient accepts is the whole point. Fabric's {@code and()} used to throw on
+     * exactly the multi-branch case it exists for.
      */
     private static void ingredientsCombine(GameTestHelper helper) {
         Ingredient either = Services.INGREDIENTS.or(Ingredient.of(Items.STICK), Ingredient.of(Items.STONE));
@@ -376,6 +444,15 @@ public final class LibGameTests {
         helper.assertTrue(allButStone.test(new ItemStack(Items.STICK)), "a DIFFERENCE ingredient dropped an item it should keep");
         helper.assertTrue(allButStone.test(new ItemStack(Items.DIRT)), "a DIFFERENCE ingredient dropped an item it should keep");
         helper.assertFalse(allButStone.test(new ItemStack(Items.STONE)), "a DIFFERENCE ingredient kept the item it subtracts");
+
+        Ingredient both = Services.INGREDIENTS.and(Ingredient.of(Items.STICK, Items.STONE), Ingredient.of(Items.STONE, Items.DIRT));
+        helper.assertTrue(both.test(new ItemStack(Items.STONE)), "an AND ingredient rejected the item both branches accept");
+        helper.assertFalse(both.test(new ItemStack(Items.STICK)), "an AND ingredient accepted an item only its first branch accepts");
+        helper.assertFalse(both.test(new ItemStack(Items.DIRT)), "an AND ingredient accepted an item only its second branch accepts");
+
+        Ingredient singleAnd = Services.INGREDIENTS.and(Ingredient.of(Items.STICK));
+        helper.assertTrue(singleAnd.test(new ItemStack(Items.STICK)), "a single branch AND rejected its own item");
+        helper.assertFalse(singleAnd.test(new ItemStack(Items.STONE)), "a single branch AND accepted a foreign item");
 
         helper.succeed();
     }
@@ -414,5 +491,188 @@ public final class LibGameTests {
 
     private static void assertBlockTagHolds(GameTestHelper helper, TagKey<Block> tag, Block block) {
         helper.assertTrue(block.defaultBlockState().is(tag), "block tag " + tag.location() + " does not contain " + BuiltInRegistries.BLOCK.getKey(block));
+    }
+
+    /**
+     * A {@code UseBlockEvent} handler that answers with a result ends the click on both loaders:
+     * vanilla's own use of the block must not run after it. A lever is the witness - a stick right
+     * clicked on it flips it, unless a handler has already taken the click. Driven through
+     * {@code ServerPlayerGameMode#useItemOn}, where NeoForge fires {@code RightClickBlock} and Fabric
+     * fires {@code UseBlockCallback}.
+     */
+    private static void useBlockResultStopsVanilla(GameTestHelper helper) {
+        registerProbes();
+        ServerLevel level = helper.getLevel();
+        BlockPos lever = helper.absolutePos(WORK);
+        helper.setBlock(WORK, Blocks.LEVER.defaultBlockState().setValue(BlockStateProperties.ATTACH_FACE, AttachFace.FLOOR));
+        BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(lever), Direction.UP, lever, false);
+
+        // The control: with nothing answering, the click reaches vanilla and flips the lever on.
+        ItemStack plain = new ItemStack(Items.STICK);
+        ServerPlayer player = survivalPlayer(helper, plain);
+        player.gameMode.useItemOn(player, level, plain, InteractionHand.MAIN_HAND, hit);
+        helper.assertBlockProperty(WORK, BlockStateProperties.POWERED, true);
+
+        ItemStack probe = probe(Items.STICK);
+        player.setItemInHand(InteractionHand.MAIN_HAND, probe);
+        InteractionResult result = player.gameMode.useItemOn(player, level, probe, InteractionHand.MAIN_HAND, hit);
+        helper.assertTrue(result.consumesAction(), "the handler's SUCCESS came back from the click as " + result);
+        helper.assertBlockProperty(WORK, BlockStateProperties.POWERED, true);
+
+        helper.succeed();
+    }
+
+    /**
+     * An {@code EntityInteractEvent} handler that cancels with a result ends the interaction on both
+     * loaders, the way Tools' milking handler relies on. A cow is the witness: an empty bucket used
+     * on it is filled with milk, unless a handler took the interaction first. Driven through
+     * {@code Player#interactOn}, where NeoForge fires {@code EntityInteract} and Fabric's
+     * {@code PlayerMixin} raises the event.
+     */
+    private static void entityInteractResultStopsVanilla(GameTestHelper helper) {
+        registerProbes();
+        Cow cow = helper.spawn(EntityTypes.COW, WORK);
+
+        ServerPlayer player = survivalPlayer(helper, new ItemStack(Items.BUCKET));
+        player.interactOn(cow, InteractionHand.MAIN_HAND, Vec3.ZERO);
+        helper.assertTrue(player.getItemInHand(InteractionHand.MAIN_HAND).is(Items.MILK_BUCKET),
+                "the control bucket was not milked, so the interaction never reached vanilla");
+
+        player.setItemInHand(InteractionHand.MAIN_HAND, probe(Items.BUCKET));
+        InteractionResult result = player.interactOn(cow, InteractionHand.MAIN_HAND, Vec3.ZERO);
+        helper.assertTrue(result.consumesAction(), "the handler's SUCCESS came back from the interaction as " + result);
+        helper.assertTrue(player.getItemInHand(InteractionHand.MAIN_HAND).is(Items.BUCKET),
+                "the cow was milked after a handler had taken the interaction");
+
+        helper.succeed();
+    }
+
+    /**
+     * An {@code AnvilUpdatedEvent} handler's output lands in a real anvil's result slot: NeoForge's
+     * {@code AnvilUpdateEvent} on one loader, the library's {@code AnvilMenuMixin} on the other.
+     * Two sticks make nothing in vanilla, so any result at all came from the handler.
+     */
+    private static void anvilEventSetsTheResult(GameTestHelper helper) {
+        registerProbes();
+        ServerPlayer player = survivalPlayer(helper, ItemStack.EMPTY);
+
+        helper.assertTrue(combine(player, new ItemStack(Items.STICK)).isEmpty(), "two plain sticks made something in an anvil");
+
+        ItemStack result = combine(player, probe(Items.STICK));
+        helper.assertTrue(result.is(Items.DIAMOND), "the handler's anvil output did not reach the result slot, got " + result);
+
+        helper.succeed();
+    }
+
+    private static ItemStack combine(ServerPlayer player, ItemStack left) {
+        AnvilMenu menu = new AnvilMenu(0, player.getInventory());
+        menu.getSlot(AnvilMenu.INPUT_SLOT).set(left);
+        menu.getSlot(AnvilMenu.ADDITIONAL_SLOT).set(new ItemStack(Items.STICK));
+        return menu.getSlot(AnvilMenu.RESULT_SLOT).getItem();
+    }
+
+    /**
+     * {@code CorrectToolForDropEvent} and {@code OnDropStacksEvent} are raised by the library's own
+     * common mixins rather than by a loader event, on both loaders; their answers must reach
+     * {@code ItemStack#isCorrectToolForDrops} and {@code Block#getDrops}.
+     */
+    private static void dropAndHarvestEventsApply(GameTestHelper helper) {
+        registerProbes();
+        BlockState obsidian = Blocks.OBSIDIAN.defaultBlockState();
+        helper.assertFalse(new ItemStack(Items.STICK).isCorrectToolForDrops(obsidian), "a plain stick harvests obsidian");
+        helper.assertTrue(probe(Items.STICK).isCorrectToolForDrops(obsidian), "the handler's answer did not reach ItemStack#isCorrectToolForDrops");
+
+        ServerLevel level = helper.getLevel();
+        BlockPos pos = helper.absolutePos(WORK);
+        BlockState stone = Blocks.STONE.defaultBlockState();
+
+        List<ItemStack> plainDrops = Block.getDrops(stone, level, pos, null, null, new ItemStack(Items.STICK));
+        helper.assertFalse(plainDrops.stream().anyMatch(drop -> drop.is(Items.DIAMOND)), "stone dropped a diamond without the handler");
+
+        List<ItemStack> probeDrops = Block.getDrops(stone, level, pos, null, null, probe(Items.STICK));
+        helper.assertTrue(probeDrops.size() == 1 && probeDrops.get(0).is(Items.DIAMOND), "the handler's drops did not reach Block#getDrops, got " + probeDrops);
+
+        helper.succeed();
+    }
+
+    /**
+     * The name the probe handlers answer to. They are registered for the life of the server, so
+     * everything they do is gated on a stack carrying it, which nothing else in a test run does.
+     */
+    private static final String PROBE = "assortedlib gametest probe";
+
+    private static boolean probesRegistered;
+
+    private static ItemStack probe(Item item) {
+        ItemStack stack = new ItemStack(item);
+        stack.set(DataComponents.CUSTOM_NAME, Component.literal(PROBE));
+        return stack;
+    }
+
+    private static boolean isProbe(ItemStack stack) {
+        Component name = stack.get(DataComponents.CUSTOM_NAME);
+        return name != null && PROBE.equals(name.getString());
+    }
+
+    /**
+     * A handler for each library event, answering only for a {@link #probe} stack and each with an
+     * outcome vanilla would never produce, so a test can see from a real interaction that the event
+     * reached it. Registered on first use rather than at load, because nothing in {@code main} may
+     * reference the gametest source set.
+     */
+    private static synchronized void registerProbes() {
+        if (probesRegistered) {
+            return;
+        }
+        probesRegistered = true;
+
+        Services.EVENTS.registerEvent(UseBlockEvent.class, (final UseBlockEvent event) -> {
+            if (isProbe(event.getPlayer().getItemInHand(event.getHand()))) {
+                event.setResult(InteractionResult.SUCCESS);
+            }
+        });
+        Services.EVENTS.registerEvent(EntityInteractEvent.class, (final EntityInteractEvent event) -> {
+            if (isProbe(event.getPlayer().getItemInHand(event.getHand()))) {
+                event.setCanceled(true);
+                event.setResult(InteractionResult.SUCCESS);
+            }
+        });
+        Services.EVENTS.registerEvent(AnvilUpdatedEvent.class, (final AnvilUpdatedEvent event) -> {
+            if (isProbe(event.getLeft())) {
+                event.setOutput(new ItemStack(Items.DIAMOND));
+                event.setCost(1);
+                event.setMaterialCost(1);
+            }
+        });
+        Services.EVENTS.registerEvent(CorrectToolForDropEvent.class, (final CorrectToolForDropEvent event) -> {
+            if (isProbe(event.getStack()) && event.getState().is(Blocks.OBSIDIAN)) {
+                event.setResponse(Optional.of(true));
+            }
+        });
+        Services.EVENTS.registerEvent(OnDropStacksEvent.class, (final OnDropStacksEvent event) -> {
+            if (isProbe(event.getStack())) {
+                event.setDrops(List.of(new ItemStack(Items.DIAMOND)));
+            }
+        });
+    }
+
+    /**
+     * A real, fully joined survival player, the same way AssortedTools' tests build one:
+     * {@code makeMockServerPlayerInLevel} is deprecated for removal and forced to creative, and the
+     * other two mock factories hand back a player with no connection.
+     */
+    private static ServerPlayer survivalPlayer(GameTestHelper helper, ItemStack held) {
+        ServerLevel level = helper.getLevel();
+        CommonListenerCookie cookie = CommonListenerCookie.createInitial(new GameProfile(UUID.randomUUID(), "assortedlib-test"), false);
+        ServerPlayer player = new ServerPlayer(level.getServer(), level, cookie.gameProfile(), cookie.clientInformation());
+
+        Connection connection = new Connection(PacketFlow.SERVERBOUND);
+        new EmbeddedChannel(connection);
+        level.getServer().getPlayerList().placeNewPlayer(connection, player, cookie);
+        helper.runBeforeTestEnd(() -> level.getServer().getPlayerList().remove(player));
+
+        player.setGameMode(GameType.SURVIVAL);
+        player.setItemInHand(InteractionHand.MAIN_HAND, held);
+        return player;
     }
 }
