@@ -16,7 +16,6 @@
     "world.item.BlockItemWorldlyBlockMixin",
     "world.item.ItemMixin",
     "world.item.ItemStackMixin",
-    "world.item.enchantment.EnchantmentMixin",
     "world.level.BlockBehaviourPropertiesMixin",
     "world.level.BlockBehaviourWorldlyBlockMixin",
     "world.level.BlockGetterWorldlyBlockMixin",
