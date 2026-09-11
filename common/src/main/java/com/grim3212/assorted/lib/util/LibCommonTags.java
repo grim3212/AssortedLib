@@ -143,6 +143,8 @@ public class LibCommonTags {
         public static final TagKey<Item> TOOLS_CROSSBOWS = commonTag("tools/crossbow");
         public static final TagKey<Item> TOOLS_FISHING_RODS = commonTag("tools/fishing_rod");
         public static final TagKey<Item> TOOLS_TRIDENTS = commonTag("tools/trident");
+        public static final TagKey<Item> TOOLS_MELEE_WEAPONS = commonTag("tools/melee_weapon");
+        public static final TagKey<Item> TOOLS_MINING_TOOLS = commonTag("tools/mining_tool");
         public static final TagKey<Item> ARMORS = commonTag("armors");
         public static final TagKey<Item> ORES = commonTag("ores");
         public static final TagKey<Item> ORES_COAL = commonTag("ores/coal");
