@@ -6,6 +6,7 @@ import net.minecraft.core.component.DataComponentType;
 import net.neoforged.neoforge.common.tooltip.TooltipAppender;
 import net.neoforged.neoforge.event.RegisterTooltipAppendersEvent;
 import com.grim3212.assorted.lib.conditions.LibConditions;
+import com.grim3212.assorted.lib.core.item.LibDataComponents;
 import com.grim3212.assorted.lib.data.ForgeBiomeTagProvider;
 import com.grim3212.assorted.lib.data.ForgeBlockTagProvider;
 import com.grim3212.assorted.lib.data.ForgeItemTagProvider;
@@ -93,6 +94,7 @@ public class AssortedLibForge {
         });
 
         Services.CONDITIONS.init();
+        LibDataComponents.init();
 
         LibForgeWorldGen.init(modBus);
     }
@@ -143,7 +145,7 @@ public class AssortedLibForge {
 
     /**
      * Vanilla only draws the tooltips of its own components; a mod's are added here, ahead of
-     * vanilla's lines, so they land where {@code Item#appendHoverText} used to put them.
+     * vanilla's lines, which is where an item's own lines have always gone.
      */
     private void registerComponentTooltips(final RegisterTooltipAppendersEvent event) {
         ForgePlatformHelper.componentTooltips.forEach(type -> addComponentTooltip(event, type.get()));
