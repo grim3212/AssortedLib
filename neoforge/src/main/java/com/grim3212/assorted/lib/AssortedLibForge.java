@@ -45,10 +45,13 @@ public class AssortedLibForge {
             NeoForge.EVENT_BUS.addListener(EventPriority.NORMAL, (final PlayerInteractEvent.RightClickBlock event) -> {
                 final UseBlockEvent newEvent = new UseBlockEvent(event.getEntity(), event.getLevel(), event.getHand(), event.getHitVec());
                 Services.EVENTS.handleEvents(newEvent);
-                if (newEvent.isCanceled()) {
-                    event.setCancellationResult(newEvent.getInteractionResult());
+                // A handler's result has to end the click here, as returning it from Fabric's
+                // UseBlockCallback does; an uncancelled RightClickBlock lets vanilla carry on and
+                // use the block too, after the handler has already acted on it.
+                newEvent.outcome().ifPresent(result -> {
+                    event.setCancellationResult(result);
                     event.setCanceled(true);
-                }
+                });
             });
         });
 
