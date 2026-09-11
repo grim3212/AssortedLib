@@ -32,3 +32,4 @@ fabric/src/generated/resources/.cache
 
 # Datagen hash cache - regenerated output, not source
 **/src/generated/resources/.cache/
+common/src/generated/client/.cache/

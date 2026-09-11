@@ -1,5 +1,6 @@
 package com.grim3212.assorted.lib;
 
+import com.grim3212.assorted.lib.data.AssortedLibLanguageProvider;
 import net.minecraft.world.item.component.TooltipProvider;
 import net.minecraft.core.component.DataComponentType;
 import net.neoforged.neoforge.common.tooltip.TooltipAppender;
@@ -41,6 +42,7 @@ public class AssortedLibForge {
         LibConstants.LOG.info(LibConstants.MOD_NAME + " starting up...");
 
         modBus.addListener(this::gatherData);
+        modBus.addListener(this::gatherClientData);
         modBus.addListener(this::registerIngredientTypes);
         modBus.addListener(this::registerConditionCodecs);
         modBus.addListener(this::modifyCreativeTabs);
@@ -126,6 +128,10 @@ public class AssortedLibForge {
      * ({@code addProvider} instead of {@code DataGenerator#addProvider(boolean, provider)}), so the
      * include flags are gone as well - the server and client halves are separate events.
      */
+    private void gatherClientData(final GatherDataEvent.Client event) {
+        event.addProvider(new AssortedLibLanguageProvider(event.getGenerator().getPackOutput()));
+    }
+
     private void gatherData(final GatherDataEvent.Server event) {
         PackOutput packOutput = event.getGenerator().getPackOutput();
         CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();

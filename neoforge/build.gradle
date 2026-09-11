@@ -50,13 +50,21 @@ neoForge {
             programArgument '--nogui'
         }
 
-        // AssortedLib only registers server-data providers (tags), which fire on
-        // GatherDataEvent.Server. clientData() runs the client generator, so nothing ran.
+        // Server data (tags) and client data (the lang file) are separate events, and each run
+        // prunes whatever it did not write, so each has its own output root.
         data {
             serverData()
             gameDirectory = project.file('run')
             programArguments.addAll '--mod', mod_id, '--all',
                     '--output', file('../common/src/generated/resources/').getAbsolutePath(),
+                    '--existing', file('../common/src/main/resources/').getAbsolutePath()
+        }
+
+        clientData {
+            clientData()
+            gameDirectory = project.file('run')
+            programArguments.addAll '--mod', mod_id, '--all',
+                    '--output', file('../common/src/generated/client/').getAbsolutePath(),
                     '--existing', file('../common/src/main/resources/').getAbsolutePath()
         }
 
@@ -76,6 +84,7 @@ neoForge {
 
 sourceSets.main.resources {
     srcDir '../common/src/generated/resources'
+    srcDir '../common/src/generated/client'
     exclude '**/.cache'
 }
 

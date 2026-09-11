@@ -82,7 +82,7 @@ loom {
 }
 
 sourceSets {
-    main.resources.srcDirs += ['src/generated/resources', '../common/src/generated/resources']
+    main.resources.srcDirs += ['src/generated/resources', '../common/src/generated/resources', '../common/src/generated/client']
 }
 
 // Fabric consumes both its own generated tree and the shared one NeoForge writes into common, and
