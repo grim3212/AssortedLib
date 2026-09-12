@@ -2,9 +2,12 @@ package com.grim3212.assorted.lib.gametest;
 
 import com.grim3212.assorted.lib.platform.Services;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.display.SlotDisplayContext;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -20,6 +23,7 @@ final class IngredientTests {
 
     static void register(BiConsumer<String, Consumer<GameTestHelper>> out) {
         out.accept("ingredients_combine", IngredientTests::ingredientsCombine);
+        out.accept("fluid_ingredient_shows_filled_containers", IngredientTests::fluidIngredientShowsFilledContainers);
     }
 
     /**
@@ -52,6 +56,29 @@ final class IngredientTests {
         Ingredient singleAnd = Services.INGREDIENTS.and(Ingredient.of(Items.STICK));
         helper.assertTrue(singleAnd.test(new ItemStack(Items.STICK)), "a single branch AND rejected its own item");
         helper.assertFalse(singleAnd.test(new ItemStack(Items.STONE)), "a single branch AND accepted a foreign item");
+
+        helper.succeed();
+    }
+
+    /**
+     * A fluid ingredient matches a container by what is inside it, and draws the containers holding
+     * that fluid rather than the bare items it matches. Both loaders ask the custom ingredient for
+     * its own {@code display()}, so the same statement holds on each. AssortedTools covers the half
+     * that only a modded container shows: one whose fluid lives in components.
+     */
+    private static void fluidIngredientShowsFilledContainers(GameTestHelper helper) {
+        Ingredient water = Services.INGREDIENTS.fluid(null, FluidTags.WATER, Services.FLUIDS.getBucketAmount());
+
+        helper.assertTrue(water.test(new ItemStack(Items.WATER_BUCKET)), "a water fluid ingredient rejected a water bucket");
+        helper.assertFalse(water.test(new ItemStack(Items.BUCKET)), "a water fluid ingredient accepted an empty bucket");
+        helper.assertFalse(water.test(new ItemStack(Items.LAVA_BUCKET)), "a water fluid ingredient accepted a lava bucket");
+
+        List<ItemStack> shown = water.display().resolveForStacks(SlotDisplayContext.fromLevel(helper.getLevel()));
+        helper.assertFalse(shown.isEmpty(), "a fluid ingredient draws nothing at all");
+        helper.assertTrue(shown.stream().anyMatch(stack -> stack.is(Items.WATER_BUCKET)),
+                "a water fluid ingredient draws " + shown + ", with no water bucket among them");
+        helper.assertFalse(shown.stream().anyMatch(stack -> stack.is(Items.BUCKET)),
+                "a water fluid ingredient draws an empty bucket, which it does not accept");
 
         helper.succeed();
     }

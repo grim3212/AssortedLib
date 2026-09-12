@@ -29,8 +29,8 @@ public class FabricIngredientHelper implements IIngredientHelper {
 
     @Override
     public Ingredient or(Ingredient... ingredients) {
-        // TODO(26.2): an Ingredient may not be empty (vanilla uses Optional<Ingredient> for
-        //  "none"), so an empty OR is rejected here rather than silently matching nothing.
+        // An Ingredient may not be empty in 26.2 - vanilla spells "none" as Optional<Ingredient> -
+        // so an empty OR is rejected here rather than silently matching nothing.
         if (ingredients.length == 0)
             throw new IllegalArgumentException("You must supply at least 1 ingredient for an OR!");
 

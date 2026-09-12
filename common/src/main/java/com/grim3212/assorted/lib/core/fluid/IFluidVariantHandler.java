@@ -44,9 +44,14 @@ public interface IFluidVariantHandler {
     /** The fluid's tint colour. */
     int getTintColor(FluidInformation variant);
 
-    /** The fluid's still texture, if it has one. */
+    /**
+     * The fluid's still texture, if it has one. Both loaders answer from the baked {@code FluidModel}
+     * the model manager holds per fluid state, which is where a fluid's textures live now. So this is
+     * client only, readable only once models have baked, and the component data a
+     * {@link FluidInformation} carries does not change the answer.
+     */
     Optional<Identifier> getStillTexture(FluidInformation variant);
 
-    /** The fluid's flowing texture, if it has one. */
+    /** The fluid's flowing texture, if it has one; same source as {@link #getStillTexture}. */
     Optional<Identifier> getFlowingTexture(FluidInformation variant);
 }

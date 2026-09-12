@@ -49,7 +49,9 @@ public class FabricFluidIngredient extends LibFluidIngredient implements CustomI
 
     /**
      * The items this ingredient may ever match, for the recipe book display and the ingredient
-     * index. The contained fluid is checked per stack in {@link #test(ItemStack)}.
+     * index. The contained fluid is checked per stack in {@link #test(ItemStack)} and drawn by
+     * {@code display()}, which is inherited from {@link LibFluidIngredient} - a superclass method
+     * wins over the interface default, so both loaders draw the filled containers the same way.
      */
     @Override
     public Stream<Holder<Item>> items() {

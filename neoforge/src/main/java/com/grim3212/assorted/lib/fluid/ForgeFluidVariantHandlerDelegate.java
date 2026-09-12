@@ -72,9 +72,10 @@ public class ForgeFluidVariantHandlerDelegate implements IFluidVariantHandler {
         return Optional.of(fluidModel(variant).flowingMaterial().sprite().contents().name());
     }
 
-    // TODO(26.2): a fluid's textures and tint are a baked FluidModel per Fluid, not on the
-    //  FluidType, so this looks the model up by fluid, only works once models have baked, and
-    //  FluidInformation#data can no longer change the result.
+    // A fluid's textures and tint are a baked FluidModel per Fluid, not anything on the FluidType,
+    // so this looks the model up by fluid: readable only once models have baked, and
+    // FluidInformation#data cannot change the result. Fabric reads the same source; said at
+    // IFluidVariantHandler.
     private static FluidModel fluidModel(final FluidInformation variant) {
         return Minecraft.getInstance().getModelManager().getFluidStateModelSet().get(variant.fluid().defaultFluidState());
     }

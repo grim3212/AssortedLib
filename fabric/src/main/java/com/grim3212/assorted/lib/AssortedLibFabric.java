@@ -10,9 +10,6 @@ import net.fabricmc.fabric.api.event.player.PlayerPickItemEvents;
 import net.fabricmc.fabric.api.item.v1.EnchantingContext;
 import net.fabricmc.fabric.api.item.v1.EnchantmentEvents;
 import net.fabricmc.fabric.api.util.TriState;
-import net.minecraft.core.Direction;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
 
 public class AssortedLibFabric implements ModInitializer {
 
@@ -37,13 +34,11 @@ public class AssortedLibFabric implements ModInitializer {
             return TriState.DEFAULT;
         });
 
-        // TODO(26.2): pick block is resolved on the server (PlayerPickItemEvents.BLOCK), which
-        //  gives no HitResult. IBlockCloneStack still asks for one, so a hit at the block centre is
-        //  synthesised; the real face and hit vector are unavailable.
+        // Pick block is resolved on the server here, as it is on NeoForge; the event carries the
+        // block and its position and no hit result, which is why IBlockCloneStack does not ask for one.
         PlayerPickItemEvents.BLOCK.register((player, pos, state, includeData) -> {
             if (state.getBlock() instanceof IBlockCloneStack extraProperties) {
-                final BlockHitResult target = new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false);
-                return extraProperties.getCloneItemStack(state, target, player.level(), pos, player);
+                return extraProperties.getCloneItemStack(state, player.level(), pos, player);
             }
 
             // null lets the next listener - and ultimately vanilla - handle the pick.

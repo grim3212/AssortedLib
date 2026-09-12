@@ -13,7 +13,6 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
-import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 
 public class FabricLevelPropertyAccessor implements ILevelPropertyAccessor {
@@ -78,9 +77,9 @@ public class FabricLevelPropertyAccessor implements ILevelPropertyAccessor {
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter blockGetter, BlockPos pos, Player player) {
+    public ItemStack getCloneItemStack(BlockState state, BlockGetter blockGetter, BlockPos pos, Player player) {
         if (state.getBlock() instanceof IBlockCloneStack extraProperties) {
-            return extraProperties.getCloneItemStack(state, target, blockGetter, pos, player);
+            return extraProperties.getCloneItemStack(state, blockGetter, pos, player);
         }
 
         // Vanilla's pick block moved onto the block state and now needs a LevelReader, because it may

@@ -12,6 +12,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.common.crafting.ICustomIngredient;
 import net.neoforged.neoforge.common.crafting.IngredientType;
@@ -77,13 +78,22 @@ public class ForgeFluidIngredient implements ICustomIngredient {
     }
 
     /**
-     * TODO(26.2): an ingredient reports only the {@linkplain Item items} it accepts, so the fluid
-     *  contents of matching stacks (filled buckets) are lost from display. The default
-     *  {@code display()} is kept rather than hand-rolling a {@code SlotDisplay}.
+     * The {@linkplain Item items} this ingredient may ever match, for the recipe book and the
+     * ingredient index. An item alone cannot say what fluid is inside it, so the contents are checked
+     * per stack in {@link #test(ItemStack)} and drawn by {@link #display()}.
      */
     @Override
     public Stream<Holder<Item>> items() {
         return this.fluidIngredient.getMatchingStacks().stream().map(ItemStack::typeHolder).distinct();
+    }
+
+    /**
+     * Vanilla's {@code Ingredient#display()} asks the custom ingredient first on both loaders, so the
+     * filled containers are drawn instead of the bare items {@link #items()} lists.
+     */
+    @Override
+    public SlotDisplay display() {
+        return this.fluidIngredient.display();
     }
 
     public void invalidate() {

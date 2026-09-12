@@ -7,9 +7,13 @@ import com.grim3212.assorted.lib.platform.FabricFluidManager;
 import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRenderHandler;
 import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributeHandler;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.FluidModel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 
 import java.util.Optional;
 
@@ -77,11 +81,7 @@ public class FabricFluidVariantHandlerDelegate implements IFluidVariantHandler {
                         return renderDelegate.getDelegate().getStillTexture(variant);
                     }
 
-                    // TODO(26.2): FluidVariantRendering#getSprites and FluidVariantRenderHandler#getSprites
-                    //  were both removed. A fluid's textures live in a FluidModel.Unbaked registered
-                    //  through FluidRenderingRegistry now, and nothing hands them back as sprites, so a
-                    //  handler that is not one of ours can no longer be asked what it draws with.
-                    return Optional.empty();
+                    return fluidModel(variant.fluid()).map(model -> model.stillMaterial().sprite().contents().name());
                 },
                 () -> Optional::empty
         );
@@ -96,11 +96,26 @@ public class FabricFluidVariantHandlerDelegate implements IFluidVariantHandler {
                         return renderDelegate.getDelegate().getFlowingTexture(variant);
                     }
 
-                    // TODO(26.2): see getStillTexture - there is no sprite accessor left on the
-                    //  Fabric fluid rendering API.
-                    return Optional.empty();
+                    return fluidModel(variant.fluid()).map(model -> model.flowingMaterial().sprite().contents().name());
                 },
                 () -> Optional::empty
         );
+    }
+
+    /**
+     * The baked {@link FluidModel} the model manager holds for the fluid, which is the only place a
+     * fluid's textures live now: {@code FluidVariantRendering#getSprites} and
+     * {@code FluidVariantRenderHandler#getSprites} are both gone, so a handler that is not one of
+     * ours cannot be asked what it draws with. This is the same source
+     * {@code FabricClientFluidHelper} and NeoForge's {@code ForgeFluidVariantHandlerDelegate} read,
+     * so every path answers from one place. Only readable once models have baked, and the extra data
+     * a {@link FluidInformation} carries cannot change the answer.
+     */
+    private static Optional<FluidModel> fluidModel(final Fluid fluid) {
+        if (fluid == Fluids.EMPTY) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(Minecraft.getInstance().getModelManager().getFluidStateModelSet().get(fluid.defaultFluidState()));
     }
 }

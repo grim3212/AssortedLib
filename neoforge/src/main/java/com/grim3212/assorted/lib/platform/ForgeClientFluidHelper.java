@@ -10,9 +10,9 @@ import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.client.fluid.FluidTintSource;
 
 /**
- * TODO(26.2): a fluid's textures are a baked {@link FluidModel} per {@link Fluid}, readable only
- *  once models have baked, so everything resolves from the fluid alone; the extra data a
- *  {@link FluidInformation} carries only still feeds the tint.
+ * A fluid's textures are a baked {@link FluidModel} per {@link Fluid}, readable only once models
+ * have baked, so everything resolves from the fluid alone; the extra data a {@link FluidInformation}
+ * carries only still feeds the tint. Fabric's helper reads that same source.
  */
 public class ForgeClientFluidHelper implements IClientFluidHelper {
 

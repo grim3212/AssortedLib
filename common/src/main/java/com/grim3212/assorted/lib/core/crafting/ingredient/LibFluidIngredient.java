@@ -1,12 +1,12 @@
 package com.grim3212.assorted.lib.core.crafting.ingredient;
 
-import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.grim3212.assorted.lib.LibConstants;
 import com.grim3212.assorted.lib.core.fluid.FluidInformation;
 import com.grim3212.assorted.lib.platform.Services;
 import com.grim3212.assorted.lib.util.LibCommonTags;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
@@ -15,6 +15,8 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.Nullable;
 
@@ -70,30 +72,54 @@ public class LibFluidIngredient {
         return false;
     }
 
+    /**
+     * Every container stack this ingredient accepts: one that already holds the fluid, because a
+     * vanilla filled bucket is its own item, and one filled with it, because a container that keeps
+     * its contents in components has no filled form until something fills it. Both are needed - the
+     * item list and what a recipe viewer draws are built from this.
+     */
     public List<ItemStack> getMatchingStacks() {
         if (this.itemStacks == null) {
-            this.itemStacks = new ArrayList<>();
+            final List<ItemStack> stacks = new ArrayList<>();
 
-            List<Fluid> fluids = Lists.newArrayList();
-            BuiltInRegistries.FLUID.getTagOrEmpty(this.fluidTag).forEach(f -> fluids.add(f.value()));
+            for (Holder<Fluid> fluid : BuiltInRegistries.FLUID.getTagOrEmpty(this.fluidTag)) {
+                // A fluid tag lists the flowing form beside the source one, and a container filled
+                // with the flowing form keeps it: on NeoForge the bucket then reads back as
+                // minecraft:flowing_water, where Fabric normalises while building its variant. Both
+                // loaders have to end up listing the same stack, so only the source is ever poured.
+                final FluidInformation contents = new FluidInformation(fluid.value(), this.amount).withSource();
 
-            List<Item> items = Lists.newArrayList();
-            BuiltInRegistries.ITEM.getTagOrEmpty(LibCommonTags.Items.FLUID_CONTAINERS).forEach(i -> items.add(i.value()));
-
-            for (Fluid fluid : fluids) {
-                for (Item itm : items) {
-                    ItemStack stack = new ItemStack(itm);
-                    Services.FLUIDS.get(stack).ifPresent((itemFluid) -> {
-                        if (itemFluid.fluid().isSame(fluid) && itemFluid.amount() >= Services.FLUIDS.getBucketAmount()) {
-                            if (this.itemStacks.stream().noneMatch(i -> ItemStack.matches(i, stack))) {
-                                this.itemStacks.add(stack);
-                            }
-                        }
-                    });
+                for (Holder<Item> container : BuiltInRegistries.ITEM.getTagOrEmpty(LibCommonTags.Items.FLUID_CONTAINERS)) {
+                    final ItemStack empty = new ItemStack(container.value());
+                    addIfAccepted(stacks, empty);
+                    // insertInto works on a copy and hands back an unchanged one when nothing moved,
+                    // so a container that cannot take this fluid just fails the test below.
+                    addIfAccepted(stacks, Services.FLUIDS.insertInto(empty, contents));
                 }
             }
+
+            this.itemStacks = stacks;
         }
         return this.itemStacks;
+    }
+
+    /** Keeps a stack this ingredient accepts, unless an equal one is listed already. */
+    private void addIfAccepted(final List<ItemStack> stacks, final ItemStack stack) {
+        if (test(stack) && stacks.stream().noneMatch(listed -> ItemStack.matches(listed, stack))) {
+            stacks.add(stack);
+        }
+    }
+
+    /**
+     * What a recipe viewer draws for this ingredient: the containers it accepts, each still holding
+     * its fluid. The display an ingredient gets by default is built from the items it matches, and an
+     * item alone cannot say what is inside it - so a container that holds its fluid in components
+     * would be drawn empty, which is the one thing this ingredient does not accept.
+     */
+    public SlotDisplay display() {
+        return new SlotDisplay.Composite(getMatchingStacks().stream()
+                .<SlotDisplay>map(stack -> new SlotDisplay.ItemStackSlotDisplay(ItemStackTemplate.fromNonEmptyStack(stack)))
+                .toList());
     }
 
     public void invalidate() {

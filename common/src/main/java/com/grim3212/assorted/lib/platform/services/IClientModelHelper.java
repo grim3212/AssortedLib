@@ -5,15 +5,8 @@ import com.grim3212.assorted.lib.client.model.data.IModelDataBuilder;
 import com.grim3212.assorted.lib.client.model.data.IModelDataKey;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
-import net.minecraft.client.resources.model.UnbakedModel;
-import net.minecraft.resources.Identifier;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.FluidState;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Collection;
 
 public interface IClientModelHelper {
     /**
@@ -41,29 +34,19 @@ public interface IClientModelHelper {
     /** Creates a new model data key; each call returns a unique key. */
     @NotNull <T> IModelDataKey<T> createNewModelDataKey();
 
-    /** The unbaked model at the given location. */
-    UnbakedModel getUnbakedModel(final Identifier unbakedModel);
-
     /**
      * Adapts a vanilla {@link BlockStateModel} to this loader's own model implementation, unlocking
      * loader-specific functionality where there is any.
      */
     BlockStateModel adaptToPlatform(final BlockStateModel model);
 
-    /** Whether the block state has to be drawn in the given render type. */
-    boolean canRenderInType(final BlockState blockState, final RenderType renderType);
-
-    /** Whether the fluid state has to be drawn in the given render type. */
-    boolean canRenderInType(final FluidState fluidState, final RenderType renderType);
-
-    /** The {@linkplain RenderType render types} the model draws this block state and data in. */
-    @NotNull
-    Collection<RenderType> getRenderTypesFor(BlockStateModel model, BlockState state, RandomSource rand, IBlockModelData data);
-
-    // The item-side getRenderTypesFor(model, stack, isFabulous) was removed, not stubbed: item
-    // rendering is push-only, so an ItemModel's render types exist only inside one
-    // ItemModel#update. A caller that needs them runs update() on its own ItemStackRenderState and
-    // reads the layers.
+    // No model lookup or render type queries here any more, because 26.2 has no answer either loader
+    // can give honestly:
+    //  - an UnbakedModel can only be resolved through a ModelBaker, mid-bake, so a model that needs
+    //    one takes an IModelBakingContext instead of asking this service;
+    //  - a block model does not declare its render types (a terrain layer comes per quad from
+    //    BakedQuad.MaterialInfo) and a fluid has only the ChunkSectionLayer on its baked FluidModel,
+    //    so a caller that must know reads the layer itself.
 
     RenderType getItemUnlitUnsortedTranslucentRenderType();
 

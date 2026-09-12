@@ -15,10 +15,11 @@ public class FabricFluidVariantRenderHandlerDelegate implements FluidVariantRend
         this.delegate = delegate;
     }
 
-    // TODO(26.2): FluidVariantRenderHandler has no getSprites any more; textures come from a
-    //  FluidModel.Unbaked registered through FluidRenderingRegistry. So the still/flowing textures
-    //  can only be read back from this delegate, not a foreign handler (see
-    //  FabricFluidVariantHandlerDelegate).
+    // FluidVariantRenderHandler has no getSprites any more; a fluid's textures come from a
+    // FluidModel.Unbaked registered through FluidRenderingRegistry. Only the colour is still a
+    // variant level question, so that is all this delegate answers - the textures are read off the
+    // baked model instead, by FabricFluidVariantHandlerDelegate, for our handlers and foreign ones
+    // alike.
 
     @Override
     public int getColor(final FluidVariant fluidVariant, @Nullable final BlockAndTintGetter view, @Nullable final BlockPos pos) {

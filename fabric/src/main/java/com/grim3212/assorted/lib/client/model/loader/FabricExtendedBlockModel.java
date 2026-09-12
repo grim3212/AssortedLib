@@ -94,10 +94,10 @@ public class FabricExtendedBlockModel implements UnbakedModel, IModelSpecificati
         specification.resolveDependencies(resolver);
     }
 
-    // TODO(26.2): the specification's BlockStateModel is flattened into one QuadCollection here,
-    //  losing per-part ambient occlusion and particles and any parts chosen per render. Model json
-    //  geometry cannot express more; a model that needs them must go through the blockstate json
-    //  instead (the assortedlib:specification type, FabricSpecificationBlockStateModel).
+    // The specification's BlockStateModel is flattened into one QuadCollection here, losing per-part
+    // ambient occlusion and particles and any parts chosen per render. Model json geometry cannot
+    // express more, so a model that needs them goes through the blockstate json instead (the
+    // assortedlib:specification type, FabricSpecificationBlockStateModel).
     private QuadCollection bakeGeometry(final TextureSlots textureSlots, final ModelBaker baker, final ModelState modelState, final ModelDebugName debugName) {
         final Identifier modelLocation = resolveModelLocation(debugName);
         final FabricModelBakingContextDelegate context = new FabricModelBakingContextDelegate(this, textureSlots);

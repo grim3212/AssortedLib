@@ -26,8 +26,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -196,8 +194,7 @@ final class PlatformServiceTests {
                 "glass is treated as a redstone conductor");
 
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
-        BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(stone), Direction.UP, stone, false);
-        ItemStack cloned = Services.LEVEL_PROPERTIES.getCloneItemStack(level.getBlockState(stone), hit, level, stone, player);
+        ItemStack cloned = Services.LEVEL_PROPERTIES.getCloneItemStack(level.getBlockState(stone), level, stone, player);
         helper.assertTrue(cloned.is(Items.STONE), "picking stone produced " + cloned);
 
         helper.succeed();
