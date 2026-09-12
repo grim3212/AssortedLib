@@ -7,34 +7,27 @@ import com.grim3212.assorted.lib.events.OnDropStacksEvent;
 import com.grim3212.assorted.lib.events.UseBlockEvent;
 import com.grim3212.assorted.lib.platform.Services;
 import com.grim3212.assorted.lib.platform.services.IPlatformHelper;
-import com.mojang.authlib.GameProfile;
-import io.netty.channel.embedded.EmbeddedChannel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.PacketFlow;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
- * Helpers, constants and the probe event handlers shared by AssortedLib's gametest classes, which import them statically.
+ * Helpers, constants and the probe event handlers shared by AssortedLib's gametest classes, which
+ * import them statically. The loader-agnostic helpers every mod's tests share (players, tooltips,
+ * block entity round trips) are {@link com.grim3212.assorted.lib.test.TestSupport}.
  */
 final class LibTestSupport {
 
@@ -138,25 +131,5 @@ final class LibTestSupport {
                 event.setDrops(List.of(new ItemStack(Items.DIAMOND)));
             }
         });
-    }
-
-    /**
-     * A real, fully joined survival player, the same way AssortedTools' tests build one:
-     * {@code makeMockServerPlayerInLevel} is deprecated for removal and forced to creative, and the
-     * other two mock factories hand back a player with no connection.
-     */
-    static ServerPlayer survivalPlayer(GameTestHelper helper, ItemStack held) {
-        ServerLevel level = helper.getLevel();
-        CommonListenerCookie cookie = CommonListenerCookie.createInitial(new GameProfile(UUID.randomUUID(), "assortedlib-test"), false);
-        ServerPlayer player = new ServerPlayer(level.getServer(), level, cookie.gameProfile(), cookie.clientInformation());
-
-        Connection connection = new Connection(PacketFlow.SERVERBOUND);
-        new EmbeddedChannel(connection);
-        level.getServer().getPlayerList().placeNewPlayer(connection, player, cookie);
-        helper.runBeforeTestEnd(() -> level.getServer().getPlayerList().remove(player));
-
-        player.setGameMode(GameType.SURVIVAL);
-        player.setItemInHand(InteractionHand.MAIN_HAND, held);
-        return player;
     }
 }

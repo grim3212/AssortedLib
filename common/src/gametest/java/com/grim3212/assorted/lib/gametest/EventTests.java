@@ -28,6 +28,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import static com.grim3212.assorted.lib.gametest.LibTestSupport.*;
+import static com.grim3212.assorted.lib.test.TestSupport.survivalPlayer;
 
 /**
  * The library's events reaching their handlers through the call sites each loader raises them from.
