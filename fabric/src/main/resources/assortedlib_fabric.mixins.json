@@ -22,10 +22,10 @@
     "world.level.ExplosionDamageCalculatorWorldlyBlockMixin",
     "world.level.ServerPlayerGameModeMixin",
     "world.level.SignalGetterMixin",
+    "world.level.chunk.LevelChunkMixin",
     "world.level.lighting.BlockLightEngineMixin",
     "world.level.lighting.LayerLightSectionStorageAccessor",
-    "world.level.lighting.LightEngineAccessor",
-    "world.level.lighting.LightEngineMixin"
+    "world.level.lighting.LightEngineAccessor"
   ],
   "client": [
     "client.multiplayer.MultiPlayerGameModeWorldlyBlockMixin",
