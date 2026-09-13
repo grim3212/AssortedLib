@@ -3,7 +3,6 @@ subprojects {
 
     java.toolchain.languageVersion = JavaLanguageVersion.of(25)
     java.withSourcesJar()
-    java.withJavadocJar()
 
     jar {
         from(rootProject.file("LICENSE"))
@@ -91,7 +90,9 @@ subprojects {
         it.options.compilerArgs << '-Xlint:deprecation'
     }
 
-    // Javadoc on Minecraft-derived sources trips doclint constantly; keep the jar, drop the pedantry.
+    // No javadoc jar is published - the sources jar already gives consumers IDE docs at a
+    // twentieth of the size. This only shapes a manual `gradlew javadoc`, which trips
+    // doclint constantly on Minecraft-derived sources.
     tasks.withType(Javadoc).configureEach {
         options.addStringOption('Xdoclint:none', '-quiet')
         failOnError = false

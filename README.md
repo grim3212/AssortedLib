@@ -26,8 +26,9 @@ com.grim3212.assorted.lib:assortedlib-neoforge-26.2:<version>
 ```
 
 Depend on `common` from your common module and on the matching loader artifact from each loader
-module. The 26.2 artifacts are not on a public Maven yet, so until they are, publish them to your
-own local Maven and resolve from `mavenLocal()`:
+module. The Minecraft version is part of the artifactId, so each version of the game gets its
+own artifact tree. They are published to `https://maven.grimoid.com/mods`; to test a local build
+instead, install it to your own Maven and resolve from `mavenLocal()`:
 
 ```bash
 ./gradlew publishToMavenLocal
