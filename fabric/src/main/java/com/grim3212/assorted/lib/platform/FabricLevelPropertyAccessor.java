@@ -78,13 +78,8 @@ public class FabricLevelPropertyAccessor implements ILevelPropertyAccessor {
 
     @Override
     public ItemStack getCloneItemStack(BlockState state, BlockGetter blockGetter, BlockPos pos, Player player) {
-        if (state.getBlock() instanceof IBlockCloneStack extraProperties) {
-            return extraProperties.getCloneItemStack(state, blockGetter, pos, player);
-        }
-
-        // Vanilla's pick block moved onto the block state and now needs a LevelReader, because it may
-        // read block entity data for the "include data" variant. The platform interface still hands us
-        // a plain BlockGetter, so fall back to the bare item when the getter is not a level.
+        // BlockState#getCloneItemStack needs a LevelReader, because it may read block entity data
+        // for the "include data" variant; fall back to the bare item when the getter is not a level.
         if (blockGetter instanceof LevelReader levelReader) {
             return state.getCloneItemStack(levelReader, pos, true);
         }

@@ -1,7 +1,9 @@
 package com.grim3212.assorted.lib.config;
 
 import net.neoforged.neoforge.common.ModConfigSpec;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -28,7 +30,58 @@ public class ForgeDelegateConfigurationBuilder implements IConfigurationBuilder 
         // The three argument overload is deprecated; the supported one also takes a supplier for the
         // "add entry" button in the config screen. There is no such notion on the common interface, and
         // null is how NeoForge itself spells "no add button", which is what this already behaved like.
-        return builder.defineList(key, defaultValue, (Supplier<T>) null, t -> true)::get;
+        final ModConfigSpec.ConfigValue<List<? extends T>> value = builder.defineList(key, defaultValue, (Supplier<T>) null, element -> asType(element, containedType) != null);
+
+        // NightConfig reads every TOML number as a Long or a Double, so the list handed back is not
+        // the List<? extends T> the signature promises and the caller's first unboxing throws.
+        // Fabric's Gson-backed builder already parses to containedType.
+        return () -> convert(value.get(), containedType);
+    }
+
+    private static <T> List<? extends T> convert(final List<?> values, final Class<T> containedType) {
+        if (values == null) {
+            return List.of();
+        }
+
+        final List<T> converted = new ArrayList<>(values.size());
+        for (final Object value : values) {
+            final T element = asType(value, containedType);
+            if (element == null) {
+                throw new IllegalStateException("Configured list holds " + value + ", which is not a " + containedType.getSimpleName());
+            }
+
+            converted.add(element);
+        }
+
+        return converted;
+    }
+
+    /**
+     * {@code value} as {@code containedType}, or null if it cannot be one. Number types convert
+     * freely: which one a TOML number arrives as is the parser's choice, not the caller's.
+     */
+    private static <T> @Nullable T asType(final Object value, final Class<T> containedType) {
+        if (containedType.isInstance(value)) {
+            return containedType.cast(value);
+        }
+
+        if (value instanceof Number number) {
+            if (containedType == Float.class) {
+                return containedType.cast(number.floatValue());
+            } else if (containedType == Double.class) {
+                return containedType.cast(number.doubleValue());
+            } else if (containedType == Integer.class) {
+                return containedType.cast(number.intValue());
+            } else if (containedType == Long.class) {
+                return containedType.cast(number.longValue());
+            } else if (containedType == Short.class) {
+                return containedType.cast(number.shortValue());
+            } else if (containedType == Byte.class) {
+                return containedType.cast(number.byteValue());
+            }
+        }
+
+        return null;
     }
 
     @Override

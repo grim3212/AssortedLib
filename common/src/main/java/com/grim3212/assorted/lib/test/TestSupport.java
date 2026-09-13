@@ -21,6 +21,7 @@ import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -58,11 +59,9 @@ public final class TestSupport {
 
     /**
      * A real, fully joined survival player. None of vanilla's mock players will do for survival
-     * behaviour: {@code makeMockServerPlayerInLevel} is deprecated for removal and forced to
-     * creative, which changes nearly everything under test, and {@code makeMockPlayer} /
-     * {@code makeMockServerPlayer} are never placed, so their connection is null and anything sent
-     * to them throws. This is the in-level factory minus the game mode override. The player is
-     * removed again when the test ends.
+     * behaviour: {@code makeMockServerPlayerInLevel} is deprecated for removal and forced to creative,
+     * and {@code makeMockPlayer} / {@code makeMockServerPlayer} are never placed, so their connection
+     * is null. The player is removed again when the test ends.
      */
     public static ServerPlayer survivalPlayer(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
@@ -85,6 +84,19 @@ public final class TestSupport {
         ServerPlayer player = survivalPlayer(helper);
         player.setItemInHand(InteractionHand.MAIN_HAND, held);
         return player;
+    }
+
+    /** How many of {@code item} are anywhere in the player's inventory. */
+    public static int countInInventory(Player player, Item item) {
+        int count = 0;
+        for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+            ItemStack stack = player.getInventory().getItem(slot);
+            if (stack.is(item)) {
+                count += stack.getCount();
+            }
+        }
+
+        return count;
     }
 
     /** Stands {@code entity} on top of {@code rel}, within reach of anything nearby. */

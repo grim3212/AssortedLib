@@ -13,10 +13,8 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.EntityHitResult;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,7 +23,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(MultiPlayerGameMode.class)
 public abstract class MultiPlayerGameModeWorldlyBlockMixin {
@@ -66,16 +63,16 @@ public abstract class MultiPlayerGameModeWorldlyBlockMixin {
         }
     }
 
-    @Inject(method = "destroyBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;playerWillDestroy(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/entity/player/Player;)Lnet/minecraft/world/level/block/state/BlockState;"), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
-    public void assortedlib_onDestroyedByPlayer(BlockPos pos, CallbackInfoReturnable<Boolean> cir, Level level, BlockState blockState, Block block) {
-        if (blockState.getBlock() instanceof IBlockOnPlayerBreak extraProperties) {
-            FluidState fluidstate = level.getFluidState(pos);
-            boolean flag = extraProperties.onDestroyedByPlayer(blockState, level, pos, minecraft.player, false, fluidstate);
-            if (flag) {
-                block.destroy(level, pos, blockState);
-            }
-
-            cir.setReturnValue(flag);
+    /**
+     * The client half of {@link IBlockOnPlayerBreak}: refusing here is what keeps the client from
+     * playing a break the server is going to refuse anyway.
+     */
+    @Inject(method = "destroyBlock", at = @At("HEAD"), cancellable = true)
+    private void assortedlib_canPlayerBreak(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+        final Level level = this.minecraft.level;
+        final BlockState state = level.getBlockState(pos);
+        if (state.getBlock() instanceof IBlockOnPlayerBreak onPlayerBreak && !onPlayerBreak.canPlayerBreak(state, level, pos, this.minecraft.player)) {
+            cir.setReturnValue(false);
         }
     }
 }

@@ -4,7 +4,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.LevelReader;
@@ -19,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
  * which only exist in its patched jar; common builds against vanilla, so nothing else is available.
  */
 @SuppressWarnings("deprecation")
-public class ExtraPropertyBlock extends Block implements IBlockExtraProperties, IBlockSoundType, IBlockCloneStack, IBlockCanHarvest, IBlockLightEmission {
+public class ExtraPropertyBlock extends Block implements IBlockExtraProperties, IBlockSoundType, IBlockCanHarvest, IBlockLightEmission {
     public ExtraPropertyBlock(Properties props) {
         super(props);
     }
@@ -42,12 +41,6 @@ public class ExtraPropertyBlock extends Block implements IBlockExtraProperties, 
     @Override
     public boolean canHarvestBlock(BlockState state, BlockGetter blockGetter, BlockPos pos, Player player) {
         return player.hasCorrectToolForDrops(state);
-    }
-
-    @Override
-    public ItemStack getCloneItemStack(BlockState state, BlockGetter blockGetter, BlockPos pos, Player player) {
-        // Vanilla only exposes the LevelReader based overload now, so fall back when we only have a BlockGetter
-        return blockGetter instanceof LevelReader levelReader ? super.getCloneItemStack(levelReader, pos, state, true) : new ItemStack(this.asItem());
     }
 
     @Override

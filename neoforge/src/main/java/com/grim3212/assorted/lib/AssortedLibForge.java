@@ -6,6 +6,7 @@ import net.minecraft.core.component.DataComponentType;
 import net.neoforged.neoforge.common.tooltip.TooltipAppender;
 import net.neoforged.neoforge.event.RegisterTooltipAppendersEvent;
 import com.grim3212.assorted.lib.conditions.LibConditions;
+import com.grim3212.assorted.lib.core.block.IBlockOnPlayerBreak;
 import com.grim3212.assorted.lib.core.item.LibDataComponents;
 import com.grim3212.assorted.lib.data.ForgeBiomeTagProvider;
 import com.grim3212.assorted.lib.data.ForgeBlockTagProvider;
@@ -17,6 +18,7 @@ import com.grim3212.assorted.lib.platform.Services;
 import com.grim3212.assorted.lib.worldgen.LibForgeWorldGen;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
+import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -27,6 +29,7 @@ import net.neoforged.neoforge.event.AnvilUpdateEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.LootTableLoadEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.block.BreakBlockEvent;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.registries.RegisterEvent;
 
@@ -91,6 +94,18 @@ public class AssortedLibForge {
                 final LootTableModifyEvent newEvent = new LootTableModifyEvent(event.getTable(), event.getName(), new ForgeLootTableModificationContext(event.getTable()), true);
                 Services.EVENTS.handleEvents(newEvent);
             });
+        });
+
+        // IBlockOnPlayerBreak. BreakBlockEvent fires at the top of destroyBlock on both sides,
+        // before playerWillDestroy spawns any break particles.
+        NeoForge.EVENT_BUS.addListener(EventPriority.NORMAL, (final BreakBlockEvent event) -> {
+            if (event.isCanceled() || !(event.getLevel() instanceof Level level)) {
+                return;
+            }
+
+            if (event.getState().getBlock() instanceof IBlockOnPlayerBreak onPlayerBreak && !onPlayerBreak.canPlayerBreak(event.getState(), level, event.getPos(), event.getPlayer())) {
+                event.setCanceled(true);
+            }
         });
 
         Services.CONDITIONS.init();
