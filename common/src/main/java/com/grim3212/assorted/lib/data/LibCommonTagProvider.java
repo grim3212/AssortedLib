@@ -61,7 +61,10 @@ public class LibCommonTagProvider {
                 tagger.apply(LibCommonTags.Blocks.COBBLESTONE).add(key(Blocks.COBBLESTONE), key(Blocks.INFESTED_COBBLESTONE), key(Blocks.MOSSY_COBBLESTONE), key(Blocks.COBBLED_DEEPSLATE));
                 tagger.apply(LibCommonTags.Blocks.END_STONES).add(key(Blocks.END_STONE));
                 tagger.apply(LibCommonTags.Blocks.FENCE_GATES).addTag(LibCommonTags.Blocks.FENCE_GATES_WOODEN);
-                tagger.apply(LibCommonTags.Blocks.FENCE_GATES_WOODEN).add(key(Blocks.OAK_FENCE_GATE), key(Blocks.SPRUCE_FENCE_GATE), key(Blocks.BIRCH_FENCE_GATE), key(Blocks.JUNGLE_FENCE_GATE), key(Blocks.ACACIA_FENCE_GATE), key(Blocks.DARK_OAK_FENCE_GATE), key(Blocks.CRIMSON_FENCE_GATE), key(Blocks.WARPED_FENCE_GATE), key(Blocks.MANGROVE_FENCE_GATE));
+                // #minecraft:fence_gates is exactly the wooden fence gates - there is no other kind -
+                // so this follows vanilla rather than listing them, which had already fallen three
+                // woods behind (cherry, pale oak, bamboo).
+                tagger.apply(LibCommonTags.Blocks.FENCE_GATES_WOODEN).addOptionalTag(BlockTags.FENCE_GATES);
                 tagger.apply(LibCommonTags.Blocks.FENCES).addTag(LibCommonTags.Blocks.FENCES_WOODEN);
                 tagger.apply(LibCommonTags.Blocks.FENCES).addTag(LibCommonTags.Blocks.FENCES_NETHER_BRICK);
                 tagger.apply(LibCommonTags.Blocks.FENCES_NETHER_BRICK).add(key(Blocks.NETHER_BRICK_FENCE));
