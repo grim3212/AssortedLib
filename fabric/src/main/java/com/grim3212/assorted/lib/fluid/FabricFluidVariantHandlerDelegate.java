@@ -104,12 +104,11 @@ public class FabricFluidVariantHandlerDelegate implements IFluidVariantHandler {
 
     /**
      * The baked {@link FluidModel} the model manager holds for the fluid, which is the only place a
-     * fluid's textures live now: {@code FluidVariantRendering#getSprites} and
-     * {@code FluidVariantRenderHandler#getSprites} are both gone, so a handler that is not one of
-     * ours cannot be asked what it draws with. This is the same source
-     * {@code FabricClientFluidHelper} and NeoForge's {@code ForgeFluidVariantHandlerDelegate} read,
-     * so every path answers from one place. Only readable once models have baked, and the extra data
-     * a {@link FluidInformation} carries cannot change the answer.
+     * fluid's textures live: {@code FluidVariantRendering#getSprites} and
+     * {@code FluidVariantRenderHandler#getSprites} are both gone. {@code FabricClientFluidHelper} and
+     * NeoForge's {@code ForgeFluidVariantHandlerDelegate} read the same source, so every path answers
+     * alike. Only readable once models have baked, and a {@link FluidInformation}'s extra data cannot
+     * change the answer.
      */
     private static Optional<FluidModel> fluidModel(final Fluid fluid) {
         if (fluid == Fluids.EMPTY) {

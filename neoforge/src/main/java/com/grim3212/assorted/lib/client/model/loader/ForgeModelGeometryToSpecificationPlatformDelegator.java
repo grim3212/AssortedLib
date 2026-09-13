@@ -24,12 +24,10 @@ import java.util.List;
 /**
  * Adapts an {@link IModelSpecification} onto NeoForge's unbaked model pipeline: an {@link
  * AbstractUnbakedModel} carrying the json's {@link StandardModelParameters}, whose {@link
- * #geometry()} bakes into a {@link QuadCollection}.
- * <p> A model json loader can only contribute geometry, not a whole {@link
- * BlockStateModel}, so the specification is baked once and its parts flattened: one that varies
- * with the random source or {@link com.grim3212.assorted.lib.client.model.data.IBlockModelData}
- * draws its empty-data parts. Such models must be baked from the blockstate side ({@link
- * ForgeSpecificationBlockStateModel}, which wraps {@link ForgeBakedModelDelegate}).
+ * #geometry()} bakes into a {@link QuadCollection}. A model json loader can only contribute geometry,
+ * so the specification is baked once with empty data and its parts flattened; one that varies with
+ * the random source or {@link com.grim3212.assorted.lib.client.model.data.IBlockModelData} must be
+ * baked from the blockstate side ({@link ForgeSpecificationBlockStateModel}).
  */
 public final class ForgeModelGeometryToSpecificationPlatformDelegator<T extends IModelSpecification<T>> extends AbstractUnbakedModel implements IModelSpecificationHolder {
 

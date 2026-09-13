@@ -5,16 +5,12 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * A block whose light dampening depends on where it is, not only on its state - a block that keeps
- * what it should look and behave like in its block entity, such as a colorizer. This is what
- * {@code ILevelPropertyAccessor} asks, beside {@link IBlockLightEmission}.
- * <p>
- * It does not reach the light engines. Vanilla bakes {@code lightDampening} into the block state
- * ({@code BlockStateBase#initCache}) and neither loader offers a position-aware hook for it, so a
- * block whose dampening must actually darken the world has to carry it in a block state property,
- * as the colorizer's full cubes do; vanilla then relights, recomputes the sky column and tells the
- * clients on its own. Implementing this only keeps the library's answer honest for the shapes that
- * do not.
+ * A block whose light dampening depends on where it is, not only on its state - one that keeps what
+ * it stands in for in its block entity, such as a colorizer. This is what
+ * {@code ILevelPropertyAccessor} asks, beside {@link IBlockLightEmission}; it does not reach the
+ * light engines. Vanilla bakes {@code lightDampening} into the block state and neither loader offers
+ * a position-aware hook, so a block whose dampening must really darken the world carries it in a
+ * block state property instead, as the colorizer's full cubes do.
  */
 public interface IBlockLightDampening {
 

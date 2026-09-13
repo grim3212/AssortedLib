@@ -21,10 +21,9 @@ import java.util.List;
 
 /**
  * Bridges {@link IDataAwareBakedModel} onto NeoForge's position aware
- * {@link DynamicBlockStateModel}, reading the model data from {@code level.getModelData(pos)}.
- * <p>
- * The item side of this delegate (item render passes and transforms) is gone: an
- * {@code ItemModel} is unrelated to {@code BlockStateModel}, so one wrapper cannot cover both.
+ * {@link DynamicBlockStateModel}, reading the model data from {@code level.getModelData(pos)}. Blocks
+ * only: an {@code ItemModel} is unrelated to {@code BlockStateModel}, so one wrapper cannot cover
+ * both.
  */
 public final class ForgeBakedModelDelegate implements DynamicBlockStateModel, IDelegatingBakedModel, IDataAwareBakedModel {
 

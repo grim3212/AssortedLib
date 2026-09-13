@@ -15,11 +15,10 @@ import java.util.Optional;
 
 /**
  * The blockstate side entry point for an
- * {@link com.grim3212.assorted.lib.client.model.loaders.IModelSpecification}. Through a model json
- * loader a specification is baked once with empty data, so a block entity driven model draws its
- * empty state everywhere. The blockstate's model still sees level and position, so this bakes the
- * specification itself and returns a {@link ForgeBakedModelDelegate}. Its json is a vanilla
- * {@link Variant} plus the {@code type}.
+ * {@link com.grim3212.assorted.lib.client.model.loaders.IModelSpecification}: through a model json
+ * loader it is baked once with empty data, while the blockstate's model still sees level and
+ * position. So this bakes the specification itself and returns a {@link ForgeBakedModelDelegate}.
+ * Its json is a vanilla {@link Variant} plus the {@code type}.
  */
 public record ForgeSpecificationBlockStateModel(Variant variant) implements CustomUnbakedBlockStateModel {
 

@@ -82,10 +82,9 @@ public interface IClientHelper {
     void registerConditionalItemModelProperty(Identifier id, MapCodec<? extends ConditionalItemModelProperty> codec);
 
     /**
-     * Bakes the model at {@code modelLocation}, keeping it dynamic when it is backed by a
-     * {@link com.grim3212.assorted.lib.client.model.loaders.IModelSpecification}. Through a model
-     * json a specification is baked once with empty model data; this keeps its own model, so one
-     * that depends on a block entity draws what it holds. Any other model bakes as a plain variant.
+     * Bakes the model at {@code modelLocation}, keeping it dynamic when it is backed by an
+     * {@link com.grim3212.assorted.lib.client.model.loaders.IModelSpecification}, so one that depends
+     * on a block entity draws what it holds. Any other model bakes as a plain variant.
      *
      * @param baker         kept past the bake by a data aware model, which bakes states while
      *                      rendering

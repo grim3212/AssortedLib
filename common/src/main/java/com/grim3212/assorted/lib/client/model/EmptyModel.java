@@ -26,9 +26,8 @@ public class EmptyModel {
     }
 
     /**
-     * The missing texture on the block atlas, wrapped as a baked material.
-     * <p>
-     * Resolved lazily because there is no sprite to hand out until the atlases have been stitched.
+     * The missing texture on the block atlas, wrapped as a baked material. Resolved lazily because
+     * there is no sprite to hand out until the atlases have been stitched.
      */
     public static Material.Baked missingMaterial() {
         if (missingMaterial == null) {

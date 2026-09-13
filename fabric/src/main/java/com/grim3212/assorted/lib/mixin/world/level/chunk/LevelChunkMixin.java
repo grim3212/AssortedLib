@@ -13,19 +13,15 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 /**
- * Decides whether a block change altered the light properties at that position, rather than only in
- * the abstract.
+ * Decides whether a block change altered the light properties at that position rather than only in
+ * the abstract, which keeps a light re-check from being queued for every change involving one of
+ * these blocks.
  * <p>
- * {@link LightEngine#hasDifferentLightProperties(BlockState, BlockState)} compares two states and
- * has no position, so an {@link IBlockLightEmission} block - whose emission comes from its block
- * entity - cannot be compared honestly there. NeoForge patches vanilla to pass the level and
- * position ({@code hasDifferentLightProperties(BlockGetter, BlockPos, BlockState, BlockState)});
- * Fabric has no such patch, so the call site is redirected here instead. {@code setBlockState} takes
- * the position as a parameter, which is what makes this possible at all.
- * <p>
- * Answering per position rather than conservatively is what keeps a light re-check from being queued
- * for every change involving one of these blocks. The other caller of the vanilla method,
- * {@code ProtoChunk}, is left alone: worldgen has no level and no block entities to ask.
+ * {@link LightEngine#hasDifferentLightProperties(BlockState, BlockState)} has no position, so an
+ * {@link IBlockLightEmission} block - whose emission comes from its block entity - cannot be compared
+ * honestly there. NeoForge patches vanilla to pass the level and position; Fabric has no such patch,
+ * so the call site is redirected here, {@code setBlockState} having the position to hand.
+ * {@code ProtoChunk}, the other caller, is left alone: worldgen has no block entities to ask.
  */
 @Mixin(LevelChunk.class)
 public abstract class LevelChunkMixin {

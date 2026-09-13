@@ -20,12 +20,10 @@ public interface IBlockLightEmission {
     int getLightEmission(BlockState state, BlockGetter blockGetter, BlockPos pos);
 
     /**
-     * The block entity at {@code pos}, from any thread. {@code Level#getBlockEntity} answers null
-     * off the server thread - silently, so a block read straight through it looks empty to the
-     * light engine and only the client's light ever shows its stored block glowing. A server level
-     * is therefore read through its chunk, the way the light engine itself reads blocks
-     * ({@code ServerChunkCache#getChunkForLighting}): a plain map read that works from any thread
-     * and never loads a chunk. Everything else - a client level, a chunk, a worldgen region - answers
+     * The block entity at {@code pos}, from any thread. {@code Level#getBlockEntity} answers null off
+     * the server thread - silently, so a block read through it looks empty to the light engine. A
+     * server level is therefore read through its chunk, the way the light engine itself reads blocks:
+     * a plain map read that works from any thread and never loads a chunk. Every other level answers
      * as it is.
      */
     @Nullable
