@@ -57,6 +57,17 @@ public interface IItemStorageHandler {
      */
     void setStackInSlot(int slot, @NotNull ItemStack stack);
 
+    /**
+     * Captures a slot and returns the means to restore it exactly; both loaders undo a rolled back
+     * transaction with this. Override when a slot holds more than an {@link ItemStack} can describe,
+     * or restoring truncates it.
+     */
+    @NotNull
+    default Runnable captureSlot(int slot) {
+        ItemStack snapshot = this.getStackInSlot(slot).copy();
+        return () -> this.setStackInSlot(slot, snapshot);
+    }
+
     default void startOpen(Player player) {
     }
 

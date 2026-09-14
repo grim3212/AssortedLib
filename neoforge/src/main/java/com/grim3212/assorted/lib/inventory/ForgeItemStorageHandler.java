@@ -77,25 +77,23 @@ public class ForgeItemStorageHandler implements ResourceHandler<ItemResource> {
     }
 
     /**
-     * Copies every slot on the first mutation inside a transaction and restores them if that
-     * transaction is rolled back.
+     * Captures every slot on the first mutation in a transaction and restores them on rollback, via
+     * {@link IItemStorageHandler#captureSlot(int)} so nothing wider than an ItemStack is lost.
      */
-    private final class SlotJournal extends SnapshotJournal<List<ItemStack>> {
+    private final class SlotJournal extends SnapshotJournal<List<Runnable>> {
 
         @Override
-        protected List<ItemStack> createSnapshot() {
-            List<ItemStack> snapshot = new ArrayList<>(storage.getSlots());
+        protected List<Runnable> createSnapshot() {
+            List<Runnable> snapshot = new ArrayList<>(storage.getSlots());
             for (int slot = 0; slot < storage.getSlots(); slot++) {
-                snapshot.add(storage.getStackInSlot(slot).copy());
+                snapshot.add(storage.captureSlot(slot));
             }
             return snapshot;
         }
 
         @Override
-        protected void revertToSnapshot(List<ItemStack> snapshot) {
-            for (int slot = 0; slot < snapshot.size(); slot++) {
-                storage.setStackInSlot(slot, snapshot.get(slot));
-            }
+        protected void revertToSnapshot(List<Runnable> snapshot) {
+            snapshot.forEach(Runnable::run);
         }
     }
 }

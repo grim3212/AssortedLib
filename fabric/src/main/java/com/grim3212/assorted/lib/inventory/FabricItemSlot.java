@@ -8,7 +8,7 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
 import net.minecraft.world.item.ItemStack;
 
-public class FabricItemSlot extends SnapshotParticipant<ItemStack> implements SingleSlotStorage<ItemVariant> {
+public class FabricItemSlot extends SnapshotParticipant<Runnable> implements SingleSlotStorage<ItemVariant> {
 
     private final IItemStorageHandler storageHandler;
     private final int slot;
@@ -73,14 +73,15 @@ public class FabricItemSlot extends SnapshotParticipant<ItemStack> implements Si
         return this.storageHandler.getSlotLimit(this.slot);
     }
 
+    // captureSlot, not a copy of the stack: a slot may hold more than an ItemStack can count.
     @Override
-    protected ItemStack createSnapshot() {
-        return this.getStack().copy();
+    protected Runnable createSnapshot() {
+        return this.storageHandler.captureSlot(this.slot);
     }
 
     @Override
-    protected void readSnapshot(ItemStack snapshot) {
-        this.storageHandler.setStackInSlot(this.slot, snapshot);
+    protected void readSnapshot(Runnable snapshot) {
+        snapshot.run();
     }
 
 }
