@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,18 +16,37 @@ public class FabricItemStorageHandler extends CombinedStorage<ItemVariant, Singl
     private final IItemStorageHandler storage;
 
     public FabricItemStorageHandler(@NotNull IItemStorageHandler storage) {
-        super(getItemSlotsFromStorage(storage));
+        super(new SlotList(storage));
         this.storage = storage;
     }
 
-    public static List<SingleSlotStorage<ItemVariant>> getItemSlotsFromStorage(@NotNull IItemStorageHandler storage) {
-        List<SingleSlotStorage<ItemVariant>> slots = new ArrayList<>();
+    /**
+     * Live view. {@link CombinedStorage} keeps the list it is constructed with, but a slot count can
+     * change - a crate controller's grows as it finds crates on its first server tick.
+     */
+    private static final class SlotList extends AbstractList<SingleSlotStorage<ItemVariant>> {
 
-        for (int i = 0; i < storage.getSlots(); i++) {
-            slots.add(new FabricItemSlot(storage, i));
+        private final IItemStorageHandler storage;
+        // Cached: each slot is a SnapshotParticipant, so a transaction must get the same object back.
+        private final List<SingleSlotStorage<ItemVariant>> slots = new ArrayList<>();
+
+        private SlotList(IItemStorageHandler storage) {
+            this.storage = storage;
         }
 
-        return slots;
+        @Override
+        public SingleSlotStorage<ItemVariant> get(int index) {
+            while (this.slots.size() <= index) {
+                this.slots.add(new FabricItemSlot(this.storage, this.slots.size()));
+            }
+
+            return this.slots.get(index);
+        }
+
+        @Override
+        public int size() {
+            return this.storage.getSlots();
+        }
     }
 
     @Override
