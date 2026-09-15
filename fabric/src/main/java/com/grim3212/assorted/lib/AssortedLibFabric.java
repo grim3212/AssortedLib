@@ -22,6 +22,8 @@ public class AssortedLibFabric implements ModInitializer {
 
         FabricConfigHelper.init();
 
+        LibCommonSetup.init();
+
         // On NeoForge an IItemEnchantmentCondition's methods are IItemExtension overrides already;
         // Fabric asks through this event at the same four places - table, anvil, loot, /enchant.
         EnchantmentEvents.ALLOW_ENCHANTING.register((enchantment, stack, context) -> {

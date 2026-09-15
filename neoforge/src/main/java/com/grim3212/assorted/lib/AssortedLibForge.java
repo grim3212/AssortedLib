@@ -1,6 +1,8 @@
 package com.grim3212.assorted.lib;
 
 import com.grim3212.assorted.lib.data.AssortedLibLanguageProvider;
+import com.grim3212.assorted.lib.client.data.LibItemModelProvider;
+import com.grim3212.assorted.lib.data.LibRecipes;
 import net.minecraft.world.item.component.TooltipProvider;
 import net.minecraft.core.component.DataComponentType;
 import net.neoforged.neoforge.common.tooltip.TooltipAppender;
@@ -14,6 +16,7 @@ import com.grim3212.assorted.lib.data.ForgeItemTagProvider;
 import com.grim3212.assorted.lib.data.LibCommonTagProvider;
 import com.grim3212.assorted.lib.events.*;
 import com.grim3212.assorted.lib.platform.ForgePlatformHelper;
+import com.grim3212.assorted.lib.platform.ForgeRecipeSyncHelper;
 import com.grim3212.assorted.lib.platform.Services;
 import com.grim3212.assorted.lib.worldgen.LibForgeWorldGen;
 import net.minecraft.core.HolderLookup;
@@ -26,6 +29,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.event.AnvilUpdateEvent;
+import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.LootTableLoadEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
@@ -51,6 +55,12 @@ public class AssortedLibForge {
         modBus.addListener(this::registerConditionCodecs);
         modBus.addListener(this::modifyCreativeTabs);
         modBus.addListener(this::registerComponentTooltips);
+
+        LibCommonSetup.init();
+
+        // Recipes are not sent to clients by default; anything that opted a type into
+        // SyncedRecipes is asked for here, while the datapack is being synced.
+        NeoForge.EVENT_BUS.addListener((final OnDatapackSyncEvent event) -> event.sendRecipes(ForgeRecipeSyncHelper.requestedTypes()));
 
         Services.EVENTS.registerEventType(UseBlockEvent.class, () -> {
             NeoForge.EVENT_BUS.addListener(EventPriority.NORMAL, (final PlayerInteractEvent.RightClickBlock event) -> {
@@ -135,7 +145,7 @@ public class AssortedLibForge {
     private void modifyCreativeTabs(final BuildCreativeModeTabContentsEvent event) {
         for (var tab : ForgePlatformHelper.tabsToRegister.entrySet()) {
             if (event.getTabKey() == tab.getKey()) {
-                event.acceptAll(tab.getValue().get());
+                tab.getValue().forEach(stacks -> event.acceptAll(stacks.get()));
             }
         }
     }
@@ -146,13 +156,16 @@ public class AssortedLibForge {
      * include flags are gone as well - the server and client halves are separate events.
      */
     private void gatherClientData(final GatherDataEvent.Client event) {
-        event.addProvider(new AssortedLibLanguageProvider(event.getGenerator().getPackOutput()));
+        PackOutput clientOutput = event.getGenerator().getPackOutput();
+        event.addProvider(new LibItemModelProvider(clientOutput));
+        event.addProvider(new AssortedLibLanguageProvider(clientOutput));
     }
 
     private void gatherData(final GatherDataEvent.Server event) {
         PackOutput packOutput = event.getGenerator().getPackOutput();
         CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
 
+        event.addProvider(new LibRecipes.Runner(packOutput, lookupProvider));
         ForgeBlockTagProvider blockTagProvider = event.addProvider(new ForgeBlockTagProvider(packOutput, lookupProvider, LibConstants.MOD_ID, new LibCommonTagProvider.BlockTagProvider(packOutput, lookupProvider)));
         event.addProvider(new ForgeItemTagProvider(packOutput, lookupProvider, blockTagProvider.contentsGetter(), LibConstants.MOD_ID, new LibCommonTagProvider.ItemTagProvider(packOutput, lookupProvider, blockTagProvider.contentsGetter())));
         event.addProvider(new ForgeBiomeTagProvider(packOutput, lookupProvider, LibConstants.MOD_ID, new LibCommonTagProvider.BiomeTagProvider(packOutput, lookupProvider)));

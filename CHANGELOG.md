@@ -1,5 +1,17 @@
 # Changelog
 
+## 4.1.0
+
+- Added the instruction manual: an in-game book that any mod depending on Assorted Lib can add a
+  section to. Chapters are read from `assets/<modid>/manual/*.json`, so a resource pack can extend
+  or rewrite them. Right clicking a block, item or creature that has a page opens the book there,
+  and the book shows two pages at once.
+- Recipe pages are drawn on the screen of the container that makes them, taken from that container's own texture. A container's fuel and tool slots are drawn too, cycling through what they accept.
+- The whole manual is data: the book's own look, which mods are in the index, their chapters, which
+  block, item or creature opens which page, and how each kind of recipe is drawn all come from
+  resource packs, so a pack can move a slot, re-point a link, re-skin the book or rewrite a chapter
+  without touching a mod.
+
 ## 4.0.1
 
 - An item transfer that is rolled back no longer rebuilds the slot it touched from a single stack,

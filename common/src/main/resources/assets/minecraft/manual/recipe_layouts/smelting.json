@@ -1,0 +1,16 @@
+{
+  "texture": "minecraft:textures/gui/container/furnace.png",
+  "u": 52,
+  "v": 13,
+  "width": 94,
+  "height": 60,
+  "columns": 1,
+  "inputs": [[4, 4]],
+  "result": [64, 22],
+  "extras": [
+    {
+      "position": [4, 40],
+      "display": { "type": "minecraft:any_fuel" }
+    }
+  ]
+}

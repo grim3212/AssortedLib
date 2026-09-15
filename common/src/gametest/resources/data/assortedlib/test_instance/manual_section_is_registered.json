@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:function",
+  "environment": "minecraft:default",
+  "function": "assortedlib:manual_section_is_registered",
+  "structure": "assortedlib:test_box",
+  "max_ticks": 1,
+  "setup_ticks": 0,
+  "required": true
+}

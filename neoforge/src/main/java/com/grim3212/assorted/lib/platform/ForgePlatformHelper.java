@@ -37,6 +37,8 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -100,11 +102,16 @@ public class ForgePlatformHelper implements IPlatformHelper {
         return ForgeRegistryWrapper.getRegistry(key);
     }
 
-    public static Map<ResourceKey<CreativeModeTab>, Supplier<List<ItemStack>>> tabsToRegister = new HashMap<>();
+    /**
+     * Every contributor to a tab, not just the last one: more than one mod can add to the same
+     * vanilla tab, and Fabric's side registers a listener per call rather than replacing. Concurrent
+     * because mods are constructed in parallel.
+     */
+    public static final Map<ResourceKey<CreativeModeTab>, List<Supplier<List<ItemStack>>>> tabsToRegister = new ConcurrentHashMap<>();
 
     @Override
     public void modifyCreativeTab(ResourceKey<CreativeModeTab> key, Supplier<List<ItemStack>> displayStacks) {
-        tabsToRegister.put(key, displayStacks);
+        tabsToRegister.computeIfAbsent(key, tab -> new CopyOnWriteArrayList<>()).add(displayStacks);
     }
 
     public static final List<Supplier<? extends DataComponentType<? extends TooltipProvider>>> componentTooltips = new ArrayList<>();
