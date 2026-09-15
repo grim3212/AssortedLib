@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:function",
+  "environment": "minecraft:default",
+  "function": "assortedlib:manual_codecs_read_the_shipped_data",
+  "structure": "assortedlib:test_box",
+  "max_ticks": 1,
+  "setup_ticks": 0,
+  "required": true
+}

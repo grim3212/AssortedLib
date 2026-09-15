@@ -34,6 +34,118 @@ instead, install it to your own Maven and resolve from `mavenLocal()`:
 ./gradlew publishToMavenLocal
 ```
 
+## The instruction manual
+
+Assorted Lib adds an in-game book, `assortedlib:instruction_manual`. Everything in it is data, read
+from resource packs, so a mod adds its part by shipping files and a pack can change any of it
+without touching the mod:
+
+```
+assets/assortedlib/manual/book.json                 what the book itself looks like
+assets/<modid>/manual/section.json                  that mod's place in the index
+assets/<modid>/manual/links.json                    what right clicking its content opens
+assets/<modid>/manual/chapters/<chapter>.json       a chapter of it
+assets/<ns>/manual/recipe_layouts/<path>.json       how <ns>:<path> recipes are drawn
+```
+
+A mod gets a section in the index by shipping `section.json`; one that ships nothing is simply
+absent. Its chapters are the files beside it. Every `title` and `text` is a translation key, never
+the words themselves.
+
+```json
+{ "sort_order": 0, "icon": "mymod:kiln" }
+```
+
+```json
+{
+  "sort_order": 0,
+  "pages": [
+    { "id": "intro", "type": "assortedlib:text", "title": "...", "text": "..." },
+    { "id": "kiln", "type": "assortedlib:recipe", "text": "...", "recipes": ["mymod:kiln"] }
+  ]
+}
+```
+
+The page types are `assortedlib:text`, `assortedlib:image`, `assortedlib:item` (one or more items
+shown large, cycling) and `assortedlib:recipe` (one or more recipes, cycling). A mod can add its own
+with `ManualPageTypes.register` from client init.
+
+### Recipe layouts
+
+A recipe is drawn on the screen of the container that makes it, so crafting looks like a crafting
+table and smelting like a furnace. A layout names the part of a container texture to draw and where
+the items sit on it. The same positions that container's menu already gives its slots.
+
+```json
+{
+  "texture": "mymod:textures/gui/container/kiln.png",
+  "u": 28, "v": 20, "width": 118, "height": 60,
+  "corner_radius": 3,
+  "columns": 2,
+  "inputs": [[4, 7], [28, 7]],
+  "result": [87, 7],
+  "extras": [
+    { "position": [52, 42], "display": { "type": "minecraft:any_fuel" } },
+    { "position": [34, 4], "display": { "type": "minecraft:tag", "tag": "mymod:kiln_tools" } }
+  ]
+}
+```
+
+`columns` is how many of `inputs` make a row, which puts a recipe smaller than the station in its
+top left corner the way the recipe book does. `extras` are slots the station always has but no one
+recipe fills, like a furnace's fuel or a mill's tool. Their contents are a vanilla `SlotDisplay`, so
+`any_fuel` cycles through everything that burns and `tag` through everything in a tag; both are
+ringed in gold and say what they take in their tooltip.
+
+`corner_radius` rounds off the corners of the region so a screen cut out of its own frame does not
+sit on the page as a hard rectangle; 0 leaves it square. A recipe whose inputs go in any arrangement
+is marked with three loose pieces, in the region's top right corner unless `shapeless_marker` names
+somewhere else.
+
+Anything that cycles blocks/items like a recipe page with several recipes, a slot with several stacks, or an item page
+with several items holds still while the cursor rests on it, so it can be read.
+
+A page whose text outgrows its box scrolls rather than losing the tail of it. A bar appears down the
+side of that page: drag it, click anywhere on its track to jump, or use the wheel over the page.
+
+Assorted Lib ships layouts for crafting, the furnace family and the stonecutter under
+`assets/minecraft/manual/recipe_layouts`. A pack can replace any of them by writing the same path,
+and a type with no layout falls back to the crafting table.
+
+### Pointing at things
+
+Right clicking something with the manual opens its page. Name what opens what in
+`assets/<modid>/manual/links.json`, grouped by the page they open. Listing a block covers the item
+that places it; vanilla content can be listed too.
+
+```json
+{
+  "links": [
+    { "page": "mymod:machines/kiln", "blocks": ["mymod:kiln"] },
+    { "page": "mymod:metals/steel", "items": ["mymod:steel_ingot"], "entities": ["mymod:slag_golem"] }
+  ]
+}
+```
+
+A page that depends on the thing's state like a multiblock that reads its own block state, comes
+from implementing `IManualEntry` on the block, item or entity instead. `ManualLinks.linkBlock` and
+friends register a link from code, for a link that has to be computed. They are asked in that
+order, `IManualEntry`, then `links.json`, then the code registry so a pack can re-point any link
+a mod registered in code.
+
+### Recipes on the client
+
+Recipe pages read whole recipes on the client. Vanilla crafting, smelting and stonecutting
+are asked for by the library itself (see `manual.syncVanillaRecipes` in `assortedlib-common`); a
+mod's own recipe type has to ask for itself, from common init:
+
+```java
+SyncedRecipes.require(MyRecipes.KILN_TYPE, KilnRecipeSerializer.INSTANCE);
+```
+
+A recipe with no `RecipeDisplay` like a machine recipe kept out of the recipe book can say how it should
+be drawn by implementing `IManualRecipeProvider`.
+
 ## Building
 
 JDK 25 and the bundled Gradle wrapper. `common/` holds the loader-agnostic code; both loader
@@ -51,6 +163,7 @@ How the build works - the Minecraft and loader versions, the runs, the tests, pu
 ./gradlew :neoforge:runGameTestServer  # headless gametests, non-zero exit on failure
 ./gradlew :fabric:runGameTest
 ./gradlew :neoforge:runClientData      # datagen
+./gradlew :neoforge:runServerData
 ./gradlew :fabric:runDatagenClient
 ```
 

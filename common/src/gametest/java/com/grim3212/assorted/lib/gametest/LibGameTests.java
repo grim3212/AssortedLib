@@ -23,5 +23,6 @@ public final class LibGameTests {
         IngredientTests.register(out);
         EventTests.register(out);
         MenuTests.register(out);
+        ManualTests.register(out);
     }
 }

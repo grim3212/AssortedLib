@@ -26,10 +26,10 @@ runserver
 logs
 
 # Data Generator cache
-common/src/generated/resources/.cache
+common/src/generated/server/.cache
 forge/src/generated/resources/.cache
 fabric/src/generated/resources/.cache
 
 # Datagen hash cache - regenerated output, not source
-**/src/generated/resources/.cache/
 common/src/generated/client/.cache/
+common/src/generated/server/.cache/

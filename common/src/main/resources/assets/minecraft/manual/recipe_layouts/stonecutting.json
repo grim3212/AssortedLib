@@ -1,0 +1,10 @@
+{
+  "texture": "minecraft:textures/gui/container/stonecutter.png",
+  "u": 16,
+  "v": 28,
+  "width": 150,
+  "height": 28,
+  "columns": 1,
+  "inputs": [[4, 5]],
+  "result": [127, 5]
+}
