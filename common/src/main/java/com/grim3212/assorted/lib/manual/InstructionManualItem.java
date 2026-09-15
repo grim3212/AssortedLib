@@ -8,7 +8,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -16,7 +15,6 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
@@ -34,31 +32,13 @@ public class InstructionManualItem extends Item implements IManualEntry.IManualI
 
     @Override
     public InteractionResult useOn(UseOnContext context) {
-        Level level = context.getLevel();
-        if (level.isClientSide()) {
-            openAt(ManualLinks.pageFor(level, context.getClickedPos(), level.getBlockState(context.getClickedPos())));
-        }
-
-        return InteractionResult.SUCCESS;
+        return openLookedAt(context.getLevel());
     }
 
-    @Override
-    public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity target, InteractionHand hand) {
-        if (target.level().isClientSide()) {
-            openAt(ManualLinks.pageFor(target));
-        }
-
-        return InteractionResult.SUCCESS;
-    }
-
-    /** Anything that is not a block or living entity is only known to the client, which raytraces it. */
+    /** Whatever the crosshair is on that did not already open the book above. */
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
-        if (level.isClientSide()) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ManualClient::openAtLookedAt);
-        }
-
-        return InteractionResult.SUCCESS;
+        return openLookedAt(level);
     }
 
     @Override
@@ -66,8 +46,12 @@ public class InstructionManualItem extends Item implements IManualEntry.IManualI
         return OWN_PAGE;
     }
 
-    private static void openAt(@Nullable ManualPageRef ref) {
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ManualClient.open(ref));
+    private static InteractionResult openLookedAt(Level level) {
+        if (level.isClientSide()) {
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ManualClient::openAtLookedAt);
+        }
+
+        return InteractionResult.SUCCESS;
     }
 
     /** Deprecated for data component tooltips, which cannot count something at runtime. */

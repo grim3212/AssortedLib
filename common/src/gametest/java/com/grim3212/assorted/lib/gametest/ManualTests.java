@@ -12,13 +12,18 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityTypes;
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 import java.io.IOException;
@@ -26,6 +31,8 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+
+import static com.grim3212.assorted.lib.test.TestSupport.survivalPlayer;
 
 /**
  * The parts of the manual a dedicated server can see: the page addresses, the section registry and
@@ -49,7 +56,8 @@ final class ManualTests {
         out.accept("manual_page_refs_round_trip", ManualTests::pageRefsRoundTrip);
         out.accept("manual_page_refs_reject_nonsense", ManualTests::pageRefsRejectNonsense);
         out.accept("manual_links_resolve_by_kind", ManualTests::linksResolveByKind);
-        out.accept("manual_links_read_dropped_items", ManualTests::linksReadDroppedItems);
+        out.accept("manual_links_read_framed_items", ManualTests::linksReadFramedItems);
+        out.accept("manual_takes_the_click_off_a_frame", ManualTests::manualTakesTheClickOffAFrame);
         out.accept("manual_section_is_registered", ManualTests::sectionIsRegistered);
         out.accept("manual_codecs_read_the_shipped_data", ManualTests::codecsReadTheShippedData);
     }
@@ -104,16 +112,49 @@ final class ManualTests {
         helper.succeed();
     }
 
-    /** Pointing at a dropped item reads the item it holds, not the item entity. */
-    private static void linksReadDroppedItems(GameTestHelper helper) {
+    /** A frame reads the item on display, and an empty one reads as nothing. */
+    private static void linksReadFramedItems(GameTestHelper helper) {
         ManualLinks.link(Items.APPLE, APPLE_PAGE);
 
-        BlockPos pos = helper.absolutePos(BlockPos.ZERO.above());
-        ItemEntity dropped = new ItemEntity(helper.getLevel(), pos.getX(), pos.getY(), pos.getZ(), new ItemStack(Items.APPLE));
-        helper.getLevel().addFreshEntity(dropped);
+        ItemFrame frame = frameHolding(helper, ItemStack.EMPTY);
+        if (ManualLinks.pageFor(frame) != null) {
+            helper.fail("An empty frame should have no page");
+        }
 
-        assertEquals(helper, APPLE_PAGE, ManualLinks.pageFor(dropped), "dropped item link");
+        frame.setItem(new ItemStack(Items.APPLE));
+        assertEquals(helper, APPLE_PAGE, ManualLinks.pageFor(frame), "framed item link");
         helper.succeed();
+    }
+
+    /**
+     * The interaction the book takes before the frame's own: a frame holding something with a page
+     * is read rather than rotated, so the click reaches the book at all.
+     */
+    private static void manualTakesTheClickOffAFrame(GameTestHelper helper) {
+        ManualLinks.link(Items.APPLE, APPLE_PAGE);
+
+        ItemFrame frame = frameHolding(helper, new ItemStack(Items.APPLE));
+        ServerPlayer player = survivalPlayer(helper, new ItemStack(LibItems.INSTRUCTION_MANUAL.get()));
+
+        InteractionResult result = player.interactOn(frame, InteractionHand.MAIN_HAND, Vec3.ZERO);
+        helper.assertTrue(result.consumesAction(), "the manual did not take the interaction, got " + result);
+        helper.assertValueEqual(frame.getRotation(), 0, "frame rotation after the manual was used on it");
+
+        // A frame with nothing to read is left to vanilla, which is what lets the book be framed.
+        ItemFrame empty = frameHolding(helper, ItemStack.EMPTY);
+        player.interactOn(empty, InteractionHand.MAIN_HAND, Vec3.ZERO);
+        helper.assertTrue(empty.getItem().is(LibItems.INSTRUCTION_MANUAL.get()),
+                "an empty frame should still take the book, it holds " + empty.getItem());
+
+        helper.succeed();
+    }
+
+    private static ItemFrame frameHolding(GameTestHelper helper, ItemStack held) {
+        BlockPos pos = helper.absolutePos(BlockPos.ZERO.above());
+        ItemFrame frame = new ItemFrame(helper.getLevel(), pos, Direction.NORTH);
+        frame.setItem(held);
+        helper.getLevel().addFreshEntity(frame);
+        return frame;
     }
 
     /**

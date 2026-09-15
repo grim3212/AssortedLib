@@ -1,7 +1,7 @@
 {
   "type": "minecraft:function",
   "environment": "minecraft:default",
-  "function": "assortedlib:manual_links_read_dropped_items",
+  "function": "assortedlib:manual_takes_the_click_off_a_frame",
   "structure": "assortedlib:test_box",
   "max_ticks": 1,
   "setup_ticks": 0,

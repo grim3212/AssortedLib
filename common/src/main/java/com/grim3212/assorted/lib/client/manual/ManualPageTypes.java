@@ -1,5 +1,10 @@
 package com.grim3212.assorted.lib.client.manual;
 
+import com.grim3212.assorted.lib.LibConstants;
+import com.grim3212.assorted.lib.client.manual.page.ImagePage;
+import com.grim3212.assorted.lib.client.manual.page.ItemPage;
+import com.grim3212.assorted.lib.client.manual.page.RecipePage;
+import com.grim3212.assorted.lib.client.manual.page.TextPage;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.resources.Identifier;
@@ -24,6 +29,21 @@ public final class ManualPageTypes {
     public static final Codec<ManualPage> CODEC = MAP_CODEC.codec();
 
     private ManualPageTypes() {
+    }
+
+    /**
+     * The page types the library itself provides. Called from client init, and from datagen, which
+     * encodes chapters through these same codecs but never runs client init.
+     */
+    public static void bootstrap() {
+        register(libId("text"), TextPage.CODEC);
+        register(libId("image"), ImagePage.CODEC);
+        register(libId("item"), ItemPage.CODEC);
+        register(libId("recipe"), RecipePage.CODEC);
+    }
+
+    private static Identifier libId(String name) {
+        return Identifier.fromNamespaceAndPath(LibConstants.MOD_ID, name);
     }
 
     public static void register(Identifier id, MapCodec<? extends ManualPage> codec) {

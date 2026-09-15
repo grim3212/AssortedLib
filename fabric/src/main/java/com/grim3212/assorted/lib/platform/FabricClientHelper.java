@@ -1,6 +1,7 @@
 package com.grim3212.assorted.lib.platform;
 
 import com.grim3212.assorted.lib.client.events.ClientTickHandler;
+import com.grim3212.assorted.lib.client.events.HudElementHandler;
 import com.grim3212.assorted.lib.client.model.loader.FabricPlatformModelLoaderPlatformDelegate;
 import com.grim3212.assorted.lib.client.model.loaders.IModelSpecificationLoader;
 import com.grim3212.assorted.lib.client.render.ISpecialModelRendererRegistry;
@@ -27,6 +28,8 @@ import net.fabricmc.fabric.api.client.model.loading.v1.UnbakedModelDeserializer;
 import net.fabricmc.fabric.api.client.particle.v1.FabricSpriteSet;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.BlockColorRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
 import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.minecraft.client.KeyMapping;
@@ -168,6 +171,11 @@ public class FabricClientHelper implements IClientHelper {
     @Override
     public void registerClientTickEnd(ClientTickHandler handler) {
         ClientTickEvents.END_CLIENT_TICK.register(handler::handle);
+    }
+
+    @Override
+    public void registerHudElement(Identifier id, HudElementHandler element) {
+        HudElementRegistry.attachElementAfter(VanillaHudElements.CROSSHAIR, id, element::extract);
     }
 
     @Override

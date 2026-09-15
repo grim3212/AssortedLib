@@ -133,6 +133,48 @@ friends register a link from code, for a link that has to be computed. They are 
 order, `IManualEntry`, then `links.json`, then the code registry so a pack can re-point any link
 a mod registered in code.
 
+An item frame reads the item on display, so a wall of framed samples doubles as an index. The book
+takes that click before the frame does, or the frame would rotate instead; an empty frame has
+nothing to read and still takes the book as any frame would.
+
+While the manual is in hand a green check mark sits beside the crosshair whenever what it is on has
+a page, so a link is visible before it is clicked. Turn the mark off with
+`manual.showPageIndicator` in `assortedlib-client`.
+
+### Generating a section
+
+Nothing above has to be written by hand. `LibManualProvider` generates the whole section with a
+mod's other client assets, through the same codecs the book reads, so a chapter that generates is
+a chapter that loads:
+
+```java
+public class KilnManualProvider extends LibManualProvider {
+
+    public KilnManualProvider(PackOutput output) {
+        super(output, Constants.MOD_ID);
+    }
+
+    @Override
+    protected void addChapters() {
+        this.section(0, MyBlocks.KILN.get());
+
+        ChapterBuilder machines = this.chapter("machines");
+        machines.recipes("kiln", "kiln").opens(MyBlocks.KILN.get());
+        machines.items("tiers", MyBlocks.KILN.get(), MyBlocks.BIG_KILN.get()).every(50)
+                .opens(MyBlocks.BIG_KILN.get());
+        machines.text("firing");
+    }
+}
+```
+
+Links are declared on the page they open rather than in a list of their own, so the two cannot
+disagree. Titles and bodies are the derived keys above, never passed. `opensEveryItem` and
+`opensEveryBlock` take a predicate over this mod's ids, for a family named by its shape rather
+than listed, so a new material joins its page on its own.
+
+The provider refuses to generate while any block or item of the mod opens nothing, which is what
+keeps a section complete as content is added.
+
 ### Recipes on the client
 
 Recipe pages read whole recipes on the client. Vanilla crafting, smelting and stonecutting

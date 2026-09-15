@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:function",
+  "environment": "minecraft:default",
+  "function": "assortedlib:manual_links_read_framed_items",
+  "structure": "assortedlib:test_box",
+  "max_ticks": 1,
+  "setup_ticks": 0,
+  "required": true
+}

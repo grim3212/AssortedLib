@@ -2,6 +2,7 @@ package com.grim3212.assorted.lib.platform;
 
 import com.google.common.collect.Maps;
 import com.grim3212.assorted.lib.client.events.ClientTickHandler;
+import com.grim3212.assorted.lib.client.events.HudElementHandler;
 import com.grim3212.assorted.lib.client.model.loader.ForgePlatformModelLoaderPlatformDelegate;
 import com.grim3212.assorted.lib.client.model.loader.ForgeBakedModelDelegate;
 import com.grim3212.assorted.lib.client.model.loaders.IModelSpecification;
@@ -55,12 +56,14 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterConditionalItemModelPropertyEvent;
 import net.neoforged.neoforge.client.event.RegisterItemModelsEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.ArrayList;
@@ -176,6 +179,11 @@ public class ForgeClientHelper implements IClientHelper {
     }
 
     @Override
+    public void registerHudElement(Identifier id, HudElementHandler element) {
+        getRegistration().hudElements.put(id, element);
+    }
+
+    @Override
     public <T extends ParticleOptions> void registerParticle(Supplier<ParticleType<T>> type, Function<SpriteSet, ParticleProvider<T>> particleFactory) {
         getRegistration().particleProviders.put((Supplier<ParticleType<?>>) (Supplier<? extends ParticleType<?>>) type, particleFactory::apply);
     }
@@ -213,6 +221,7 @@ public class ForgeClientHelper implements IClientHelper {
         private final Map<Identifier, MapCodec<? extends ConditionalItemModelProperty>> conditionalItemModelProperties = new HashMap<>();
         private final Map<Supplier<ParticleType<?>>, Function<SpriteSet, ParticleProvider<?>>> particleProviders = new HashMap<>();
         private final Map<Supplier<MenuType<?>>, LibScreenFactory<?, ?>> menuTypes = new HashMap<>();
+        private final Map<Identifier, HudElementHandler> hudElements = new HashMap<>();
 
         @SubscribeEvent
         @SuppressWarnings("unchecked")
@@ -303,6 +312,13 @@ public class ForgeClientHelper implements IClientHelper {
         public void registerModelLoaders(final ModelEvent.RegisterLoaders event) {
             for (Map.Entry<Identifier, IModelSpecificationLoader<?>> entry : modelLoaders.entrySet()) {
                 event.register(entry.getKey(), new ForgePlatformModelLoaderPlatformDelegate<>(entry.getValue()));
+            }
+        }
+
+        @SubscribeEvent
+        public void registerHudElements(final RegisterGuiLayersEvent event) {
+            for (Map.Entry<Identifier, HudElementHandler> entry : hudElements.entrySet()) {
+                event.registerAbove(VanillaGuiLayers.CROSSHAIR, entry.getKey(), entry.getValue()::extract);
             }
         }
 

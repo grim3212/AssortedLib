@@ -1,0 +1,31 @@
+{
+  "pages": [
+    {
+      "type": "assortedlib:text",
+      "id": "pointing",
+      "text": "manual.assortedlib.chapter.reading.pointing",
+      "title": "manual.assortedlib.chapter.reading.pointing.title"
+    },
+    {
+      "type": "assortedlib:text",
+      "id": "recipes",
+      "text": "manual.assortedlib.chapter.reading.recipes",
+      "title": "manual.assortedlib.chapter.reading.recipes.title"
+    },
+    {
+      "type": "assortedlib:text",
+      "id": "marks",
+      "text": "manual.assortedlib.chapter.reading.marks",
+      "title": "manual.assortedlib.chapter.reading.marks.title"
+    },
+    {
+      "type": "assortedlib:recipe",
+      "id": "crafting",
+      "recipes": [
+        "assortedlib:instruction_manual"
+      ],
+      "text": "manual.assortedlib.chapter.reading.crafting",
+      "title": "manual.assortedlib.chapter.reading.crafting.title"
+    }
+  ]
+}

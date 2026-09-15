@@ -2,6 +2,7 @@ package com.grim3212.assorted.lib;
 
 import com.grim3212.assorted.lib.config.LibCommonConfig;
 import com.grim3212.assorted.lib.crafting.SyncedRecipes;
+import com.grim3212.assorted.lib.manual.ManualInteractions;
 import com.grim3212.assorted.lib.manual.LibItems;
 import net.minecraft.world.item.crafting.BlastingRecipe;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
@@ -22,6 +23,7 @@ public class LibCommonSetup {
     public static void init() {
         LibItems.init();
 
+        ManualInteractions.register();
         requireVanillaRecipes();
     }
 

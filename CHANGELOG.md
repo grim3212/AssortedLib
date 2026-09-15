@@ -11,6 +11,9 @@
   block, item or creature opens which page, and how each kind of recipe is drawn all come from
   resource packs, so a pack can move a slot, re-point a link, re-skin the book or rewrite a chapter
   without touching a mod.
+- Holding the manual puts a green check mark beside the crosshair when whatever it is on has a page,
+  so a link is visible before it is clicked. Turn it off with `manual.showPageIndicator`.
+- Right clicking an item frame with the manual opens the page of the item on display.
 
 ## 4.0.1
 

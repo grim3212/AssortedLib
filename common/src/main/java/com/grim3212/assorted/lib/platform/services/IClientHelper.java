@@ -1,6 +1,7 @@
 package com.grim3212.assorted.lib.platform.services;
 
 import com.grim3212.assorted.lib.client.events.ClientTickHandler;
+import com.grim3212.assorted.lib.client.events.HudElementHandler;
 import com.grim3212.assorted.lib.client.model.loaders.IModelSpecificationLoader;
 import com.grim3212.assorted.lib.client.render.ISpecialModelRendererRegistry;
 import com.grim3212.assorted.lib.client.screen.LibScreenFactory;
@@ -97,6 +98,12 @@ public interface IClientHelper {
     void registerClientTickStart(ClientTickHandler handler);
 
     void registerClientTickEnd(ClientTickHandler handler);
+
+    /**
+     * Draws {@code element} on the HUD directly after vanilla's crosshair. Registered during mod
+     * construction, the same as every other client registration here.
+     */
+    void registerHudElement(Identifier id, HudElementHandler element);
 
     <T extends ParticleOptions> void registerParticle(Supplier<ParticleType<T>> type, Function<SpriteSet, ParticleProvider<T>> particleFactory);
 

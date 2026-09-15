@@ -11,7 +11,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -120,7 +120,10 @@ public final class ManualLinks {
         return lookUp(BuiltInRegistries.ITEM.getKey(stack.getItem()), loaded.items(), ITEMS);
     }
 
-    /** An {@link ItemEntity} resolves to the page of the item it holds. */
+    /**
+     * An {@link ItemFrame} resolves to the page of the item on display, unless the frame itself was
+     * linked.
+     */
     @Nullable
     public static ManualPageRef pageFor(Entity entity) {
         if (entity instanceof IManualEntity manualEntity) {
@@ -135,7 +138,7 @@ public final class ManualLinks {
             return linked;
         }
 
-        return entity instanceof ItemEntity item ? pageFor(item.getItem()) : null;
+        return entity instanceof ItemFrame frame ? pageFor(frame.getItem()) : null;
     }
 
     private static @Nullable ManualPageRef lookUp(Identifier id, Map<Identifier, ManualPageRef> fromData,

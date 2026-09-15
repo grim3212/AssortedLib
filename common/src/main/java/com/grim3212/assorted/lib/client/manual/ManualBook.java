@@ -27,6 +27,9 @@ public final class ManualBook {
         /** Marks a shapeless recipe. */
         public static final Identifier SHAPELESS = sprite("shapeless");
 
+        /** Beside the crosshair, when what it is on has a page. */
+        public static final Identifier PAGE_AVAILABLE = sprite("page_available");
+
         private Sprites() {
         }
     }

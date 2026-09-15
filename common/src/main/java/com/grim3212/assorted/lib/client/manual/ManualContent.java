@@ -81,8 +81,15 @@ public final class ManualContent {
         return this.chapters.getOrDefault(section, List.of());
     }
 
+    /** A loop rather than a stream: the HUD asks this every frame while the manual is in hand. */
     public Optional<ManualChapter> chapter(String section, String id) {
-        return this.chaptersOf(section).stream().filter(chapter -> chapter.id().equals(id)).findFirst();
+        for (ManualChapter chapter : this.chaptersOf(section)) {
+            if (chapter.id().equals(id)) {
+                return Optional.of(chapter);
+            }
+        }
+
+        return Optional.empty();
     }
 
     /** Where a reference lands, or empty when nothing loaded matches it. */

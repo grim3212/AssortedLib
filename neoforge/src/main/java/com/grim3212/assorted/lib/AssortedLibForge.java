@@ -1,6 +1,7 @@
 package com.grim3212.assorted.lib;
 
 import com.grim3212.assorted.lib.data.AssortedLibLanguageProvider;
+import com.grim3212.assorted.lib.data.AssortedLibManualProvider;
 import com.grim3212.assorted.lib.client.data.LibItemModelProvider;
 import com.grim3212.assorted.lib.data.LibRecipes;
 import net.minecraft.world.item.component.TooltipProvider;
@@ -55,8 +56,6 @@ public class AssortedLibForge {
         modBus.addListener(this::registerConditionCodecs);
         modBus.addListener(this::modifyCreativeTabs);
         modBus.addListener(this::registerComponentTooltips);
-
-        LibCommonSetup.init();
 
         // Recipes are not sent to clients by default; anything that opted a type into
         // SyncedRecipes is asked for here, while the datapack is being synced.
@@ -118,6 +117,10 @@ public class AssortedLibForge {
             }
         });
 
+        // After the event types above: this registers handlers for them, and a handler that arrives
+        // first is reported as one nothing raises.
+        LibCommonSetup.init();
+
         Services.CONDITIONS.init();
         LibDataComponents.init();
 
@@ -159,6 +162,7 @@ public class AssortedLibForge {
         PackOutput clientOutput = event.getGenerator().getPackOutput();
         event.addProvider(new LibItemModelProvider(clientOutput));
         event.addProvider(new AssortedLibLanguageProvider(clientOutput));
+        event.addProvider(new AssortedLibManualProvider(clientOutput));
     }
 
     private void gatherData(final GatherDataEvent.Server event) {
