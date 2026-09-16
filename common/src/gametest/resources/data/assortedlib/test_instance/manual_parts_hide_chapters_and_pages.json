@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:function",
+  "environment": "minecraft:default",
+  "function": "assortedlib:manual_parts_hide_chapters_and_pages",
+  "structure": "assortedlib:test_box",
+  "max_ticks": 1,
+  "setup_ticks": 0,
+  "required": true
+}

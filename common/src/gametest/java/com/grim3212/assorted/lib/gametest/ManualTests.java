@@ -1,7 +1,14 @@
 package com.grim3212.assorted.lib.gametest;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.grim3212.assorted.lib.client.manual.ManualBookStyle;
+import com.grim3212.assorted.lib.client.manual.ManualChapter;
+import com.grim3212.assorted.lib.client.manual.ManualPageEntry;
+import com.grim3212.assorted.lib.client.manual.page.TextPage;
+import com.grim3212.assorted.lib.conditions.DisplayCondition;
+import com.grim3212.assorted.lib.conditions.DisplayConditions;
+import com.grim3212.assorted.lib.conditions.LibParts;
 import com.grim3212.assorted.lib.client.manual.ManualRecipeLayout;
 import com.grim3212.assorted.lib.manual.LibItems;
 import com.grim3212.assorted.lib.manual.ManualLinks;
@@ -12,8 +19,10 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -26,9 +35,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
+import java.util.Optional;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -49,6 +60,9 @@ final class ManualTests {
     private static final ManualPageRef APPLE_PAGE = ManualPageRef.of("assortedlibtest", "food", "apple");
     private static final ManualPageRef PIG_PAGE = ManualPageRef.of("assortedlibtest", "animals", "pig");
 
+    private static final String PART_ON = "assortedlibtest_on";
+    private static final String PART_OFF = "assortedlibtest_off";
+
     private ManualTests() {
     }
 
@@ -58,6 +72,8 @@ final class ManualTests {
         out.accept("manual_links_resolve_by_kind", ManualTests::linksResolveByKind);
         out.accept("manual_links_read_framed_items", ManualTests::linksReadFramedItems);
         out.accept("manual_takes_the_click_off_a_frame", ManualTests::manualTakesTheClickOffAFrame);
+        out.accept("manual_parts_hide_chapters_and_pages", ManualTests::partsHideChaptersAndPages);
+        out.accept("manual_conditions_read_and_compose", ManualTests::conditionsReadAndCompose);
         out.accept("manual_section_is_registered", ManualTests::sectionIsRegistered);
         out.accept("manual_codecs_read_the_shipped_data", ManualTests::codecsReadTheShippedData);
     }
@@ -155,6 +171,117 @@ final class ManualTests {
         frame.setItem(held);
         helper.getLevel().addFreshEntity(frame);
         return frame;
+    }
+
+    /**
+     * Resolving applies the conditions once: a hidden chapter leaves the book, a hidden page leaves
+     * the chapter, and the pages after it close up so nothing addresses a page that is not there.
+     */
+    private static void partsHideChaptersAndPages(GameTestHelper helper) {
+        registerTestParts();
+
+        ManualPageEntry always = pageEntry("always", List.of());
+        ManualPageEntry off = pageEntry("off", List.of(new DisplayConditions.PartEnabled(PART_OFF)));
+        ManualPageEntry last = pageEntry("last", List.of(new DisplayConditions.PartEnabled(PART_ON)));
+
+        ManualChapter raw = chapter("parts", List.of(), List.of(always, off, last));
+        List<ManualChapter> resolved = ManualChapter.resolve(List.of(raw));
+        assertEquals(helper, 1, resolved.size(), "resolved chapter count");
+
+        ManualChapter chapter = resolved.getFirst();
+        assertEquals(helper, 2, chapter.pageCount(), "visible page count");
+        assertEquals(helper, "always", chapter.page(0).flatMap(ManualPageEntry::id).orElse(""), "first visible page");
+        assertEquals(helper, "last", chapter.page(1).flatMap(ManualPageEntry::id).orElse(""), "second visible page");
+
+        // The hidden page is gone rather than blank, so the one after it moves up into its place.
+        assertEquals(helper, 1, chapter.indexOfPage("last"), "index of the page after a hidden one");
+        // A link to a hidden page falls back to the chapter rather than opening nothing.
+        assertEquals(helper, 0, chapter.indexOfPage("off"), "index of a hidden page");
+
+        // A chapter whose own condition fails, and one left with no page, both leave the book.
+        ManualChapter hidden = chapter("hidden", List.of(new DisplayConditions.PartEnabled(PART_OFF)), List.of(always));
+        assertEquals(helper, 0, ManualChapter.resolve(List.of(hidden)).size(), "a chapter conditioned off");
+        ManualChapter emptied = chapter("emptied", List.of(), List.of(off));
+        assertEquals(helper, 0, ManualChapter.resolve(List.of(emptied)).size(), "a chapter with every page hidden");
+
+        // Reading a resolved chapter must not ask a condition again; the book draws from these.
+        int before = PART_CHECKS.get();
+        for (int i = 0; i < 20; i++) {
+            chapter.pageCount();
+            chapter.page(0);
+            chapter.indexOfPage("last");
+        }
+        assertEquals(helper, before, PART_CHECKS.get(), "condition checks while reading a resolved chapter");
+
+        helper.succeed();
+    }
+
+    private static ManualChapter chapter(String id, List<DisplayCondition> conditions, List<ManualPageEntry> pages) {
+        return new ManualChapter.Definition(Optional.empty(), Optional.empty(), 0, conditions, pages)
+                .bind("assortedlibtest", id);
+    }
+
+    private static ManualPageEntry pageEntry(String id, List<DisplayCondition> conditions) {
+        return new ManualPageEntry(Optional.of(id), conditions,
+                new TextPage(Optional.empty(), Component.literal(id)));
+    }
+
+    /**
+     * The conditions a pack can name are not all about parts: they compose, and they round trip
+     * through the same json shape a recipe's load conditions use.
+     */
+    private static void conditionsReadAndCompose(GameTestHelper helper) {
+        registerTestParts();
+        DisplayConditions.bootstrap();
+
+        DisplayCondition on = new DisplayConditions.PartEnabled(PART_ON);
+        DisplayCondition off = new DisplayConditions.PartEnabled(PART_OFF);
+
+        assertEquals(helper, true, on.test(), "a part that is on");
+        assertEquals(helper, false, off.test(), "a part that is off");
+        assertEquals(helper, true, new DisplayConditions.Not(off).test(), "not of a failing condition");
+        assertEquals(helper, false, new DisplayConditions.AllOf(List.of(on, off)).test(), "all_of with one failing");
+        assertEquals(helper, true, new DisplayConditions.AnyOf(List.of(on, off)).test(), "any_of with one passing");
+        assertEquals(helper, false, new DisplayConditions.AnyOf(List.of()).test(), "any_of of nothing");
+        assertEquals(helper, true, new DisplayConditions.AllOf(List.of()).test(), "all_of of nothing");
+
+        // A mod that is loaded, and one that is not, without naming a part at all.
+        assertEquals(helper, true, new DisplayConditions.ModLoaded("assortedlib").test(), "a loaded mod");
+        assertEquals(helper, false, new DisplayConditions.ModLoaded("not_a_real_mod").test(), "an absent mod");
+        assertEquals(helper, true, new DisplayConditions.ItemExists(Identifier.withDefaultNamespace("apple")).test(),
+                "an item that exists");
+        assertEquals(helper, false,
+                new DisplayConditions.ItemExists(Identifier.withDefaultNamespace("not_a_real_item")).test(),
+                "an item that does not");
+
+        // Nesting survives being written out and read back, which is what a resource pack does.
+        DisplayCondition nested = new DisplayConditions.Not(new DisplayConditions.AnyOf(List.of(off, on)));
+        JsonElement json = DisplayConditions.CODEC.encodeStart(JsonOps.INSTANCE, nested).getOrThrow();
+        DisplayCondition read = DisplayConditions.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
+        assertEquals(helper, nested.test(), read.test(), "a nested condition read back");
+        if (!json.getAsJsonObject().get("type").getAsString().equals("assortedlib:not")) {
+            helper.fail("A condition should write its type the way a recipe condition does, got " + json);
+        }
+
+        helper.succeed();
+    }
+
+    /** Counts how often a part was asked, so a test can show that reading does not ask again. */
+    private static final AtomicInteger PART_CHECKS = new AtomicInteger();
+
+    private static synchronized void registerTestParts() {
+        if (!LibParts.isRegistered(PART_ON)) {
+            LibParts.register(PART_ON, () -> {
+                PART_CHECKS.incrementAndGet();
+                return true;
+            });
+        }
+        if (!LibParts.isRegistered(PART_OFF)) {
+            LibParts.register(PART_OFF, () -> {
+                PART_CHECKS.incrementAndGet();
+                return false;
+            });
+        }
     }
 
     /**

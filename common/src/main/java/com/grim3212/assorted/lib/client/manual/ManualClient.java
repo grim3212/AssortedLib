@@ -2,6 +2,7 @@ package com.grim3212.assorted.lib.client.manual;
 
 import com.grim3212.assorted.lib.LibConstants;
 import com.grim3212.assorted.lib.client.manual.screen.ManualScreen;
+import com.grim3212.assorted.lib.conditions.DisplayConditions;
 import com.grim3212.assorted.lib.config.LibClientConfig;
 import com.grim3212.assorted.lib.manual.ManualPageRef;
 import com.grim3212.assorted.lib.platform.ClientServices;
@@ -18,9 +19,15 @@ public final class ManualClient {
 
     public static void init() {
         ManualPageTypes.bootstrap();
+        DisplayConditions.bootstrap();
 
         ClientServices.CLIENT.addReloadListener(ManualLoader.ID, new ManualLoader());
         ClientServices.CLIENT.registerHudElement(ManualHud.ID, ManualHud::extract);
+    }
+
+    /** Both loaders call this when the server sends its data: on join, and on every {@code /reload}. */
+    public static void refreshConditions() {
+        ManualContent.refresh();
     }
 
     /** Read per frame rather than cached: the config is reloadable. */

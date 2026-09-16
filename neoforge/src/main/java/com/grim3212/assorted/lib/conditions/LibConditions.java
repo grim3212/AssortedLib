@@ -19,12 +19,6 @@ import java.util.function.Supplier;
  */
 public final class LibConditions {
 
-    /**
-     * The parts a {@link PartEnabledCondition} can ask about. Populated by
-     * {@code IConditionHelper#registerPartCondition}.
-     */
-    public static final Map<String, Supplier<Boolean>> REGISTERED_PARTS = new HashMap<>();
-
     private static final Map<Identifier, RecipeConditionWrapper> DYNAMIC_CONDITIONS = new LinkedHashMap<>();
 
     private LibConditions() {
@@ -40,13 +34,11 @@ public final class LibConditions {
     }
 
     /**
-     * Registers a part check that {@link PartEnabledCondition} can look up.
+     * Registers a part check that {@link PartEnabledCondition} can look up. The registry is shared
+     * with the rest of the library, which asks the same question outside of recipes.
      */
     public static void registerPartCondition(String part, Supplier<Boolean> check) {
-        if (REGISTERED_PARTS.containsKey(part)) {
-            throw new IllegalArgumentException("Can't have registered part with the same name as another");
-        }
-        REGISTERED_PARTS.put(part, check);
+        LibParts.register(part, check);
     }
 
     /**

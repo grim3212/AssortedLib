@@ -1,6 +1,7 @@
 package com.grim3212.assorted.lib.platform;
 
 import com.grim3212.assorted.lib.LibConstants;
+import com.grim3212.assorted.lib.conditions.LibParts;
 import com.grim3212.assorted.lib.core.conditions.LibCondition;
 import com.grim3212.assorted.lib.core.conditions.LibConditionProvider;
 import com.grim3212.assorted.lib.platform.services.IConditionHelper;
@@ -36,7 +37,6 @@ import java.util.function.Supplier;
  */
 public class FabricConditionHelper implements IConditionHelper {
     public static final Identifier PART_ENABLED = Identifier.fromNamespaceAndPath(LibConstants.MOD_ID, "part_enabled");
-    private static final Map<String, Supplier<Boolean>> REGISTERED_PARTS = new HashMap<>();
 
     @Override
     public void init() {
@@ -134,10 +134,7 @@ public class FabricConditionHelper implements IConditionHelper {
 
     @Override
     public void registerPartCondition(String part, Supplier<Boolean> check) {
-        if (REGISTERED_PARTS.containsKey(part)) {
-            throw new IllegalArgumentException("Can't have registered part with the same name as another");
-        }
-        REGISTERED_PARTS.put(part, check);
+        LibParts.register(part, check);
     }
 
     public static LibConditionProvider wrap(ResourceCondition condition) {
@@ -189,12 +186,11 @@ public class FabricConditionHelper implements IConditionHelper {
 
         @Override
         public boolean test(RegistryOps.RegistryInfoLookup registryInfoLookup) {
-            final Supplier<Boolean> check = REGISTERED_PARTS.get(this.part);
-            if (check == null) {
+            if (!LibParts.isRegistered(this.part)) {
                 throw new IllegalArgumentException("Can't check part that doesn't exist!");
             }
 
-            return check.get();
+            return LibParts.isEnabled(this.part);
         }
     }
 

@@ -167,13 +167,44 @@ public class KilnManualProvider extends LibManualProvider {
 }
 ```
 
-Links are declared on the page they open rather than in a list of their own, so the two cannot
-disagree. Titles and bodies are the derived keys above, never passed. `opensEveryItem` and
+A recipe is named by what it makes, so another mod's recipe is named by another mod's item;
+`recipesById` takes the id itself for a smelting or stonecutting variant that is not named after
+its result. Links are declared on the page they open rather than in a list of their own, so the two
+cannot disagree. Titles and bodies are the derived keys above, never passed. `opensEveryItem` and
 `opensEveryBlock` take a predicate over this mod's ids, for a family named by its shape rather
 than listed, so a new material joins its page on its own.
 
 The provider refuses to generate while any block or item of the mod opens nothing, which is what
 keeps a section complete as content is added.
+
+### Showing a chapter conditionally
+
+A chapter or page can carry conditions, written the way a recipe's load conditions are:
+
+```json
+{
+  "conditions": [
+    { "type": "assortedlib:mod_loaded", "mod": "jei" },
+    { "type": "assortedlib:not", "value": { "type": "assortedlib:part_enabled", "part": "cage" } }
+  ],
+  "pages": [ ... ]
+}
+```
+
+The library provides `part_enabled` (a piece of a mod its config can switch off), `mod_loaded`,
+`item_exists`, `block_exists`, and `all_of` / `any_of` / `not` to combine them. A mod with a
+question of its own registers a type for it with `DisplayConditions.register` rather than making
+one of these fit.
+
+From the provider:
+
+```java
+ChapterBuilder colorizer = this.chapter("colorizer").whenPartEnabled(Parts.COLORIZER);
+lights.recipes("fluro", "fluro_white").whenPartEnabled(Parts.FLURO);
+hanging.recipes("plaque", "plaque").when(modLoaded("jei"), itemExists(SOME_ITEM));
+```
+
+Conditions are applied when the book's data loads, when a world is joined and on every `/reload`.
 
 ### Recipes on the client
 

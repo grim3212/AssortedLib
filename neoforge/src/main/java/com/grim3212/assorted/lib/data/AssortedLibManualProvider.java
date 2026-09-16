@@ -20,6 +20,6 @@ public class AssortedLibManualProvider extends LibManualProvider {
         reading.text("pointing");
         reading.text("recipes");
         reading.text("marks");
-        reading.recipes("crafting", "instruction_manual").opens(LibItems.INSTRUCTION_MANUAL.get());
+        reading.recipes("crafting", LibItems.INSTRUCTION_MANUAL.get()).opens(LibItems.INSTRUCTION_MANUAL.get());
     }
 }

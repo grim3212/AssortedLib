@@ -27,7 +27,12 @@ public class AssortedLibFabricClient implements ClientModInitializer {
         // Fabric puts the synced recipes into the client's own RecipeAccess; this mirrors them into
         // the shared cache so common code reads them the same way it does on NeoForge, which has no
         // such access.
-        ClientRecipeSynchronizedEvent.EVENT.register((client, recipes) -> SyncedRecipes.set(RecipeMap.create(recipes.recipes())));
+        ClientRecipeSynchronizedEvent.EVENT.register((client, recipes) -> {
+            SyncedRecipes.set(RecipeMap.create(recipes.recipes()));
+            // Sent on join and again on every /reload, which is where a condition can start reading
+            // differently.
+            ManualClient.refreshConditions();
+        });
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> SyncedRecipes.clear());
 
         // Must match the id ForgeSpecificationBlockStateModel is registered under: the blockstate

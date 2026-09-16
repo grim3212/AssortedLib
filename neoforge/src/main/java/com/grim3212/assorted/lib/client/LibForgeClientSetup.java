@@ -30,7 +30,12 @@ public class LibForgeClientSetup {
 
         // HIGHEST so the cache is filled before anything that starts from this same event reads it
         // - JEI waits on the recipe sync to load its plugins.
-        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, (final RecipesReceivedEvent event) -> SyncedRecipes.set(event.getRecipeMap()));
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, (final RecipesReceivedEvent event) -> {
+            SyncedRecipes.set(event.getRecipeMap());
+            // Sent on join and again on every /reload, which is where a condition can start reading
+            // differently.
+            ManualClient.refreshConditions();
+        });
         NeoForge.EVENT_BUS.addListener((final ClientPlayerNetworkEvent.LoggingOut event) -> SyncedRecipes.clear());
     }
 

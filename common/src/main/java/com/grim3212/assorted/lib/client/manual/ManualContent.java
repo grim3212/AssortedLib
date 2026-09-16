@@ -30,6 +30,9 @@ public final class ManualContent {
     private final Map<Identifier, ManualRecipeLayout> layouts;
     private final ManualLinks.Loaded links;
 
+    /** Conditions already applied; see {@link #resolveConditions()}. */
+    private volatile Map<String, List<ManualChapter>> resolved = Map.of();
+
     ManualContent(ManualBookStyle style, Map<String, ManualSection> sections,
                   Map<String, List<ManualChapter>> chapters, Map<Identifier, ManualRecipeLayout> layouts,
                   ManualLinks.Loaded links) {
@@ -45,7 +48,30 @@ public final class ManualContent {
     }
 
     static void set(ManualContent content) {
+        content.resolveConditions();
         current = content;
+    }
+
+    /**
+     * Applies every chapter and page condition, once. Called on load, on join and on {@code /reload},
+     * which is where a condition can start reading differently; the book holds the answer in between
+     * rather than testing while it draws.
+     */
+    public void resolveConditions() {
+        Map<String, List<ManualChapter>> out = new LinkedHashMap<>();
+        this.chapters.forEach((section, all) -> {
+            List<ManualChapter> visible = ManualChapter.resolve(all);
+            if (!visible.isEmpty()) {
+                out.put(section, visible);
+            }
+        });
+
+        this.resolved = Map.copyOf(out);
+    }
+
+    /** Re-applies the conditions of whatever is loaded now. */
+    public static void refresh() {
+        current.resolveConditions();
     }
 
     public ManualBookStyle style() {
@@ -77,8 +103,9 @@ public final class ManualContent {
                 : ManualRegistry.section(modId);
     }
 
+    /** A section with none of these drops out of the index, taking a switched-off mod with it. */
     public List<ManualChapter> chaptersOf(String section) {
-        return this.chapters.getOrDefault(section, List.of());
+        return this.resolved.getOrDefault(section, List.of());
     }
 
     /** A loop rather than a stream: the HUD asks this every frame while the manual is in hand. */

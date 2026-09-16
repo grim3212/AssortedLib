@@ -26,11 +26,11 @@ public class PartEnabledCondition implements ICondition {
 
     @Override
     public boolean test(IContext context) {
-        if (!LibConditions.REGISTERED_PARTS.containsKey(this.part)) {
+        if (!LibParts.isRegistered(this.part)) {
             throw new IllegalArgumentException("Can't check part that doesn't exist!");
         }
 
-        return LibConditions.REGISTERED_PARTS.get(this.part).get();
+        return LibParts.isEnabled(this.part);
     }
 
     @Override

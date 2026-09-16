@@ -1,6 +1,9 @@
 package com.grim3212.assorted.lib.data;
 
 import com.grim3212.assorted.lib.client.manual.ManualChapter;
+import com.grim3212.assorted.lib.conditions.DisplayCondition;
+import com.grim3212.assorted.lib.conditions.DisplayConditions;
+import com.grim3212.assorted.lib.conditions.LibParts;
 import com.grim3212.assorted.lib.client.manual.ManualPage;
 import com.grim3212.assorted.lib.client.manual.ManualPageEntry;
 import com.grim3212.assorted.lib.client.manual.ManualPageTypes;
@@ -22,6 +25,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -64,8 +68,9 @@ public abstract class LibManualProvider implements DataProvider {
         this.root = output.getOutputFolder(PackOutput.Target.RESOURCE_PACK).resolve(modId).resolve("manual");
         this.chapterPath = output.createPathProvider(PackOutput.Target.RESOURCE_PACK, "manual/chapters");
 
-        // Datagen never runs client init, which is where the book's page types are normally named.
+        // Datagen never runs client init, which is where these are normally named.
         ManualPageTypes.bootstrap();
+        DisplayConditions.bootstrap();
     }
 
     /** Where the chapters are declared. Called once, when the provider runs. */
@@ -191,10 +196,25 @@ public abstract class LibManualProvider implements DataProvider {
         private final String id;
         private final int sortOrder;
         private final List<PageBuilder> pages = new ArrayList<>();
+        private final List<DisplayCondition> conditions = new ArrayList<>();
 
         private ChapterBuilder(String id, int sortOrder) {
             this.id = id;
             this.sortOrder = sortOrder;
+        }
+
+        /** Hides the whole chapter unless every one of these passes. */
+        public ChapterBuilder when(DisplayCondition... conditions) {
+            this.conditions.addAll(List.of(conditions));
+            return this;
+        }
+
+        /** {@link #when} with {@link LibManualProvider#partEnabled}, which is the common case. */
+        public ChapterBuilder whenPartEnabled(String... parts) {
+            for (String part : parts) {
+                this.conditions.add(partEnabled(part));
+            }
+            return this;
         }
 
         /** Text and nothing else. */
@@ -223,11 +243,24 @@ public abstract class LibManualProvider implements DataProvider {
                     new ItemPage(this.title(page), List.copyOf(holders), interval, Optional.of(this.body(page))));
         }
 
-        /** One or more recipes drawn on their station, cycling. Ids are this mod's own. */
-        public PageBuilder recipes(String page, String... recipes) {
+        /**
+         * One or more recipes drawn on their station, cycling, named by what they make. A recipe
+         * whose id is not its result's - a smelting or stonecutting variant - needs
+         * {@link #recipesById} instead.
+         */
+        public PageBuilder recipes(String page, ItemLike... results) {
+            Identifier[] ids = new Identifier[results.length];
+            for (int i = 0; i < results.length; i++) {
+                ids[i] = recipeIdOf(results[i]);
+            }
+            return this.recipesById(page, ids);
+        }
+
+        /** The same, for a recipe named by something other than its result. */
+        public PageBuilder recipesById(String page, Identifier... recipes) {
             List<ResourceKey<Recipe<?>>> keys = new ArrayList<>();
-            for (String recipe : recipes) {
-                keys.add(ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath(modId, recipe)));
+            for (Identifier recipe : recipes) {
+                keys.add(ResourceKey.create(Registries.RECIPE, recipe));
             }
             return this.add(page, interval ->
                     new RecipePage(this.title(page), List.copyOf(keys), interval, Optional.of(this.body(page))));
@@ -250,9 +283,10 @@ public abstract class LibManualProvider implements DataProvider {
         private ManualChapter.Definition build() {
             List<ManualPageEntry> entries = new ArrayList<>();
             for (PageBuilder page : this.pages) {
-                entries.add(new ManualPageEntry(Optional.of(page.id), page.build()));
+                entries.add(new ManualPageEntry(Optional.of(page.id), List.copyOf(page.conditions), page.build()));
             }
-            return new ManualChapter.Definition(Optional.empty(), Optional.empty(), this.sortOrder, entries);
+            return new ManualChapter.Definition(Optional.empty(), Optional.empty(), this.sortOrder,
+                    List.copyOf(this.conditions), entries);
         }
     }
 
@@ -267,11 +301,29 @@ public abstract class LibManualProvider implements DataProvider {
         private final List<Identifier> blocks = new ArrayList<>();
         private final List<Identifier> items = new ArrayList<>();
         private final List<Identifier> entities = new ArrayList<>();
+        private final List<DisplayCondition> conditions = new ArrayList<>();
         private int interval = DEFAULT_INTERVAL;
 
         private PageBuilder(String id, IntFunction<ManualPage> build) {
             this.id = id;
             this.build = build;
+        }
+
+        /**
+         * Hides this page unless every one of these passes. The pages around it close up, so nothing
+         * addresses a page that is not there.
+         */
+        public PageBuilder when(DisplayCondition... conditions) {
+            this.conditions.addAll(List.of(conditions));
+            return this;
+        }
+
+        /** {@link #when} with {@link LibManualProvider#partEnabled}, which is the common case. */
+        public PageBuilder whenPartEnabled(String... parts) {
+            for (String part : parts) {
+                this.conditions.add(partEnabled(part));
+            }
+            return this;
         }
 
         /** How long each item or recipe is shown for, in ticks. Ignored by a page that draws one thing. */
@@ -339,6 +391,64 @@ public abstract class LibManualProvider implements DataProvider {
         private ManualPage build() {
             return this.build.apply(this.interval);
         }
+    }
+
+    /** A recipe of this mod's, for the ids {@link ChapterBuilder#recipesById} takes. */
+    protected Identifier recipeId(String path) {
+        return Identifier.fromNamespaceAndPath(this.modId, path);
+    }
+
+    /** The recipe that makes {@code result}, for a page that mixes those with named variants. */
+    protected Identifier recipeId(ItemLike result) {
+        return recipeIdOf(result);
+    }
+
+    /**
+     * The id of the recipe that makes {@code result}, which is the result's own. A block with no
+     * item cannot name one, and would otherwise quietly ask for {@code minecraft:air}.
+     */
+    private static Identifier recipeIdOf(ItemLike result) {
+        Item item = result.asItem();
+        if (item == Items.AIR) {
+            throw new IllegalArgumentException(result + " has no item, so no recipe can be named after it");
+        }
+
+        return BuiltInRegistries.ITEM.getKey(item);
+    }
+
+    /**
+     * A part of this mod that its config can switch off, named the way a recipe condition names it.
+     */
+    public static DisplayCondition partEnabled(String part) {
+        if (!LibParts.isRegistered(part)) {
+            throw new IllegalArgumentException("No such part: " + part + ". Registered: " + LibParts.registered());
+        }
+
+        return new DisplayConditions.PartEnabled(part);
+    }
+
+    public static DisplayCondition modLoaded(String modId) {
+        return new DisplayConditions.ModLoaded(modId);
+    }
+
+    public static DisplayCondition itemExists(Identifier item) {
+        return new DisplayConditions.ItemExists(item);
+    }
+
+    public static DisplayCondition blockExists(Identifier block) {
+        return new DisplayConditions.BlockExists(block);
+    }
+
+    public static DisplayCondition allOf(DisplayCondition... values) {
+        return new DisplayConditions.AllOf(List.of(values));
+    }
+
+    public static DisplayCondition anyOf(DisplayCondition... values) {
+        return new DisplayConditions.AnyOf(List.of(values));
+    }
+
+    public static DisplayCondition not(DisplayCondition value) {
+        return new DisplayConditions.Not(value);
     }
 
     /** The translation key a page's body reads, which a mod's language provider names. */
