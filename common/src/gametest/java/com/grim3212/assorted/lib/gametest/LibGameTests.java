@@ -18,6 +18,7 @@ public final class LibGameTests {
     /** Every test in this mod, named once, so both loaders register the same set. */
     public static void forEach(BiConsumer<String, Consumer<GameTestHelper>> out) {
         PlatformServiceTests.register(out);
+        CommonBiomeTagTests.register(out);
         InventoryTests.register(out);
         FluidTests.register(out);
         IngredientTests.register(out);
