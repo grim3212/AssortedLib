@@ -34,6 +34,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.io.IOException;
@@ -42,6 +43,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import static com.grim3212.assorted.lib.test.TestSupport.survivalPlayer;
 
@@ -74,6 +76,7 @@ final class ManualTests {
         out.accept("manual_takes_the_click_off_a_frame", ManualTests::manualTakesTheClickOffAFrame);
         out.accept("manual_parts_hide_chapters_and_pages", ManualTests::partsHideChaptersAndPages);
         out.accept("manual_conditions_read_and_compose", ManualTests::conditionsReadAndCompose);
+        out.accept("manual_sections_sort_by_index", ManualTests::sectionsSortByIndex);
         out.accept("manual_section_is_registered", ManualTests::sectionIsRegistered);
         out.accept("manual_codecs_read_the_shipped_data", ManualTests::codecsReadTheShippedData);
     }
@@ -282,6 +285,35 @@ final class ManualTests {
                 return false;
             });
         }
+    }
+
+    /**
+     * The index is ordered by the number a section carries, not by when it loaded, so a resource
+     * pack can move a mod by shipping its own {@code section.json}. Ties fall back to the mod id.
+     */
+    private static void sectionsSortByIndex(GameTestHelper helper) {
+        ManualSection lib = new ManualSection("assortedlib", ManualSection.LIB_SORT_ORDER, () -> ItemStack.EMPTY);
+        ManualSection core = new ManualSection("assortedcore", 20, () -> ItemStack.EMPTY);
+        ManualSection world = new ManualSection("assortedworld", 140, () -> ItemStack.EMPTY);
+        ManualSection tie = new ManualSection("assortedaaa", 20, () -> ItemStack.EMPTY);
+
+        List<String> order = Stream.of(world, core, tie, lib)
+                .sorted(Comparator.comparingInt(ManualSection::sortOrder).thenComparing(ManualSection::modId))
+                .map(ManualSection::modId)
+                .toList();
+        assertEquals(helper, List.of("assortedlib", "assortedaaa", "assortedcore", "assortedworld"), order,
+                "section order");
+
+        // The library sorts above a mod that named no index at all.
+        if (ManualSection.LIB_SORT_ORDER >= ManualSection.DEFAULT_SORT_ORDER) {
+            helper.fail("The library's section has to sort above a section that took the default");
+        }
+        // The shipped indices leave room to slot a mod between two neighbours.
+        if (core.sortOrder() + 1 >= world.sortOrder()) {
+            helper.fail("Section indices are spaced too tightly to insert between them");
+        }
+
+        helper.succeed();
     }
 
     /**

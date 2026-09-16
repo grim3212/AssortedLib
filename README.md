@@ -49,7 +49,8 @@ assets/<ns>/manual/recipe_layouts/<path>.json       how <ns>:<path> recipes are 
 ```
 
 A mod gets a section in the index by shipping `section.json`; one that ships nothing is simply
-absent. Its chapters are the files beside it. Every `title` and `text` is a translation key, never
+absent. `sort_order` is what orders the index, so a resource pack can move a mod by shipping its
+own. Its chapters are the files beside it. Every `title` and `text` is a translation key, never
 the words themselves.
 
 ```json
