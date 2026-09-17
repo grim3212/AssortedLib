@@ -2,6 +2,7 @@ package com.grim3212.assorted.lib.test;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.grim3212.assorted.lib.platform.Services;
 import com.mojang.authlib.GameProfile;
 import io.netty.channel.embedded.EmbeddedChannel;
@@ -38,11 +39,18 @@ import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.StreamSupport;
 
 /**
  * Gametest helpers every Assorted mod's {@code <Mod>TestSupport} imports statically. Ships in the
@@ -219,6 +227,56 @@ public final class TestSupport {
             }
         }
         return out;
+    }
+
+    /**
+     * Fails when a mod ships a JEI plugin that Fabric will never load. JEI finds a plugin by
+     * annotation on NeoForge but by the {@code jei_mod_plugin} entrypoint on Fabric, so a plugin
+     * that only carries the annotation works on one loader and is silently absent on the other -
+     * which is how Grim Cuisine's three machines came to have JEI pages on NeoForge and none on
+     * Fabric. Only meaningful on a Fabric run; on NeoForge there is no manifest to read and this
+     * passes.
+     * <p>
+     * The manifest is picked by mod id rather than by taking the first on the classpath: a gametest
+     * source set ships a {@code fabric.mod.json} of its own, and that one shadows the mod's.
+     *
+     * @param pluginClass the binary name of the {@code @JeiPlugin} class, e.g.
+     *                    {@code com.grim3212.assorted.cuisine.compat.jei.JEIAssortedCuisine}
+     */
+    public static void assertJeiPluginIsRegistered(GameTestHelper helper, String modId, String pluginClass) {
+        JsonObject manifest = null;
+
+        try {
+            Enumeration<URL> found = TestSupport.class.getClassLoader().getResources("fabric.mod.json");
+            while (found.hasMoreElements()) {
+                try (InputStream in = found.nextElement().openStream()) {
+                    JsonObject candidate = JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject();
+                    if (candidate.has("id") && modId.equals(candidate.get("id").getAsString())) {
+                        manifest = candidate;
+                        break;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw helper.assertionException("could not read fabric.mod.json: " + e);
+        }
+
+        // Not a Fabric run, so there is nothing here to get wrong.
+        if (manifest == null) {
+            return;
+        }
+
+        JsonObject entrypoints = manifest.getAsJsonObject("entrypoints");
+        boolean declared = entrypoints != null && entrypoints.has("jei_mod_plugin")
+                && StreamSupport.stream(entrypoints.getAsJsonArray("jei_mod_plugin").spliterator(), false)
+                .anyMatch(entry -> pluginClass.equals(entry.isJsonObject()
+                        ? entry.getAsJsonObject().get("value").getAsString()
+                        : entry.getAsString()));
+
+        if (!declared) {
+            helper.fail(pluginClass + " is not a jei_mod_plugin entrypoint in " + modId + "'s fabric.mod.json, so JEI"
+                    + " never loads it on Fabric and the mod's pages are missing there while NeoForge shows them");
+        }
     }
 
     private static void addVariants(JsonElement element, List<JsonObject> out) {

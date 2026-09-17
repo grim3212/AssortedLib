@@ -2,6 +2,10 @@
 
 ## 4.1.0
 
+- Features added to biomes now go in the same order on both loaders, so one seed gives one
+  world. A feature's place in its generation step decides the seed it is placed from, and the
+  NeoForge side added them in registration order while Fabric sorts by the placed feature's id -
+  identical terrain, every scattered feature somewhere else. NeoForge now sorts the same way.
 - Added the instruction manual: an in-game book that any mod depending on Assorted Lib can add a
   section to. Chapters are read from `assets/<modid>/manual/*.json`, so a resource pack can extend
   or rewrite them. Right clicking a block, item or creature that has a page opens the book there,
