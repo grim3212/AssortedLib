@@ -3,7 +3,6 @@ package com.grim3212.assorted.lib.platform.services;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 
-import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 /**
@@ -19,12 +18,9 @@ public interface IRecipeSyncHelper {
      * Call from common init, once per type. Late calls are honoured as long as they happen before a
      * world is joined.
      *
-     * @param enabled     asked as late as each loader allows, so a caller can gate on a config
-     *                    value: NeoForge asks while syncing to a player, Fabric at registration,
-     *                    since that is when it has to declare what the client understands
      * @param type        a supplier, not the type itself: this is called from common init, where a
      *                    type registered through a {@code DeferredRegister} is not yet bound
      * @param serializers every serializer that produces a recipe of that type
      */
-    void require(BooleanSupplier enabled, Supplier<? extends RecipeType<?>> type, RecipeSerializer<?>... serializers);
+    void require(Supplier<? extends RecipeType<?>> type, RecipeSerializer<?>... serializers);
 }

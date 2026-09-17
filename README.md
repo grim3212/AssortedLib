@@ -210,8 +210,8 @@ Conditions are applied when the book's data loads, when a world is joined and on
 ### Recipes on the client
 
 Recipe pages read whole recipes on the client. Vanilla crafting, smelting and stonecutting
-are asked for by the library itself (see `manual.syncVanillaRecipes` in `assortedlib-common`); a
-mod's own recipe type has to ask for itself, from common init:
+are always synced by the library itself; a mod's own recipe type or serializer has to ask for
+itself, from common init:
 
 ```java
 SyncedRecipes.require(MyRecipes.KILN_TYPE, KilnRecipeSerializer.INSTANCE);

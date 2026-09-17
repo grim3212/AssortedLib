@@ -14,7 +14,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 /**
@@ -32,15 +31,7 @@ public final class SyncedRecipes {
 
     /** See {@link IRecipeSyncHelper#require} for why both a type and its serializers are needed. */
     public static void require(Supplier<? extends RecipeType<?>> type, RecipeSerializer<?>... serializers) {
-        require(() -> true, type, serializers);
-    }
-
-    /**
-     * Gated. {@code enabled} is read as late as each loader allows, so it may read a config value:
-     * NeoForge has none loaded during mod construction.
-     */
-    public static void require(BooleanSupplier enabled, Supplier<? extends RecipeType<?>> type, RecipeSerializer<?>... serializers) {
-        Services.RECIPE_SYNC.require(enabled, type, serializers);
+        Services.RECIPE_SYNC.require(type, serializers);
     }
 
     /** Called by each loader's client on login and after {@code /reload}. */

@@ -1,6 +1,7 @@
 package com.grim3212.assorted.lib.core.item;
 
 import com.grim3212.assorted.lib.LibConstants;
+import com.grim3212.assorted.lib.manual.ManualSectionsTooltip;
 import com.grim3212.assorted.lib.platform.Services;
 import com.grim3212.assorted.lib.registry.IRegistryObject;
 import com.grim3212.assorted.lib.registry.RegistryProvider;
@@ -16,9 +17,12 @@ public class LibDataComponents {
 
     public static final IRegistryObject<DataComponentType<ItemDescription>> DESCRIPTION = DATA_COMPONENTS.register("description",
             () -> new DataComponentType.Builder<ItemDescription>().persistent(ItemDescription.CODEC).networkSynchronized(ItemDescription.STREAM_CODEC).build());
+    public static final IRegistryObject<DataComponentType<ManualSectionsTooltip>> MANUAL_SECTIONS = DATA_COMPONENTS.register("manual_sections",
+            () -> new DataComponentType.Builder<ManualSectionsTooltip>().persistent(ManualSectionsTooltip.CODEC).networkSynchronized(ManualSectionsTooltip.STREAM_CODEC).build());
 
     // Called from each loader's entry point.
     public static void init() {
         Services.PLATFORM.showComponentTooltip(DESCRIPTION);
+        Services.PLATFORM.showComponentTooltip(MANUAL_SECTIONS);
     }
 }

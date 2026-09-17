@@ -9,6 +9,7 @@ import com.grim3212.assorted.lib.client.manual.page.TextPage;
 import com.grim3212.assorted.lib.conditions.DisplayCondition;
 import com.grim3212.assorted.lib.conditions.DisplayConditions;
 import com.grim3212.assorted.lib.conditions.LibParts;
+import com.grim3212.assorted.lib.core.item.LibDataComponents;
 import com.grim3212.assorted.lib.client.manual.ManualRecipeLayout;
 import com.grim3212.assorted.lib.manual.LibItems;
 import com.grim3212.assorted.lib.manual.ManualLinks;
@@ -46,6 +47,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static com.grim3212.assorted.lib.test.TestSupport.survivalPlayer;
+import static com.grim3212.assorted.lib.test.TestSupport.tooltipKeys;
 
 /**
  * The parts of the manual a dedicated server can see: the page addresses, the section registry and
@@ -79,6 +81,7 @@ final class ManualTests {
         out.accept("manual_sections_sort_by_index", ManualTests::sectionsSortByIndex);
         out.accept("manual_section_is_registered", ManualTests::sectionIsRegistered);
         out.accept("manual_codecs_read_the_shipped_data", ManualTests::codecsReadTheShippedData);
+        out.accept("manual_tooltip_counts_sections", ManualTests::tooltipCountsSections);
     }
 
     /** A reference survives being written out and read back, with and without a page. */
@@ -393,5 +396,12 @@ final class ManualTests {
         if (!expected.equals(actual)) {
             helper.fail("Wrong " + what + ": expected " + expected + " but got " + actual);
         }
+    }
+
+    /** The book's section line comes from its component; a dedicated server has no book to count. */
+    private static void tooltipCountsSections(GameTestHelper helper) {
+        ItemStack manual = new ItemStack(LibItems.INSTRUCTION_MANUAL.get());
+        assertEquals(helper, List.of("gui.assortedlib.manual.sections"), tooltipKeys(helper, manual, LibDataComponents.MANUAL_SECTIONS.get()), "manual tooltip");
+        helper.succeed();
     }
 }

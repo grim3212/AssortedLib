@@ -1,6 +1,5 @@
 package com.grim3212.assorted.lib;
 
-import com.grim3212.assorted.lib.config.LibCommonConfig;
 import com.grim3212.assorted.lib.crafting.SyncedRecipes;
 import com.grim3212.assorted.lib.manual.ManualInteractions;
 import com.grim3212.assorted.lib.manual.LibItems;
@@ -13,12 +12,9 @@ import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.item.crafting.SmokingRecipe;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 
-import java.util.function.BooleanSupplier;
 
 /** The library's own content, as opposed to its services. Called from both loaders' entry points. */
 public class LibCommonSetup {
-
-    public static final LibCommonConfig COMMON_CONFIG = new LibCommonConfig();
 
     public static void init() {
         LibItems.init();
@@ -27,18 +23,13 @@ public class LibCommonSetup {
         requireVanillaRecipes();
     }
 
-    /**
-     * Recipe pages need whole recipes.
-     * The config is passed as a gate, not read here: NeoForge loads none during mod construction.
-     */
+    /** Recipe pages and JEI need whole recipes on the client, so these are always synced. */
     private static void requireVanillaRecipes() {
-        BooleanSupplier enabled = () -> COMMON_CONFIG.syncVanillaRecipesForManual.get();
-
-        SyncedRecipes.require(enabled, () -> RecipeType.CRAFTING, ShapedRecipe.SERIALIZER, ShapelessRecipe.SERIALIZER);
-        SyncedRecipes.require(enabled, () -> RecipeType.SMELTING, SmeltingRecipe.SERIALIZER);
-        SyncedRecipes.require(enabled, () -> RecipeType.BLASTING, BlastingRecipe.SERIALIZER);
-        SyncedRecipes.require(enabled, () -> RecipeType.SMOKING, SmokingRecipe.SERIALIZER);
-        SyncedRecipes.require(enabled, () -> RecipeType.CAMPFIRE_COOKING, CampfireCookingRecipe.SERIALIZER);
-        SyncedRecipes.require(enabled, () -> RecipeType.STONECUTTING, StonecutterRecipe.SERIALIZER);
+        SyncedRecipes.require(() -> RecipeType.CRAFTING, ShapedRecipe.SERIALIZER, ShapelessRecipe.SERIALIZER);
+        SyncedRecipes.require(() -> RecipeType.SMELTING, SmeltingRecipe.SERIALIZER);
+        SyncedRecipes.require(() -> RecipeType.BLASTING, BlastingRecipe.SERIALIZER);
+        SyncedRecipes.require(() -> RecipeType.SMOKING, SmokingRecipe.SERIALIZER);
+        SyncedRecipes.require(() -> RecipeType.CAMPFIRE_COOKING, CampfireCookingRecipe.SERIALIZER);
+        SyncedRecipes.require(() -> RecipeType.STONECUTTING, StonecutterRecipe.SERIALIZER);
     }
 }
