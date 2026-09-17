@@ -26,6 +26,18 @@ import java.util.Optional;
 
 public class LibFluidIngredient {
 
+    /** Recipe files give fluid amounts in millibuckets on every loader. */
+    public static final long MILLIBUCKETS_PER_BUCKET = 1000;
+
+    /** A recipe file's amount in this loader's own unit - droplets on Fabric. */
+    public static long fromMillibuckets(long millibuckets) {
+        return millibuckets * Services.FLUIDS.getBucketAmount() / MILLIBUCKETS_PER_BUCKET;
+    }
+
+    public static long toMillibuckets(long amount) {
+        return amount * MILLIBUCKETS_PER_BUCKET / Services.FLUIDS.getBucketAmount();
+    }
+
     protected final TagKey<Item> itemTag;
     protected final TagKey<Fluid> fluidTag;
     protected final long amount;
@@ -144,7 +156,7 @@ public class LibFluidIngredient {
 
             long amount = Services.FLUIDS.getBucketAmount();
             if (json.has("amount")) {
-                amount = GsonHelper.getAsInt(json, "amount");
+                amount = fromMillibuckets(GsonHelper.getAsLong(json, "amount"));
             }
 
             if (fluidTag == null) {
@@ -159,7 +171,7 @@ public class LibFluidIngredient {
                 output.addProperty("item", ingredient.itemTag.location().toString());
             output.addProperty("fluid", ingredient.fluidTag.location().toString());
             if (ingredient.amount > 0)
-                output.addProperty("amount", ingredient.amount);
+                output.addProperty("amount", toMillibuckets(ingredient.amount));
         }
 
         public T read(FriendlyByteBuf buf) {

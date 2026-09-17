@@ -19,9 +19,6 @@
     ],
     "client": [
       "com.grim3212.assorted.lib.AssortedLibFabricClient"
-    ],
-    "fabric-datagen": [
-      "com.grim3212.assorted.lib.AssortedLibFabricDatagen"
     ]
   },
   "mixins": [

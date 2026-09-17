@@ -1,0 +1,19 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:always"
+    }
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:true"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:dead_bush"
+  ],
+  "result": {
+    "id": "minecraft:stick"
+  }
+}

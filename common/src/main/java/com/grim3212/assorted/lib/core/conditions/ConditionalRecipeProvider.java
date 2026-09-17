@@ -1,8 +1,11 @@
 package com.grim3212.assorted.lib.core.conditions;
 
+import com.grim3212.assorted.lib.data.CrossLoaderData;
 import com.grim3212.assorted.lib.platform.Services;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.data.CachedOutput;
+import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
@@ -128,24 +131,34 @@ public abstract class ConditionalRecipeProvider extends RecipeProvider {
     }
 
     /**
-     * A {@link RecipeProvider.Runner} that knows the mod id of the provider it creates. Recipe
-     * providers are no longer data providers themselves in 26.2 - the runner owns the file
-     * writing and hands a {@link RecipeOutput} to a freshly created provider instead.
+     * Writes a mod's recipes for both loaders. Recipe providers are no longer data providers
+     * themselves in 26.2 - a {@link RecipeProvider.Runner} owns the file writing - and its
+     * {@code run} is final, so this wraps one and hands it a {@link CrossLoaderData} output.
      */
-    public abstract static class Runner extends RecipeProvider.Runner {
+    public abstract static class Runner implements DataProvider {
         protected final String modId;
+        private final RecipeProvider.Runner delegate;
 
         public Runner(PackOutput output, CompletableFuture<HolderLookup.Provider> registries, String modId) {
-            super(output, registries);
             this.modId = modId;
+            this.delegate = new RecipeProvider.Runner(output, registries) {
+                @Override
+                protected RecipeProvider createRecipeProvider(HolderLookup.Provider lookup, RecipeOutput recipeOutput) {
+                    return Runner.this.createRecipeProvider(lookup, recipeOutput);
+                }
+
+                @Override
+                public String getName() {
+                    return Runner.this.getName();
+                }
+            };
         }
 
-        /**
-         * The provider this runner builds, for a loader-side runner that has to own the output
-         * itself - Fabric only writes load conditions through its own {@code FabricRecipeProvider}.
-         */
-        public RecipeProvider newProvider(HolderLookup.Provider registries, RecipeOutput output) {
-            return this.createRecipeProvider(registries, output);
+        @Override
+        public CompletableFuture<?> run(CachedOutput output) {
+            return this.delegate.run(CrossLoaderData.wrap(output));
         }
+
+        protected abstract RecipeProvider createRecipeProvider(HolderLookup.Provider registries, RecipeOutput output);
     }
 }

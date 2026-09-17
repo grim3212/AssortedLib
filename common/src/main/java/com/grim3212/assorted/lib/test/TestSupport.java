@@ -162,7 +162,7 @@ public final class TestSupport {
         return line.getContents() instanceof TranslatableContents translatable ? translatable.getKey() : line.getString();
     }
 
-    /** NeoForge adds mod component tooltip lines on the server too; Fabric only on the client. */
+    /** Whether this run is NeoForge, for the few statements that legitimately differ by loader. */
     public static boolean onNeoForge() {
         return "Forge".equals(Services.PLATFORM.getPlatformName());
     }

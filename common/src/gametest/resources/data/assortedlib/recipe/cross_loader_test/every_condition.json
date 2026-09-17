@@ -1,0 +1,123 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:and",
+      "values": [
+        {
+          "type": "neoforge:or",
+          "values": [
+            {
+              "type": "neoforge:never"
+            },
+            {
+              "type": "neoforge:registered",
+              "value": "minecraft:stick"
+            }
+          ]
+        },
+        {
+          "type": "neoforge:registered",
+          "registry": "minecraft:block",
+          "value": "minecraft:stone"
+        },
+        {
+          "type": "neoforge:not",
+          "value": {
+            "type": "neoforge:tag_empty",
+            "tag": "minecraft:planks"
+          }
+        },
+        {
+          "type": "neoforge:mod_loaded",
+          "modid": "minecraft"
+        }
+      ]
+    },
+    {
+      "type": "assortedlib:item_tag_populated",
+      "tag": "minecraft:logs"
+    },
+    {
+      "type": "assortedlib:block_tag_populated",
+      "tag": "minecraft:logs"
+    },
+    {
+      "type": "assortedlib:block_exists",
+      "block": "minecraft:stone"
+    }
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:and",
+      "values": [
+        {
+          "condition": "fabric:or",
+          "values": [
+            {
+              "condition": "fabric:false"
+            },
+            {
+              "condition": "fabric:registry_contains",
+              "values": [
+                "minecraft:stick"
+              ]
+            }
+          ]
+        },
+        {
+          "condition": "fabric:registry_contains",
+          "registry": "minecraft:block",
+          "values": [
+            "minecraft:stone"
+          ]
+        },
+        {
+          "condition": "fabric:not",
+          "value": {
+            "condition": "fabric:not",
+            "value": {
+              "condition": "fabric:tags_populated",
+              "values": [
+                "minecraft:planks"
+              ]
+            }
+          }
+        },
+        {
+          "condition": "fabric:all_mods_loaded",
+          "values": [
+            "minecraft"
+          ]
+        }
+      ]
+    },
+    {
+      "condition": "fabric:tags_populated",
+      "registry": "minecraft:item",
+      "values": [
+        "minecraft:logs"
+      ]
+    },
+    {
+      "condition": "fabric:tags_populated",
+      "registry": "minecraft:block",
+      "values": [
+        "minecraft:logs"
+      ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "registry": "minecraft:block",
+      "values": [
+        "minecraft:stone"
+      ]
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:dead_bush"
+  ],
+  "result": {
+    "id": "minecraft:stick"
+  }
+}

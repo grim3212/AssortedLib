@@ -57,7 +57,7 @@ final class PlatformServiceTests {
     private static void servicesAllResolve(GameTestHelper helper) {
         String platform = Services.PLATFORM.getPlatformName();
         helper.assertTrue(platform.equals("Forge") || platform.equals("Fabric"),
-                "unexpected platform name '" + platform + "'; LibCommonTagProvider branches on this exact string");
+                "unexpected platform name '" + platform + "'; TestSupport#onNeoForge compares against this exact string");
 
         assertLoaded(helper, platform, "IPlatformHelper", Services.PLATFORM);
         assertLoaded(helper, platform, "IConfigHelper", Services.CONFIG);

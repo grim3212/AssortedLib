@@ -71,7 +71,10 @@ public class FabricFluidIngredient extends LibFluidIngredient implements CustomI
         private static final MapCodec<FabricFluidIngredient> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 TagKey.codec(Registries.ITEM).optionalFieldOf("item").forGetter(ingredient -> Optional.ofNullable(ingredient.getItemTag())),
                 TagKey.codec(Registries.FLUID).fieldOf("fluid").forGetter(LibFluidIngredient::getFluidTag),
-                Codec.LONG.optionalFieldOf("amount").forGetter(ingredient -> Optional.of(ingredient.getAmount()))
+                // Millibuckets in the file, as on NeoForge, so one recipe file reads the same on both.
+                Codec.LONG.optionalFieldOf("amount", LibFluidIngredient.MILLIBUCKETS_PER_BUCKET)
+                        .xmap(LibFluidIngredient::fromMillibuckets, LibFluidIngredient::toMillibuckets)
+                        .forGetter(LibFluidIngredient::getAmount)
         ).apply(instance, Serializer::create));
 
         private static final StreamCodec<RegistryFriendlyByteBuf, FabricFluidIngredient> STREAM_CODEC = StreamCodec.composite(
@@ -81,8 +84,8 @@ public class FabricFluidIngredient extends LibFluidIngredient implements CustomI
                 (itemTag, fluidTag, amount) -> new FabricFluidIngredient(itemTag.orElse(null), fluidTag, amount)
         );
 
-        private static FabricFluidIngredient create(final Optional<TagKey<Item>> itemTag, final TagKey<Fluid> fluidTag, final Optional<Long> amount) {
-            return new FabricFluidIngredient(itemTag.orElse(null), fluidTag, amount.orElseGet(() -> Services.FLUIDS.getBucketAmount()));
+        private static FabricFluidIngredient create(final Optional<TagKey<Item>> itemTag, final TagKey<Fluid> fluidTag, final long amount) {
+            return new FabricFluidIngredient(itemTag.orElse(null), fluidTag, amount);
         }
 
         @Override

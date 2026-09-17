@@ -1,0 +1,17 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:always"
+    }
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:true"
+    }
+  ],
+  "criteria": {
+    "never": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

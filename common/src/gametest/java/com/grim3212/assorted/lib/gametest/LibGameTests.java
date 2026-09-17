@@ -22,6 +22,7 @@ public final class LibGameTests {
         InventoryTests.register(out);
         FluidTests.register(out);
         IngredientTests.register(out);
+        CrossLoaderDataTests.register(out);
         EventTests.register(out);
         MenuTests.register(out);
         ManualTests.register(out);

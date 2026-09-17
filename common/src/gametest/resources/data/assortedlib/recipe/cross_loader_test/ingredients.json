@@ -1,0 +1,103 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:always"
+    }
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:true"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "D": {
+      "neoforge:ingredient_type": "neoforge:difference",
+      "fabric:type": "fabric:difference",
+      "base": [
+        "minecraft:stick",
+        "minecraft:stone",
+        "minecraft:dirt"
+      ],
+      "subtracted": "minecraft:stone"
+    },
+    "A": {
+      "neoforge:ingredient_type": "neoforge:compound",
+      "fabric:type": "fabric:any",
+      "children": [
+        "minecraft:stick",
+        "minecraft:stone"
+      ],
+      "ingredients": [
+        "minecraft:stick",
+        "minecraft:stone"
+      ]
+    },
+    "I": {
+      "neoforge:ingredient_type": "neoforge:intersection",
+      "fabric:type": "fabric:all",
+      "children": [
+        [
+          "minecraft:stick",
+          "minecraft:stone"
+        ],
+        [
+          "minecraft:stone",
+          "minecraft:dirt"
+        ]
+      ],
+      "ingredients": [
+        [
+          "minecraft:stick",
+          "minecraft:stone"
+        ],
+        [
+          "minecraft:stone",
+          "minecraft:dirt"
+        ]
+      ]
+    },
+    "N": {
+      "neoforge:ingredient_type": "neoforge:difference",
+      "fabric:type": "fabric:difference",
+      "base": {
+        "neoforge:ingredient_type": "neoforge:compound",
+        "fabric:type": "fabric:any",
+        "children": [
+          "minecraft:stick",
+          "minecraft:stone"
+        ],
+        "ingredients": [
+          "minecraft:stick",
+          "minecraft:stone"
+        ]
+      },
+      "subtracted": "minecraft:stone"
+    },
+    "W": {
+      "neoforge:ingredient_type": "assortedlib:stored_fluid_ingredient",
+      "fabric:type": "assortedlib:stored_fluid_ingredient",
+      "fluid": "minecraft:water"
+    },
+    "H": {
+      "neoforge:ingredient_type": "assortedlib:stored_fluid_ingredient",
+      "fabric:type": "assortedlib:stored_fluid_ingredient",
+      "fluid": "minecraft:water",
+      "amount": 500
+    },
+    "T": {
+      "neoforge:ingredient_type": "assortedlib:stored_fluid_ingredient",
+      "fabric:type": "assortedlib:stored_fluid_ingredient",
+      "fluid": "minecraft:water",
+      "amount": 2000
+    }
+  },
+  "pattern": [
+    "DAI",
+    "NWH",
+    "T  "
+  ],
+  "result": {
+    "id": "minecraft:stick"
+  }
+}
