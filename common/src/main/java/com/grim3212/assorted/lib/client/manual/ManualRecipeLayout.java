@@ -21,7 +21,8 @@ import java.util.Optional;
  * @param columns         how many of {@code inputs} make a row, which places a smaller recipe in
  *                        the station's top left corner as the recipe book does
  * @param inputs          where each input's item is drawn, relative to the region's corner
- * @param extras          slots the station has but no recipe fills, such as a furnace's fuel
+ * @param extras          slots no recipe fills: a furnace's fuel, or the machine itself where a
+ *                        recipe is drawn beside the block that runs it
  * @param cornerRadius    rounds the region's corners off; 0 leaves it square
  * @param shapelessMarker absent puts the mark in the region's top right corner
  */
@@ -81,13 +82,19 @@ public record ManualRecipeLayout(Identifier texture, int textureWidth, int textu
      * A slot belonging to the station rather than the recipe, filled from a vanilla
      * {@link SlotDisplay}: {@code minecraft:any_fuel} or {@code minecraft:tag} both cycle and are
      * marked as a choice.
+     *
+     * @param tooltip a translation key added to the slot's tooltip, given the slot's own item name
+     *                as {@code %s}. A slot the recipe does not explain itself needs one - the block
+     *                doing the work, drawn beside the recipe, otherwise says nothing about what it
+     *                is doing there. The wording belongs to whoever wrote the layout.
      */
-    public record Extra(Position position, SlotDisplay display, int count) {
+    public record Extra(Position position, SlotDisplay display, int count, Optional<String> tooltip) {
 
         public static final Codec<Extra> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 Position.CODEC.fieldOf("position").forGetter(Extra::position),
                 SlotDisplay.CODEC.fieldOf("display").forGetter(Extra::display),
-                Codec.INT.optionalFieldOf("count", 0).forGetter(Extra::count)
+                Codec.INT.optionalFieldOf("count", 0).forGetter(Extra::count),
+                Codec.STRING.optionalFieldOf("tooltip").forGetter(Extra::tooltip)
         ).apply(instance, Extra::new));
 
         public ManualSlot slot() {

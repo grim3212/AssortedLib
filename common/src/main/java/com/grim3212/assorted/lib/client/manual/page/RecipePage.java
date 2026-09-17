@@ -108,7 +108,7 @@ public record RecipePage(Optional<Component> title, List<ResourceKey<Recipe<?>>>
 
         // The station's own slots: no part of the recipe, but part of running it.
         for (ManualRecipeLayout.Extra extra : layout.extras()) {
-            this.drawSlot(view, extra.slot(), context, left + extra.position().x(), top + extra.position().y(), animationTick);
+            this.drawSlot(view, extra.slot(), context, left + extra.position().x(), top + extra.position().y(), animationTick, extra.tooltip());
         }
 
         if (recipe.shapeless()) {
@@ -129,6 +129,10 @@ public record RecipePage(Optional<Component> title, List<ResourceKey<Recipe<?>>>
     }
 
     private void drawSlot(ManualPageView view, ManualSlot slot, ContextMap context, int x, int y, int animationTick) {
+        this.drawSlot(view, slot, context, x, y, animationTick, Optional.empty());
+    }
+
+    private void drawSlot(ManualPageView view, ManualSlot slot, ContextMap context, int x, int y, int animationTick, Optional<String> tooltip) {
         List<ItemStack> stacks = slot.stacks(context);
         if (stacks.isEmpty()) {
             return;
@@ -139,7 +143,15 @@ public record RecipePage(Optional<Component> title, List<ResourceKey<Recipe<?>>>
             view.sprite(ManualBook.Sprites.TAG_SLOT, x - 1, y - 1, ManualRecipeLayout.SLOT, ManualRecipeLayout.SLOT);
         }
 
-        view.item(pick(stacks, animationTick, this.interval), x, y, notes(slot));
+        ItemStack stack = pick(stacks, animationTick, this.interval);
+        // The layout's own line wins: a slot that named one has nothing to say about tags anyway.
+        List<Component> notes = tooltip.map(key -> List.of(described(key, stack))).orElseGet(() -> notes(slot));
+        view.item(stack, x, y, notes);
+    }
+
+    /** The layout's line for this slot, with the item in it named, as {@code Made in %s} does. */
+    private static Component described(String key, ItemStack stack) {
+        return Component.translatable(key, stack.getHoverName()).withStyle(ChatFormatting.GRAY);
     }
 
     /** Says in words what the gold ring means for this slot. */
