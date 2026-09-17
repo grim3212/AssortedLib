@@ -28,9 +28,18 @@ public abstract class TagPopulatedCondition<T> implements ICondition {
         return this.tag;
     }
 
+    /**
+     * Asks whether the tag is declared, not what is in it, because that is the question the Fabric
+     * half of this condition asks. {@code fabric:tags_populated} is named for contents but tests
+     * {@code HolderGetter#get(TagKey).isEmpty()}, and that {@code Optional} is empty only when no
+     * pack declares the tag at all; {@code IContext#getTag} hands back the contents, so testing it
+     * the way {@code neoforge:tag_empty} does answers a stricter question. Both are right on their
+     * own loader - but one datagen writes both files, so they have to be asked the same thing, and
+     * a full mod set differed by 451 recipes until they were.
+     */
     @Override
     public boolean test(IContext context) {
-        return !context.getTag(this.tag).isEmpty();
+        return context.isTagLoaded(this.tag);
     }
 
     @Override
