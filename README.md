@@ -227,7 +227,7 @@ modules compile those sources inline rather than depending on a common jar, so t
 install between them.
 
 How the build works - the Minecraft and loader versions, the runs, the tests, publishing - lives in
-[AssortedBuild](https://github.com/grim3212/AssortedBuild), pinned by `assortedbuild_version` in
+[AssortedBuild](https://github.com/AssortedMods/AssortedBuild), pinned by `assortedbuild_version` in
 `gradle.properties`. This repository only says what the mod is.
 
 ```bash
