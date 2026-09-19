@@ -118,7 +118,10 @@ public final class IconExporter {
                 // Set once the initial resource reload is done and the title screen is up.
                 if (mc.isGameLoadFinished()) {
                     phase = Phase.WORLD;
-                    joinWorld(mc);
+                    // Queued rather than run here: this frame holds the window surface, so the
+                    // frames doWorldLoad draws while it waits are skipped, the loading overlay
+                    // never draws the frame that removes it, and the wait never ends.
+                    mc.schedule(() -> joinWorld(mc));
                 }
             }
             case WORLD -> {
