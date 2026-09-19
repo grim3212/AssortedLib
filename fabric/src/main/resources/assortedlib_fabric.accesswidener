@@ -21,3 +21,8 @@ accessible	field	net/minecraft/client/renderer/item/ItemModels	ID_MAPPER	Lnet/mi
 # Same story for a custom ConditionalItemModelProperty: NeoForge fires
 # RegisterConditionalItemModelPropertyEvent over this mapper, Fabric API has no equivalent.
 accessible	field	net/minecraft/client/renderer/item/properties/conditional/ConditionalItemModelProperties	ID_MAPPER	Lnet/minecraft/util/ExtraCodecs$LateBoundIdMapper;
+
+# SpawnPlacements.register is private. Fabric API widens it for its own entity type builder, but not
+# transitively, and that builder only takes a rule while the type is being built, which common code
+# cannot reach. NeoForge fires RegisterSpawnPlacementsEvent instead.
+accessible	method	net/minecraft/world/entity/SpawnPlacements	register	(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/entity/SpawnPlacementType;Lnet/minecraft/world/level/levelgen/Heightmap$Types;Lnet/minecraft/world/entity/SpawnPlacements$SpawnPredicate;)V

@@ -18,6 +18,11 @@ import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.SpawnPlacementType;
+import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -33,6 +38,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 
 import java.util.List;
 import java.util.function.BiFunction;
@@ -95,6 +101,19 @@ public interface IPlatformHelper {
     default EntityType<?> getRandomDungeonEntity(RandomSource random) {
         return Util.getRandom(MonsterRoomFeatureAccessor.getMOBS(), random);
     }
+
+    /**
+     * The attributes every entity of a living type starts with. A living type without them cannot be
+     * spawned at all. Call from common init, after the type is registered.
+     */
+    <T extends LivingEntity> void registerEntityAttributes(Supplier<EntityType<T>> type, Supplier<AttributeSupplier.Builder> attributes);
+
+    /**
+     * Where natural spawning may put a mob of this type, and the rule it has to pass there. Without
+     * one, a type added to a biome's spawns is placed anywhere at all. Replaces any rule the type
+     * already had. Call from common init, after the type is registered.
+     */
+    <T extends Mob> void registerSpawnPlacement(Supplier<EntityType<T>> type, SpawnPlacementType placement, Heightmap.Types heightmap, SpawnPlacements.SpawnPredicate<T> predicate);
 
     <T extends BlockEntity> BlockEntityType<T> createBlockEntityType(BiFunction<BlockPos, BlockState, T> builder, Block... blocks);
 

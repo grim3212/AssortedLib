@@ -18,6 +18,12 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.SpawnPlacementType;
+import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -29,12 +35,15 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
+import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
 
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -120,6 +129,33 @@ public class ForgePlatformHelper implements IPlatformHelper {
     @Override
     public <T extends TooltipProvider> void showComponentTooltip(Supplier<DataComponentType<T>> type) {
         componentTooltips.add(type);
+    }
+
+    // Both handed to their mod bus events from AssortedLibForge. Concurrent because mods are
+    // constructed in parallel.
+    public static final List<AttributeRegistration<?>> attributesToRegister = new CopyOnWriteArrayList<>();
+    public static final List<SpawnPlacementRegistration<?>> spawnPlacementsToRegister = new CopyOnWriteArrayList<>();
+
+    @Override
+    public <T extends LivingEntity> void registerEntityAttributes(Supplier<EntityType<T>> type, Supplier<AttributeSupplier.Builder> attributes) {
+        attributesToRegister.add(new AttributeRegistration<>(type, attributes));
+    }
+
+    public record AttributeRegistration<T extends LivingEntity>(Supplier<EntityType<T>> type, Supplier<AttributeSupplier.Builder> attributes) {
+        public void register(EntityAttributeCreationEvent event) {
+            event.put(this.type.get(), this.attributes.get().build());
+        }
+    }
+
+    @Override
+    public <T extends Mob> void registerSpawnPlacement(Supplier<EntityType<T>> type, SpawnPlacementType placement, Heightmap.Types heightmap, SpawnPlacements.SpawnPredicate<T> predicate) {
+        spawnPlacementsToRegister.add(new SpawnPlacementRegistration<>(type, placement, heightmap, predicate));
+    }
+
+    public record SpawnPlacementRegistration<T extends Mob>(Supplier<EntityType<T>> type, SpawnPlacementType placement, Heightmap.Types heightmap, SpawnPlacements.SpawnPredicate<T> predicate) {
+        public void register(RegisterSpawnPlacementsEvent event) {
+            event.register(this.type.get(), this.placement, this.heightmap, this.predicate, RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        }
     }
 
     @Override

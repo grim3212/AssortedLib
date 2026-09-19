@@ -1,5 +1,12 @@
 # Changelog
 
+## 4.2.0
+
+- Mods can add creatures now. `IPlatformHelper#registerEntityAttributes` and
+  `#registerSpawnPlacement` register a mob's attributes and where it may spawn, and
+  `IWorldGenHelper#addSpawnToBiomes` adds it to the natural spawns of the biomes. 
+  Spawns are added in the same order on both loaders.
+
 ## 4.1.0
 
 - Features added to biomes now go in the same order on both loaders, so one seed gives one
